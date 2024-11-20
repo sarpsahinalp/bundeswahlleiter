@@ -1,0 +1,50 @@
+
+		<tr>
+			<td>1</td>
+			<td>Bündnis C</td>
+			<td>Bündnis C - Christen für Deutschland</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>2</td>
+			<td>DIE EINHEIT</td>
+			<td>DIE EINHEIT</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>3</td>
+			<td>DIE VIOLETTEN</td>
+			<td>Die Violetten</td>
+			<td>für spirituelle Politik</td>
+		</tr>
+		<tr>
+			<td>4</td>
+			<td>FAMILIE</td>
+			<td>Familien-Partei Deutschlands</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>5</td>
+			<td>DIE FRAUEN</td>
+			<td>Feministische Partei DIE FRAUEN</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>6</td>
+			<td>MIETERPARTEI</td>
+			<td>Mieterpartei</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>7</td>
+			<td>-</td>
+			<td>Neue Liberale – Die Sozialliberalen</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>8</td>
+			<td>UNABHÄNGIGE</td>
+			<td>UNABHÄNGIGE für bürgernahe Demokratie</td>
+			<td>&nbsp;</td>
+		</tr>
+	

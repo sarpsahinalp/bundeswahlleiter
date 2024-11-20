@@ -1,0 +1,44 @@
+
+		<tr>
+			<td>41.</td>
+			<td>Volksabstimmung</td>
+			<td>Ab jetzt…Demokratie durch Volksabstimmung</td>
+			<td>Politik für die Menschen</td>
+		</tr>
+		<tr>
+			<td>42.</td>
+			<td>B*</td>
+			<td>bergpartei, die überpartei</td>
+			<td>ökoanarchistisch-realdadaistisches sammelbecken</td>
+		</tr>
+		<tr>
+			<td>43.</td>
+			<td>sonstige</td>
+			<td>DIE SONSTIGEN</td>
+			<td>X</td>
+		</tr>
+		<tr>
+			<td>44.</td>
+			<td>FAMILIE</td>
+			<td>Familien-Partei Deutschlands</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>45.</td>
+			<td>Graue Panther</td>
+			<td>Graue Panther</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>46.</td>
+			<td>KlimalisteBW</td>
+			<td>Klimaliste Baden-Württemberg</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>47.</td>
+			<td>THP</td>
+			<td>Thüringer Heimatpartei</td>
+			<td>–</td>
+		</tr>
+	

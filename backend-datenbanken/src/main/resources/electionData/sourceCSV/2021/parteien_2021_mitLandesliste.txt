@@ -1,0 +1,243 @@
+
+		<tr>
+			<td>1.</td>
+			<td>CDU</td>
+			<td>Christlich Demokratische Union Deutschlands</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>2.</td>
+			<td>SPD</td>
+			<td>Sozialdemokratische Partei Deutschlands</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>3.</td>
+			<td>AfD</td>
+			<td>Alternative für Deutschland</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>4.</td>
+			<td>FDP</td>
+			<td>Freie Demokratische Partei</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>5.</td>
+			<td>DIE LINKE</td>
+			<td>DIE LINKE</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>6.</td>
+			<td>GRÜNE</td>
+			<td>BÜNDNIS 90/DIE GRÜNEN</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>7.</td>
+			<td>CSU</td>
+			<td>Christlich-Soziale Union in Bayern e.V.</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>8.</td>
+			<td>FREIE WÄHLER</td>
+			<td>FREIE WÄHLER</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>9.</td>
+			<td>Die PARTEI</td>
+			<td>Partei für Arbeit, Rechtsstaat, Tierschutz,<br>
+			Elitenförderung und basisdemokratische Initiative</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>10.</td>
+			<td>Tierschutzpartei</td>
+			<td>PARTEI MENSCH UMWELT TIERSCHUTZ</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>11.</td>
+			<td>NPD</td>
+			<td>Nationaldemokratische Partei Deutschlands</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>12.</td>
+			<td>PIRATEN</td>
+			<td>Piratenpartei Deutschland</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>13.</td>
+			<td>ÖDP</td>
+			<td>Ökologisch-Demokratische Partei</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>14.</td>
+			<td>V-Partei³</td>
+			<td>V-Partei³ - Partei für Veränderung, Vegetarier und Veganer</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>15.</td>
+			<td>DiB</td>
+			<td>DEMOKRATIE IN BEWEGUNG</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>16.</td>
+			<td>BP</td>
+			<td>Bayernpartei</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>17.</td>
+			<td>Tierschutzallianz</td>
+			<td>Allianz für Menschenrechte, Tier- und Naturschutz</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>18.</td>
+			<td>MLPD</td>
+			<td>Marxistisch-Leninistische Partei Deutschlands</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>19.</td>
+			<td>Gesundheitsforschung</td>
+			<td>Partei für Gesundheitsforschung</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>20.</td>
+			<td>MENSCHLICHE WELT</td>
+			<td>Menschliche Welt</td>
+			<td>für das Wohl und Glücklichsein aller</td>
+		</tr>
+		<tr>
+			<td>21.</td>
+			<td>DKP</td>
+			<td>Deutsche Kommunistische Partei</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>22.</td>
+			<td>Die Grauen</td>
+			<td>Die Grauen – Für alle Generationen</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>23.</td>
+			<td>BüSo</td>
+			<td>Bürgerrechtsbewegung Solidarität</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>24.</td>
+			<td>Die Humanisten</td>
+			<td>Partei der Humanisten</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>25.</td>
+			<td>Gartenpartei</td>
+			<td>Gartenpartei</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>26.</td>
+			<td>du.</td>
+			<td>Die Urbane. Eine HipHop Partei</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>27.</td>
+			<td>SGP</td>
+			<td>Sozialistische Gleichheitspartei, Vierte Internationale</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>28.</td>
+			<td>dieBasis</td>
+			<td>Basisdemokratische Partei Deutschland</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>29.</td>
+			<td>Bündnis C</td>
+			<td>Bündnis C - Christen für Deutschland</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>30.</td>
+			<td>BÜRGERBEWEGUNG</td>
+			<td>Bürgerbewegung für Fortschritt und Wandel</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>31.</td>
+			<td>III. Weg</td>
+			<td>DER DRITTE WEG</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>32.</td>
+			<td>BÜNDNIS21</td>
+			<td>diePinken/BÜNDNIS21</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>33.</td>
+			<td>LIEBE</td>
+			<td>Europäische Partei LIEBE</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>34.</td>
+			<td>LKR</td>
+			<td>Liberal-Konservative Reformer</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>35.</td>
+			<td>PdF</td>
+			<td>Partei des Fortschritts</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>36.</td>
+			<td>LfK</td>
+			<td>&gt;&gt; Partei für Kinder, Jugendliche und Familien &lt;&lt;&nbsp; – Lobbyisten für Kinder –</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>37.</td>
+			<td>SSW</td>
+			<td>Südschleswigscher Wählerverband</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>38.</td>
+			<td>Team Todenhöfer</td>
+			<td>Team Todenhöfer – Die Gerechtigkeitspartei</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>39.</td>
+			<td>UNABHÄNGIGE</td>
+			<td>UNABHÄNGIGE für bürgernahe Demokratie</td>
+			<td>–</td>
+		</tr>
+		<tr>
+			<td>40.</td>
+			<td>Volt</td>
+			<td>Volt Deutschland</td>
+			<td>–</td>
+		</tr>
+	

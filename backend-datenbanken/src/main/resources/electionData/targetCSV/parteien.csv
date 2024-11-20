@@ -1,0 +1,349 @@
+index;kurzbezeichnung;name;Zusatzbezeichnung;isEinzelbewerber
+1;CDU;Christlich Demokratische Union Deutschlands;;False
+2;SPD;Sozialdemokratische Partei Deutschlands;;False
+3;AfD;Alternative für Deutschland;;False
+4;FDP;Freie Demokratische Partei;;False
+5;DIE LINKE;DIE LINKE;;False
+6;GRÜNE;BÜNDNIS 90/DIE GRÜNEN;;False
+7;CSU;Christlich-Soziale Union in Bayern e.V.;;False
+8;FREIE WÄHLER;FREIE WÄHLER;;False
+9;Die PARTEI;Partei für Arbeit, Rechtsstaat, Tierschutz, Elitenförderung und basisdemokratische Initiative;;False
+10;Tierschutzpartei;PARTEI MENSCH UMWELT TIERSCHUTZ;;False
+11;NPD;Nationaldemokratische Partei Deutschlands;;False
+12;PIRATEN;Piratenpartei Deutschland;;False
+13;ÖDP;Ökologisch-Demokratische Partei;;False
+14;V-Partei³;V-Partei³ - Partei für Veränderung, Vegetarier und Veganer;;False
+15;DiB;DEMOKRATIE IN BEWEGUNG;;False
+16;BP;Bayernpartei;;False
+17;Tierschutzallianz;Allianz für Menschenrechte, Tier- und Naturschutz;;False
+18;MLPD;Marxistisch-Leninistische Partei Deutschlands;;False
+19;Gesundheitsforschung;Partei für Gesundheitsforschung;;False
+20;MENSCHLICHE WELT;Menschliche Welt;für das Wohl und Glücklichsein aller;False
+21;DKP;Deutsche Kommunistische Partei;;False
+22;Die Grauen;Die Grauen – Für alle Generationen;;False
+23;BüSo;Bürgerrechtsbewegung Solidarität;;False
+24;Die Humanisten;Partei der Humanisten;;False
+25;Gartenpartei;Gartenpartei;;False
+26;du.;Die Urbane. Eine HipHop Partei;;False
+27;SGP;Sozialistische Gleichheitspartei, Vierte Internationale;;False
+28;dieBasis;Basisdemokratische Partei Deutschland;;False
+29;Bündnis C;Bündnis C - Christen für Deutschland;;False
+30;BÜRGERBEWEGUNG;Bürgerbewegung für Fortschritt und Wandel;;False
+31;III. Weg;DER DRITTE WEG;;False
+32;BÜNDNIS21;diePinken/BÜNDNIS21;;False
+33;LIEBE;Europäische Partei LIEBE;;False
+34;LKR;Liberal-Konservative Reformer;;False
+35;PdF;Partei des Fortschritts;;False
+36;LfK;"&gt;&gt; Partei für Kinder, Jugendliche und Familien &lt;&lt; – Lobbyisten für Kinder –";;False
+37;SSW;Südschleswigscher Wählerverband;;False
+38;Team Todenhöfer;Team Todenhöfer – Die Gerechtigkeitspartei;;False
+39;UNABHÄNGIGE;UNABHÄNGIGE für bürgernahe Demokratie;;False
+40;Volt;Volt Deutschland;;False
+41;Volksabstimmung;Ab jetzt…Demokratie durch Volksabstimmung;Politik für die Menschen;False
+42;B*;bergpartei, die überpartei;ökoanarchistisch-realdadaistisches sammelbecken;False
+43;sonstige;DIE SONSTIGEN;X;False
+44;FAMILIE;Familien-Partei Deutschlands;;False
+45;Graue Panther;Graue Panther;;False
+46;KlimalisteBW;Klimaliste Baden-Württemberg;;False
+47;THP;Thüringer Heimatpartei;;False
+48;EB: Schlüter 9;Einzelkandidat Schlüter;;True
+49;EB: Kerkhoff 11;Kerkhoff;;True
+50;EB: Löwe 13;parteienunabhängig;;True
+51;EB: Krüger 16;Sören Krüger;;True
+52;EB: Janoske-Kizildag 18;ODIN;;True
+53;EB: Lenz 24;Internationalistisches Bündnis;;True
+54;EB: Balzer 25;Internationalistisches Bündnis;;True
+55;EB: Gums 33;Einzelbewerber Rüdiger Gums Parteilos;;True
+56;EB: Großkopf 37;Internationalistisches Bündnis;;True
+57;EB: Weich 40;Weich - parteilos;;True
+58;EB: Kober 43;Internationalistisches Bündnis;;True
+59;EB: Schlüter 44;Internationalistisches Bündnis;;True
+60;EB: Neumann 45;Frieden;;True
+61;EB: Kunick 45;Internationalistisches Bündnis;;True
+62;EB: Göller 47;Internationalistische Liste;;True
+63;EB: Wieczorek 48;Einzelbewerber Wieczorek;;True
+64;EB: Herzig 48;Internationalistisches Bündnis;;True
+65;EB: Jagau 49;Andere Perspektiven;;True
+66;EB: Deutsch 49;Internationalistisches-Bündnis;;True
+67;EB: Rosenbaum 50;BIBS;;True
+68;EB: Wolter 50;DEMOKRATIE FAIR UND DIREKT;;True
+69;EB: Gust 50;DUD;;True
+70;EB: Kunick 51;Internationalistisches Bündnis;;True
+71;EB: Wiesenthal 51;Klimaschutz;;True
+72;EB: Hönig 51;OpaBraveheart;;True
+73;EB: Schäuble-Leopold 52;Internationalistisches Bündnis;;True
+74;EB: Glamann 56;ehrliche Politik / Transparenz;;True
+75;EB: Eckelmann 56;Wirklich besser regieren, für unser Land und für unsere Zukunft.;;True
+76;EB: Buro 57;Gesicht zeigen;;True
+77;EB: Schlippenbach 57;PARTEILOS - FÜR MEHR DIREKTE DEMOKRATIE;;True
+78;EB: Lorenz 59;Parteilos;;True
+79;EB: Schütz 59;Wirtschaftlich-Ökologisch-Familienfreundlich;;True
+80;EB: Conrad 60;für mehr Bürgerbeteiligung;;True
+81;EB: Hinners 60;ZUKUNFT;;True
+82;EB: Roloff 61;EINFACH MACHEN;;True
+83;EB: Müller 61;Ihre parteilose Direktstimme im Bundestag für Mitbestimmung;;True
+84;EB: Grütte 61;Internationalistisches Bündnis;;True
+85;EB: Charnow 61;Parteilos;;True
+86;EB: Gabler 62;Bobby;;True
+87;EB: Hitzer 62;Bürger bewirbt sich als freier Direktkandidat;;True
+88;EB: Commentz 62;Demokratie verteidigen;;True
+89;EB: Kaun 63;Direktkandidat Ralf Kaun;;True
+90;EB: Marquardt 63;parteilose Direktkandidatin Marquardt;;True
+91;EB: Janda 65;Internationalistisches Bündnis;;True
+92;EB: Bibiella 66;BibiellaBTW;;True
+93;EB: Janowski 66;Für die Altmark nach Berlin;;True
+94;EB: Barth 68;Internationalistische Liste;;True
+95;EB: Rohne 70;Einzelbewerber Rohne;;True
+96;EB: Wassenaar 70;UN-Menschenrecht auf Frieden;;True
+97;EB: Zimmermann 71;EB Zimmermann;;True
+98;EB: Fielsch 75;www.weltrettung-durch-therapie.de;;True
+99;EB: Zebian 75;Zebian, Ayman;;True
+100;EB: Bunte 78;Zeit zählt!;;True
+101;EB: Voß 80;Direkt – bürgerschaftlich – unabhängig;;True
+102;EB: Pape 82;erneuerung-klima.de;;True
+103;EB: Lindlmair 82;Mieterinitiativen;;True
+104;EB: Moser 82;Parteifrei, unabhängig und transparent. Für eine direktere Demokratie ohne Fraktionszwang und eine Amtszeitbeschränkung.;;True
+105;EB: Wendt 83;FriGGa Wendt, Grundeinkommen-für-alle.org;;True
+106;EB: Snelinski 83;Parteifrei in den Bundestag;;True
+107;EB: Böving 87;ADONIS;;True
+108;EB: Teßmann 87;Teßmann;;True
+109;EB: Przybylski 93;Seelenwärmer;;True
+110;EB: Podjaski 95;Artgerecht;;True
+111;EB: Goldbeck 95;Goldi;;True
+112;EB: Blum 101;Klimaliste;;True
+113;EB: Kramer 103;Ehrensache;;True
+114;EB: Klimczak 104;Paletten;;True
+115;EB: Herrmann 104;Unabhängig und FREI;;True
+116;EB: Richter 105;Jugend-Narrativ;;True
+117;EB: Baumanns 106;KLIMAgerechtigkeitsLISTE;;True
+118;EB: Herbert 108;Internationalistische Liste;;True
+119;EB: Opfer 115;DU1;;True
+120;EB: Ergin 115;Ergin;;True
+121;EB: Lenz 116;LENZ;;True
+122;EB: Saygili 116;Saygili;;True
+123;EB: Bilo 118;Bilo - für Mülheim nach Berlin;;True
+124;EB: Wetklo 123;Bürgerstimme;;True
+125;EB: Georgiou 128;Internationalistisches Bündnis;;True
+126;EB: Kaldewei 128;Stimme für Freiheitlichkeit, Bürgerlichkeit und menschliche Identität;;True
+127;EB: Dumberger 129;Internationalistische Liste;;True
+128;EB: Geselbracht 129;Münsterliste - bunt und international e.V.;;True
+129;EB: Brehm 130;BRD braucht Brehm;;True
+130;EB: Martinschledde 131;Alle in EU;;True
+131;EB: Zajonc 131;Internationalistisches Bündnis;;True
+132;EB: Sonnabend 133;Bedingungsloses Grundeinkommen;;True
+133;EB: Tropp 138;Wir! Gemeinsam stark;;True
+134;EB: Hofmann 142;Eure Stimme von Morgen;;True
+135;EB: Trojanowski 142;Unsere Zukunftsperspektive für Digitalisierung, Bildung und Umwelt;;True
+136;EB: Peiler 144;Peiler;;True
+137;EB: Meister 148;Internationalistische Liste;;True
+138;EB: Asmus 151;ASMUSfddB;;True
+139;EB: Oschkinat 151;AufrechterDemokrat;;True
+140;EB: Härtlein 152;Ein Leipziger für Leipzig;;True
+141;EB: Hummitzsch 152;KARLKOMMT;;True
+142;EB: Kohl 152;WIR sind LEIPZIGER;;True
+143;EB: Bayer 152;www.zeitkaufhaus.de Martin Bayer;;True
+144;EB: Schöllner 153;DK Schöllner;;True
+145;EB: Zimmet 154;Direktkandidat Daniel Zimmet;;True
+146;EB: Blickle 157;Internationalistisches Bündnis;;True
+147;EB: Brähmig 158;Brähmig;;True
+148;EB: Queck 158;QUECK;;True
+149;EB: Fuchs 159;Marcus Fuchs - Querdenken 351;;True
+150;EB: Häupl 159;UNO - Menschenrecht - FRIEDEN für Alle;;True
+151;EB: Hannig 160;Direktkandidat Frank Hannig;;True
+152;EB: Richter 162;Daniel Richter;;True
+153;EB: Weidemann 162;Internationalistisches Bündnis;;True
+154;EB: Röhder 162;Röhder;;True
+155;EB: Reichel 164;REICHEL;;True
+156;EB: Krajak 165;Internationalistisches Bündnis;;True
+157;EB: Gerisch 166;Ischgl;;True
+158;EB: Meyer 167;Internationalistisches Bündnis;;True
+159;EB: Müller 167;Wir - alle gemeinsam;;True
+160;EB: Mascher 168;Mascher;;True
+161;EB: El-Fayoumy 168;Wir haben eine Welt zu verlieren;;True
+162;EB: Schmidt 169;Internationalistisches Bündnis;;True
+163;EB: Klement 170;Neue Wege;;True
+164;EB: Marinello 171;Internationalistisches Bündnis;;True
+165;EB: Carstensen 171;Marburger Pogo-Anarchisten;;True
+166;EB: Hemm 174;Aktion Bürger für Gerechtigkeit;;True
+167;EB: Schlossbauer 178;CSB Carsten Schlossbauer;;True
+168;EB: Rehbein 180;REHBEIN;;True
+169;EB: Stachowiak 186;Klimaliste Darmstadt-Dieburg;;True
+170;EB: Stein 187;Internationalistisches Bündnis;;True
+171;EB: Grammbitter 188;Gemeinsam sind Wir MehrWert!;;True
+172;EB: Nebeler 194;Bernd Nebeler;;True
+173;EB: Berger 194;Gebhard Berger;;True
+174;EB: Bieling 196;Marko Bieling;;True
+175;EB: Erdmann 197;Markus Erdmann - Klimaliste;;True
+176;EB: Mandel 198;Klimaliste für Collective Care und Inklusion;;True
+177;EB: Sayn 199;Klimaliste;;True
+178;EB: Krämer 200;Wahlrechtsreform;;True
+179;EB: Vollmer 201;Klimaliste;;True
+180;EB: Bartholomé 203;Internationalistisches Bündnis;;True
+181;EB: Moritz 203;Parteilos Dr. Moritz;;True
+182;EB: Engels 204;Wotan Engels;;True
+183;EB: Seiffert 205;Klimaliste;;True
+184;EB: Heil 205;Mit Sachverstand die Zukunft gestalten;;True
+185;EB: Pohl 206;Klimaliste;;True
+186;EB: Hackel 207;AusUnsrerMitte;;True
+187;EB: Schöne 207;Klimaliste;;True
+188;EB: Bechtel 207;Politik durch Bodenständigkeit und Bürgerbeteiligung;;True
+189;EB: Wittner 208;Klimaliste;;True
+190;EB: Schwang 209;Internationalistisches Bündnis;;True
+191;EB: Hoppe 209;Klimaliste;;True
+192;EB: Lauer 209;Lauer, Marius Wolfgang;;True
+193;EB: Hofmann 210;Klimaliste;;True
+194;EB: Mobasheri 211;Klimaliste;;True
+195;EB: Koccu 211;Parteilos;;True
+196;EB: Vogler 211;Südpfalz - stellt Fragen!;;True
+197;EB: Hilz 217;Vereinigte Direktkandidaten;;True
+198;EB: Klopstock 218;Politisch mitwirken für alle;;True
+199;EB: Dönmez 220;Deutschland ist Önders;;True
+200;EB: Sommerfeldt 220;Mehr Vernunft;;True
+201;EB: Englisch 225;Einzelbewerber Englisch;;True
+202;EB: Ryssel 226;Parteifreier Direktkandidat WK 226;;True
+203;EB: Manz 228;Manz;;True
+204;EB: Pettenkofer 228;Pettenkofer;;True
+205;EB: Knott 231;Stimme gegen Fraktionszwang;;True
+206;EB: Gradl 232;Unabhängiger Direktkandidat / Nikolaus Gradl;;True
+207;EB: Friedl 233;Malkampf für das Klima;;True
+208;EB: Bauer 235;Keine CO2-Steuer. WIEDERHERSTELLUNG unserer Grundrechte!;;True
+209;EB: Dippel 235;#parteifrei #Gemeinsam gewinnen! #Gemeinsam verändern! Einfach mal anders: Erststimme Dippel!;;True
+210;EB: Roensch 236;Deas;;True
+211;EB: Löhnert 239;MACH;;True
+212;EB: Kunstmann 242;AKB;;True
+213;EB: Kalupner 242;Angela and I are here to create ...;;True
+214;EB: Henig 242;Klimaliste;;True
+215;EB: Eppel 244;Eppel;;True
+216;EB: Schlot 246;Prof. Dr. med. Udo Schlot;;True
+217;EB: Lembach 247;Zeitgemäße Demokratie mit Politik auf Augenhöhe;;True
+218;EB: Kaiser 248;Freiheit jetzt! - Michael Kaiser;;True
+219;EB: Schürer 251;Unparteilich;;True
+220;EB: Kolb 252;Aktion Bürger für Gerechtigkeit;;True
+221;EB: Sirin 252;Ediz Sirin;;True
+222;EB: Baydar 253;Internationalistische Liste;;True
+223;EB: Langhans 255;Vereinigte Direktkandidaten;;True
+224;EB: Dorn 256;Aktion Bürger für Gerechtigkeit;;True
+225;EB: Ressdorf 258;Volk ins Parlament - VIP;;True
+226;EB: Demir 259;Demir;;True
+227;EB: Miller 260;FRiDi - unabhängig - unbestechlich - ehrlich - bürgernah;;True
+228;EB: Tolzin 260;Nie wieder sinnlose Lockdowns!;;True
+229;EB: Gibanica 265;David Gibanica;;True
+230;EB: Novotny 265;Nicht Ich. Wir.;;True
+231;EB: Hartmann 266;Werner Hartmann;;True
+232;EB: Mund 272;Heidi Mund;;True
+233;EB: Rapps 273;Internationalistische Liste;;True
+234;EB: Schmitt 277;Schmitt Wiesloch;;True
+235;EB: Fritsch 278;Die Zukunft am Start;;True
+236;EB: Herrlinger 279;Internationalistisches Bündnis;;True
+237;EB: Harting 287;Internationalistische Liste;;True
+238;EB: Ringger 287;Wadenbeißer;;True
+239;EB: Schmidt 293;Internationalistisches Bündnis;;True
+240;EB: Poss 296;Poss4SB;;True
+241;PDV;Partei der Vernunft;;False
+242;DIE RECHTE;DIE RECHTE;;False
+243;ADD;Allianz Deutscher Demokraten;;False
+244;BGE;Bündnis Grundeinkommen;Die Grundeinkommenspartei;False
+245;DM;Deutsche Mitte;Politik geht anders…;False
+246;MG;Magdeburger Gartenpartei;ökologisch, sozial und ökonomisch;False
+247;DIE EINHEIT;DIE EINHEIT;;False
+248;DIE VIOLETTEN;Die Violetten;für spirituelle Politik;False
+249;DIE FRAUEN;Feministische Partei DIE FRAUEN;;False
+250;MIETERPARTEI;Mieterpartei;;False
+251;NL;Neue Liberale – Die Sozialliberalen;;False
+252;EB: Abaga Ayingono 129;;;True
+253;EB: Ates 282;;;True
+254;EB: Babnik 199;;;True
+255;EB: Barski 281;;;True
+256;EB: Barton 130;;;True
+257;EB: Beckmann 83;;;True
+258;EB: Blume 83;;;True
+259;EB: Borchert 56;;;True
+260;EB: Bovenkerk 112;;;True
+261;EB: Bucher 188;;;True
+262;EB: Bultheel 19;;;True
+263;EB: Çelikkan 91;;;True
+264;EB: Dachner 278;;;True
+265;EB: Datli 116;;;True
+266;EB: Ehrl 234;;;True
+267;EB: Eichbaum 148;;;True
+268;EB: Elkins 206;;;True
+269;EB: Felde-Bajerowitz 83;;;True
+270;EB: Fleischhauer 64;;;True
+271;EB: Frenzel 187;;;True
+272;EB: Geidel 194;;;True
+273;EB: Gent 168;;;True
+274;EB: Giebel 23;;;True
+275;EB: Glück 279;;;True
+276;EB: Gruner 191;;;True
+277;EB: Hasel 83;;;True
+278;EB: Heck 205;;;True
+279;EB: Held 164;;;True
+280;EB: Hirsch-Sternberg 34;;;True
+281;EB: Hofer 19;;;True
+282;EB: Holbein 168;;;True
+283;EB: Hoyer 158;;;True
+284;EB: Hüfken 194;;;True
+285;EB: Klis 173;;;True
+286;EB: Knoop 30;;;True
+287;EB: Kreiß 215;;;True
+288;EB: Krüger-Winands 1;;;True
+289;EB: Leder 247;;;True
+290;EB: Luong 96;;;True
+291;EB: Maier 150;;;True
+292;EB: Marquardt 267;;;True
+293;EB: Martin 267;;;True
+294;EB: Matheis 289;;;True
+295;EB: Mauson 74;;;True
+296;EB: May 191;;;True
+297;EB: Mayer 271;;;True
+298;EB: Meier 63;;;True
+299;EB: Meier 146;;;True
+300;EB: Meißner 195;;;True
+301;EB: Menga Nsibu 120;;;True
+302;EB: Mertel 220;;;True
+303;EB: Metzler 195;;;True
+304;EB: Miehlke 192;;;True
+305;EB: Mollik 144;;;True
+306;EB: Müller-Horn 109;;;True
+307;EB: Niesen 203;;;True
+308;EB: Overdiek 129;;;True
+309;EB: Pape 83;;;True
+310;EB: von Pentz 24;;;True
+311;EB: Polivka 188;;;True
+312;EB: Puppel 167;;;True
+313;EB: Rascopp 189;;;True
+314;EB: Renne 66;;;True
+315;EB: Richter 156;;;True
+316;EB: Richter 165;;;True
+317;EB: Rieth 189;;;True
+318;EB: Rink 166;;;True
+319;EB: Ritter 83;;;True
+320;EB: Roeder 153;;;True
+321;EB: Rohrbach 290;;;True
+322;EB: Rosenacker 293;;;True
+323;EB: Ruthner 224;;;True
+324;EB: Salveter 49;;;True
+325;EB: Sattler 172;;;True
+326;EB: Scharnweber 23;;;True
+327;EB: Scheffler 20;;;True
+328;EB: Schirm 76;;;True
+329;EB: Schmid 235;;;True
+330;EB: Schmidt 66;;;True
+331;EB: Schmidtke 171;;;True
+332;EB: Schneider 191;;;True
+333;EB: Schuldis 258;;;True
+334;EB: Schuler 293;;;True
+335;EB: Snelinski 86;;;True
+336;EB: Staratschek 99;;;True
+337;EB: Stoof 12;;;True
+338;EB: Tschammer-Osten 15;;;True
+339;EB: Tschan 215;;;True
+340;EB: Ulbrich 70;;;True
+341;EB: Verdonk 198;;;True
+342;EB: Vollmer 19;;;True
+343;EB: Weidelt 65;;;True
+344;EB: Weinert 294;;;True
+345;EB: Welte 286;;;True
+346;EB: Werner 101;;;True
+347;EB: Willing 105;;;True
+348;EB: Zagermann 165;;;True
