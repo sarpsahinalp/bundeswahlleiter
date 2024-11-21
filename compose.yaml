@@ -8,7 +8,7 @@ services:
       - redis_data:/data
     command: [ "redis-server", "--save", "60", "1", "--loglevel", "warning" ]
     networks:
-      - cache_network
+      - bridge-network
 
   postgres:
     image: 'postgres:latest'
@@ -18,11 +18,40 @@ services:
       - 'POSTGRES_USER=user'
     ports:
       - '5432:5432'
+    networks:
+      - bridge-network
+
+  springboot-app:
+    build:
+      context: backend-datenbanken/.
+      dockerfile: Dockerfile  # Path to your Dockerfile
+    ports:
+      - "8080:8080"  # Map the container port to a local port
+    environment:
+      - 'SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/wahlanalyse'
+      - 'SPRING_DATASOURCE_USERNAME=user'
+      - 'SPRING_DATASOURCE_PASSWORD=1234'
+    depends_on:
+      - postgres  # Wait for postgres to be ready
+      - redis
+    networks:
+      - bridge-network
+
+  frontend:
+    build:
+      context: frontend-datenbank/.
+      dockerfile: Dockerfile  # Path to your Dockerfile
+    ports:
+      - "3000:3000"  # Map the container port to a local port
+    networks:
+      - bridge-network
+    depends_on:
+      - springboot-app
 
 volumes:
   redis_data:
     driver: local
 
 networks:
-  cache_network:
+  bridge-network:
     driver: bridge

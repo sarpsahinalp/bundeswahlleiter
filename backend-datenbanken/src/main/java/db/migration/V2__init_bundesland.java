@@ -12,11 +12,10 @@ import static db.in.tum.de.datenbanken.utils.ParseAndInsertCSV.readCsv;
 
 public class V2__init_bundesland extends BaseJavaMigration {
 
-    private static final String CSV_FILE_PATH = "resources/electionData/targetCSV/bundesland.csv";
+    private static final String CSV_FILE_PATH = "src/main/resources/electionData/targetCSV/bundesland.csv";
 
     @Override
     public void migrate(Context context) {
-
         // Define the batch insert SQL with placeholders for the parameters
         String insertSql = "INSERT INTO bundesland (id, name) " +
                 "VALUES (nextval('bundesland_seq'), ?)";

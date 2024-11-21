@@ -20,7 +20,7 @@ public class ParseAndInsertCSV {
         ) {
             return reader.readAll();
         } catch (IOException | CsvException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error reading CSV file: " + e.getMessage());
         }
     }
 
