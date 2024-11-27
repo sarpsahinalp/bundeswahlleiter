@@ -1,0 +1,245 @@
+kurzbezeichnung;wahlkreis_id;isEinzelbewerber
+CDU;-1;False
+SPD;-1;False
+FDP;-1;False
+GRÜNE;-1;False
+AfD;-1;False
+DIE LINKE;-1;False
+Die PARTEI;-1;False
+FREIE WÄHLER;-1;False
+HEIMAT (2021: NPD);-1;False
+ÖDP;-1;False
+MLPD;-1;False
+dieBasis;-1;False
+DKP;-1;False
+du.;-1;False
+Wir Bürger (2021: LKR);-1;False
+Die Humanisten;-1;False
+Tierschutzpartei;-1;False
+SSW;-1;False
+Team Todenhöfer;-1;False
+Volt;-1;False
+V-Partei³;-1;False
+EB: Schlüter;9;True
+EB: Kerkhoff;11;True
+PIRATEN;-1;False
+EB: Löwe;13;True
+EB: Krüger;16;True
+UNABHÄNGIGE;-1;False
+BÜNDNIS21;-1;False
+EB: Janoske-Kizildag;18;True
+ÖLDP;19;True
+EB: Lenz;24;True
+EB: Balzer;25;True
+EB: Gums;33;True
+EB: Großkopf;37;True
+EB: Weich;40;True
+EB: Kober;43;True
+EB: Schlüter;44;True
+EB: Neumann;45;True
+EB: Kunick;45;True
+EB: Göller;47;True
+EB: Wieczorek;48;True
+EB: Herzig;48;True
+EB: Jagau;49;True
+EB: Deutsch;49;True
+EB: Rosenbaum;50;True
+EB: Wolter;50;True
+EB: Gust;50;True
+EB: Kunick;51;True
+EB: Wiesenthal;51;True
+EB: Hönig;51;True
+EB: Schäuble-Leopold;52;True
+MENSCHLICHE WELT;-1;False
+EB: Glamann;56;True
+EB: Eckelmann;56;True
+EB: Buro;57;True
+EB: Schlippenbach;57;True
+EB: Lorenz;59;True
+EB: Schütz;59;True
+EB: Conrad;60;True
+EB: Hinners;60;True
+EB: Roloff;61;True
+EB: Müller;61;True
+EB: Grütte;61;True
+EB: Charnow;61;True
+EB: Gabler;62;True
+EB: Hitzer;62;True
+EB: Commentz;62;True
+FAMILIE;-1;False
+EB: Kaun;63;True
+EB: Marquardt;63;True
+EB: Janda;65;True
+Tierschutzallianz;-1;False
+Gartenpartei;-1;False
+EB: Bibiella;66;True
+EB: Janowski;66;True
+EB: Barth;68;True
+#TeamFranka;69;True
+EB: Rohne;70;True
+EB: Wassenaar;70;True
+EB: Zimmermann;71;True
+Die Grauen;-1;False
+Verjüngungsforschung (2021: Gesundheitsforschung);-1;False
+BüSo;-1;False
+SGP;-1;False
+EB: Fielsch;75;True
+EB: Zebian;75;True
+EB: Bunte;78;True
+EB: Voß;80;True
+sonstige;-1;False
+EB: Pape;82;True
+EB: Lindlmair;82;True
+EB: Moser;82;True
+B*;-1;False
+EB: Wendt;83;True
+EB: Snelinski;83;True
+Bündnis C;-1;False
+LIEBE;-1;False
+PdF;-1;False
+LfK;-1;False
+EB: Böving;87;True
+EB: Teßmann;87;True
+EB: Przybylski;93;True
+EB: Podjaski;95;True
+EB: Goldbeck;95;True
+Volksabstimmung;-1;False
+EB: Blum;101;True
+EB: Kramer;103;True
+EB: Klimczak;104;True
+EB: Herrmann;104;True
+EB: Richter;105;True
+EB: Baumanns;106;True
+EB: Herbert;108;True
+EB: Opfer;115;True
+EB: Ergin;115;True
+EB: Lenz;116;True
+EB: Saygili;116;True
+EB: Bilo;118;True
+EB: Wetklo;123;True
+EB: Georgiou;128;True
+EB: Kaldewei;128;True
+EB: Dumberger;129;True
+EB: Geselbracht;129;True
+EB: Brehm;130;True
+EB: Martinschledde;131;True
+EB: Zajonc;131;True
+EB: Sonnabend;133;True
+EB: Tropp;138;True
+EB: Hofmann;142;True
+EB: Trojanowski;142;True
+EB: Peiler;144;True
+EB: Meister;148;True
+III. Weg;-1;False
+EB: Asmus;151;True
+EB: Oschkinat;151;True
+EB: Härtlein;152;True
+EB: Hummitzsch;152;True
+EB: Kohl;152;True
+EB: Bayer;152;True
+EB: Schöllner;153;True
+EB: Zimmet;154;True
+EB: Blickle;157;True
+EB: Brähmig;158;True
+EB: Queck;158;True
+EB: Fuchs;159;True
+EB: Häupl;159;True
+EB: Hannig;160;True
+#KLIMAfirst;160;True
+EB: Richter;162;True
+EB: Weidemann;162;True
+EB: Röhder;162;True
+EB: Reichel;164;True
+EB: Krajak;165;True
+EB: Gerisch;166;True
+EB: Meyer;167;True
+EB: Müller;167;True
+EB: Mascher;168;True
+EB: El-Fayoumy;168;True
+EB: Schmidt;169;True
+EB: Klement;170;True
+EB: Marinello;171;True
+EB: Carstensen;171;True
+TNT;172;True
+EB: Hemm;174;True
+EB: Schlossbauer;178;True
+EB: Rehbein;180;True
+EB: Stachowiak;186;True
+EB: Stein;187;True
+EB: Grammbitter;188;True
+Graue Panther;-1;False
+THP;-1;False
+EB: Nebeler;194;True
+EB: Berger;194;True
+EB: Bieling;196;True
+DiB;-1;False
+EB: Erdmann;197;True
+EB: Mandel;198;True
+EB: Sayn;199;True
+EB: Krämer;200;True
+EB: Vollmer;201;True
+EB: Bartholomé;203;True
+EB: Moritz;203;True
+EB: Engels;204;True
+EB: Seiffert;205;True
+EB: Heil;205;True
+EB: Pohl;206;True
+EB: Hackel;207;True
+EB: Schöne;207;True
+EB: Bechtel;207;True
+EB: Wittner;208;True
+EB: Schwang;209;True
+EB: Hoppe;209;True
+EB: Lauer;209;True
+EB: Hofmann;210;True
+EB: Mobasheri;211;True
+EB: Koccu;211;True
+EB: Vogler;211;True
+CSU;-1;False
+BP;-1;False
+EB: Hilz;217;True
+EB: Klopstock;218;True
+EB: Dönmez;220;True
+EB: Sommerfeldt;220;True
+EB: Englisch;225;True
+EB: Ryssel;226;True
+EB: Manz;228;True
+EB: Pettenkofer;228;True
+EB: Knott;231;True
+EB: Gradl;232;True
+EB: Friedl;233;True
+EB: Bauer;235;True
+EB: Dippel;235;True
+EB: Roensch;236;True
+EB: Löhnert;239;True
+EB: Kunstmann;242;True
+EB: Kalupner;242;True
+EB: Henig;242;True
+EB: Eppel;244;True
+EB: Schlot;246;True
+EB: Lembach;247;True
+EB: Kaiser;248;True
+EB: Schürer;251;True
+EB: Kolb;252;True
+EB: Sirin;252;True
+EB: Baydar;253;True
+EB: Langhans;255;True
+EB: Dorn;256;True
+BÜRGERBEWEGUNG;-1;False
+EB: Ressdorf;258;True
+EB: Demir;259;True
+EB: Miller;260;True
+EB: Tolzin;260;True
+EB: Gibanica;265;True
+EB: Novotny;265;True
+EB: Hartmann;266;True
+KlimalisteBW;-1;False
+EB: Mund;272;True
+EB: Rapps;273;True
+EB: Schmitt;277;True
+EB: Fritsch;278;True
+EB: Herrlinger;279;True
+EB: Harting;287;True
+EB: Ringger;287;True
+EB: Schmidt;293;True
+EB: Poss;296;True

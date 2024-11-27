@@ -12,7 +12,12 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "kandidatur")
+@Table(name = "kandidatur", uniqueConstraints = {@UniqueConstraint(name = "kandidaturEinmaligProJahr",columnNames = {
+        "nachname",
+        "vorname",
+        "geburtsjahr",
+        "jahr",
+})})
 public class Kandidatur {
 
     @Id
@@ -28,10 +33,10 @@ public class Kandidatur {
     private String vorname;
 
     @Column(name = "geburtsjahr", nullable = false)
-    private String geburtsjahr;
+    private int geburtsjahr;
 
     @ManyToOne
-    @JoinColumn(name = "partei_id", nullable = false)
+    @JoinColumn(name = "partei_id")
     private Partei partei;
 
     @ManyToOne
