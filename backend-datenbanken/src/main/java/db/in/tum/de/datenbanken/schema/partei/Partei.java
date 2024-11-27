@@ -1,5 +1,6 @@
 package db.in.tum.de.datenbanken.schema.partei;
 
+import db.in.tum.de.datenbanken.schema.kreise.Wahlkreis;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "partei")
+@Table(name = "partei", uniqueConstraints = {@UniqueConstraint(name = "parteiNameUnique", columnNames = {
+        "kurzbezeichnung",
+        "wahlkreis_id",
+})})
 public class Partei {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "partei_seq")
@@ -15,15 +19,19 @@ public class Partei {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "kurzbezeichnung", nullable = false, unique = true)
+    @Column(name = "kurzbezeichnung", nullable = false)
     private String kurzbezeichnung;
 
-    @Column(name = "Zusatzbezeichnung")
+    @Column(name = "zusatzbezeichnung")
     private String zusatzbezeichnung;
 
-    @Column(name = "isEinzelbewerber", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "wahlkreis_id")
+    private Wahlkreis wahlkreis;
+
+    @Column(name = "is_einzelbewerber", nullable = false)
     private boolean isEinzelbewerber;
 }

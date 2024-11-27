@@ -10,16 +10,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static db.in.tum.de.datenbanken.utils.ParseAndInsertCSV.readCsv;
 
-
-public class V11__init_zweitestimme_aggr extends BaseJavaMigration {
-
-    private static final String CSV_FILE_PATH = "src/main/resources/electionData/targetCSV/zweitestimme.csv";
+public class V4__init_bevoelkerung extends BaseJavaMigration {
+    private static final String CSV_FILE_PATH = "src/main/resources/electionData/targetCSV/bevoelkerung.csv";
 
     @Override
     public void migrate(Context context) {
+
         // Define the batch insert SQL with placeholders for the parameters
-        String insertSql = "INSERT INTO zweitestimme_aggr (id, partei_id, wahlkreis_id, jahr, stimmen) " +
-                "VALUES (nextval('zweitestimme_aggr_seq'), (select partei.id from partei where partei.kurzbezeichnung = ?), ?, ?, ?)";
+        String insertSql = "INSERT INTO bevoelkerung (id, bundesland_id, jahr, bevoelkerung) " +
+                "VALUES (nextval('bevoelkerung_seq'), (SELECT id FROM bundesland WHERE name = ?), ?, ?)";
 
         // Set up the reader for the CSV file (located in resources/db/migration)
 
@@ -31,14 +30,12 @@ public class V11__init_zweitestimme_aggr extends BaseJavaMigration {
             int batchSize = 1000;
             AtomicInteger count = new AtomicInteger();
 
-            // partei;wahlkreis_id;jahr;anzahl
+            // Read and parse CSV file line-by-line
             rows.forEach(row -> {
                 try {
-                    // wahlkreis_id;partei;jahr;anzahl
-                    preparedStatement.setString(1, row[0].trim()); // partei.name
-                    preparedStatement.setLong(2, Long.parseLong(row[1].trim())); // wahlkreid_id
-                    preparedStatement.setLong(3, Integer.parseInt(row[2].trim())); // jahr
-                    preparedStatement.setLong(4, Long.parseLong(row[3].trim())); // stimmen
+                    preparedStatement.setString(1, row[0].trim()); // bundesland
+                    preparedStatement.setInt(2, Integer.parseInt(row[2].trim())); // jahr
+                    preparedStatement.setLong(3, Long.parseLong(row[1].trim())); // bevoelkerung
 
                     // Add this set of parameters to the batch
                     preparedStatement.addBatch();

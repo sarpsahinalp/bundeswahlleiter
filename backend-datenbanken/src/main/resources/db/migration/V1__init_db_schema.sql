@@ -8,11 +8,7 @@ CREATE SEQUENCE IF NOT EXISTS erststimme_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE IF NOT EXISTS kandidatur_seq START WITH 1 INCREMENT BY 1;
 
-CREATE SEQUENCE IF NOT EXISTS landesliste_seq START WITH 1 INCREMENT BY 1;
-
 CREATE SEQUENCE IF NOT EXISTS partei_seq START WITH 1 INCREMENT BY 1;
-
-CREATE SEQUENCE IF NOT EXISTS partei_wahl_teilnahme_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE IF NOT EXISTS wahl_teilnahme_seq START WITH 1 INCREMENT BY 50;
 
@@ -62,8 +58,8 @@ CREATE TABLE kandidatur
     id                BIGINT       NOT NULL,
     nachname          VARCHAR(255) NOT NULL,
     vorname           VARCHAR(255) NOT NULL,
-    geburtsjahr       VARCHAR(255) NOT NULL,
-    partei_id         BIGINT       NOT NULL,
+    geburtsjahr       INTEGER      NOT NULL,
+    partei_id         BIGINT,
     wahlkreis_id      BIGINT,
     bundesland_id     BIGINT,
     landesliste_platz INTEGER,
@@ -71,31 +67,15 @@ CREATE TABLE kandidatur
     CONSTRAINT pk_kandidatur PRIMARY KEY (id)
 );
 
-CREATE TABLE landesliste
-(
-    id            BIGINT NOT NULL,
-    kandidatur_id BIGINT NOT NULL,
-    bundesland_id BIGINT NOT NULL,
-    listenplatz   INTEGER,
-    CONSTRAINT pk_landesliste PRIMARY KEY (id)
-);
-
 CREATE TABLE partei
 (
     id                BIGINT       NOT NULL,
-    name              VARCHAR(255) NOT NULL,
+    name              VARCHAR(255),
     kurzbezeichnung   VARCHAR(255) NOT NULL,
     zusatzbezeichnung VARCHAR(255),
+    wahlkreis_id      BIGINT,
     is_einzelbewerber BOOLEAN      NOT NULL,
     CONSTRAINT pk_partei PRIMARY KEY (id)
-);
-
-CREATE TABLE partei_wahl_teilnahme
-(
-    id        BIGINT  NOT NULL,
-    partei_id BIGINT  NOT NULL,
-    jahr      INTEGER NOT NULL,
-    CONSTRAINT pk_parteiwahlteilnahme PRIMARY KEY (id)
 );
 
 CREATE TABLE wahl_teilnahme
@@ -131,8 +111,11 @@ CREATE TABLE zweitestimme_aggr
     CONSTRAINT pk_zweitestimme_aggr PRIMARY KEY (id)
 );
 
+ALTER TABLE kandidatur
+    ADD CONSTRAINT kandidaturEinmaligProJahr UNIQUE (nachname, vorname, geburtsjahr, jahr);
+
 ALTER TABLE partei
-    ADD CONSTRAINT uc_partei_kurzbezeichnung UNIQUE (kurzbezeichnung);
+    ADD CONSTRAINT parteiNameUnique UNIQUE (kurzbezeichnung, wahlkreis_id);
 
 ALTER TABLE bevoelkerung
     ADD CONSTRAINT FK_BEVOELKERUNG_ON_BUNDESLAND FOREIGN KEY (bundesland_id) REFERENCES bundesland (id);
@@ -152,14 +135,8 @@ ALTER TABLE kandidatur
 ALTER TABLE kandidatur
     ADD CONSTRAINT FK_KANDIDATUR_ON_WAHLKREIS FOREIGN KEY (wahlkreis_id) REFERENCES wahlkreis (id);
 
-ALTER TABLE landesliste
-    ADD CONSTRAINT FK_LANDESLISTE_ON_BUNDESLAND FOREIGN KEY (bundesland_id) REFERENCES bundesland (id);
-
-ALTER TABLE landesliste
-    ADD CONSTRAINT FK_LANDESLISTE_ON_KANDIDATUR FOREIGN KEY (kandidatur_id) REFERENCES kandidatur (id);
-
-ALTER TABLE partei_wahl_teilnahme
-    ADD CONSTRAINT FK_PARTEIWAHLTEILNAHME_ON_PARTEI FOREIGN KEY (partei_id) REFERENCES partei (id);
+ALTER TABLE partei
+    ADD CONSTRAINT FK_PARTEI_ON_WAHLKREIS FOREIGN KEY (wahlkreis_id) REFERENCES wahlkreis (id);
 
 ALTER TABLE wahlkreis
     ADD CONSTRAINT FK_WAHLKREIS_ON_BUNDESLAND FOREIGN KEY (bundesland_id) REFERENCES bundesland (id);
