@@ -1,0 +1,6 @@
+.content{
+    display: flex;
+    justify-content: center;
+
+    padding-top: calc(64px + 50px);
+}
