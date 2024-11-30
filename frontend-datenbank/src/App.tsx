@@ -3,16 +3,24 @@ import WISToolbar from "./Components/header.tsx";
 import {useState} from "react";
 import SitzVerteilung from "./pages/sitzVerteilung.tsx";
 import BundestagsMitglieder from "./pages/bundestagsMitglieder.tsx";
+import WahlKreisSieger from "./pages/wahlKreisSieger.tsx";
+import WISDrawer from "./Components/drawer.tsx";
+import InboxIcon from "@mui/icons-material/MoveToInbox";
+import {page} from "./models/page.tsx";
+import PieChartIcon from '@mui/icons-material/PieChart';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
 
 // die namen können noch angepasst werden und wenn es passt, kann man auch unterschiedliche Seiten zusammenfügen
-const pages = [
-    'Sitzverteilung',
-    'Mitglieder des Bundestages',
-    'Wahlkreisübersicht',
-    'Stimmkreissieger',
-    'Überhangmandate',
-    'Knappste Sieger',
-    'Wahlkreisübersicht Einzelstimmen',
+const pages: page[] = [
+    {'title': 'Sitzverteilung', 'link': <SitzVerteilung />, 'icon': <PieChartIcon/>},
+    {'title': 'Mitglieder des Bundestages', 'link': <BundestagsMitglieder />, 'icon': <InboxIcon />},
+    {'title': 'Wahlkreisübersicht', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
+    {'title': 'WahlkreisSieger', 'link': <WahlKreisSieger />, 'icon': <HowToRegIcon />},
+    {'title': 'Überhangmandate', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
+    {'title': 'Knappste Sieger', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
+    {'title': 'Wahlkreisübersicht Einzelstimmen', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
+    {'title': 'Sitzverteilung', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
+    {'title': 'Sitzverteilung', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
 ]
 
 function App() {
@@ -20,26 +28,18 @@ function App() {
 
     return (
         <div>
-            <WISToolbar
+            <WISToolbar/>
+            <WISDrawer
                 pages={pages}
                 onPageSelect={(selectedPage) => {
                     setActivePage(selectedPage)
                 } }
             />
-            {pageSwitch(activePage)}
+            <div className="content">
+                {activePage.link}
+            </div>
         </div>
     )
 }
 
 export default App
-
-function pageSwitch(page: string) {
-    switch (page) {
-        case 'Sitzverteilung':
-            return <SitzVerteilung />;
-        case 'Mitglieder des Bundestages':
-            return <BundestagsMitglieder />;
-        default:
-            return <label>Not implemented!</label>
-    }
-}
