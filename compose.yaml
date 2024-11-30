@@ -23,8 +23,8 @@ services:
 
   springboot-app:
     build:
-      context: backend-datenbanken/.
-      dockerfile: Dockerfile  # Path to your Dockerfile
+      context: .
+      dockerfile: backend-datenbanken/Dockerfile  # Path to your Dockerfile
     ports:
       - "8080:8080"  # Map the container port to a local port
     environment:
@@ -39,8 +39,8 @@ services:
 
   frontend:
     build:
-      context: frontend-datenbank/.
-      dockerfile: Dockerfile  # Path to your Dockerfile
+      context: .
+      dockerfile: backend-datenbanken/Dockerfile  # Path to your Dockerfile
     ports:
       - "3000:3000"  # Map the container port to a local port
     networks:

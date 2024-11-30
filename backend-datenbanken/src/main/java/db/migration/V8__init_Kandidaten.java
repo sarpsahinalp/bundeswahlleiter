@@ -13,9 +13,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class V8__init_Kandidaten extends BaseJavaMigration {
 
     private static final String[] CSV_FILE_PATH = {
-            "src/main/resources/electionData/targetCSV/2021/direktmandate.csv",
-            "src/main/resources/electionData/targetCSV/2021/landesliste.csv",
-            "src/main/resources/electionData/targetCSV/2017/kandidaten.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2021/direktmandate.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2021/landesliste.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2017/kandidaten.csv",
     };
 
     @Override

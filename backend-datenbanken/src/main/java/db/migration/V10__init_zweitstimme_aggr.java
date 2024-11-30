@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class V10__init_zweitstimme_aggr extends BaseJavaMigration {
 
     private static final String[] CSV_FILE_PATH = {
-            "src/main/resources/electionData/targetCSV/2021/zweitstimmeAggr.csv",
-            "src/main/resources/electionData/targetCSV/2017/zweitstimmeAggr.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2021/zweitstimmeAggr.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2017/zweitstimmeAggr.csv",
     };
 
     @Override

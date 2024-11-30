@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class V9__init_erststimmen_aggr extends BaseJavaMigration {
 
     private static final String[] CSV_FILE_PATH = {
-            "src/main/resources/electionData/targetCSV/2021/erststimmeAggr.csv",
-            "src/main/resources/electionData/targetCSV/2017/erststimmeAggr.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2021/erststimmeAggr.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2017/erststimmeAggr.csv",
     };
 
     @Override

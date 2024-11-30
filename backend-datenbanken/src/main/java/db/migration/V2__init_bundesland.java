@@ -12,7 +12,7 @@ import static db.in.tum.de.datenbanken.utils.ParseAndInsertCSV.readCsv;
 
 public class V2__init_bundesland extends BaseJavaMigration {
 
-    private static final String CSV_FILE_PATH = "src/main/resources/electionData/targetCSV/bundesland.csv";
+    private static final String CSV_FILE_PATH = "backend-datenbanken/src/main/resources/electionData/targetCSV/bundesland.csv";
 
     @Override
     public void migrate(Context context) {

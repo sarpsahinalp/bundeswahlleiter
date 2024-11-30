@@ -8,7 +8,11 @@ CREATE SEQUENCE IF NOT EXISTS erststimme_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE IF NOT EXISTS kandidatur_seq START WITH 1 INCREMENT BY 1;
 
+CREATE SEQUENCE IF NOT EXISTS minderheitspartei_seq START WITH 1 INCREMENT BY 50;
+
 CREATE SEQUENCE IF NOT EXISTS partei_seq START WITH 1 INCREMENT BY 1;
+
+CREATE SEQUENCE IF NOT EXISTS partei_wahl_teilnahme_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE IF NOT EXISTS wahl_teilnahme_seq START WITH 1 INCREMENT BY 50;
 
@@ -67,6 +71,13 @@ CREATE TABLE kandidatur
     CONSTRAINT pk_kandidatur PRIMARY KEY (id)
 );
 
+CREATE TABLE minderheitspartei
+(
+    id        BIGINT NOT NULL,
+    partei_id BIGINT,
+    CONSTRAINT pk_minderheitspartei PRIMARY KEY (id)
+);
+
 CREATE TABLE partei
 (
     id                BIGINT       NOT NULL,
@@ -76,6 +87,14 @@ CREATE TABLE partei
     wahlkreis_id      BIGINT,
     is_einzelbewerber BOOLEAN      NOT NULL,
     CONSTRAINT pk_partei PRIMARY KEY (id)
+);
+
+CREATE TABLE partei_wahl_teilnahme
+(
+    id        BIGINT  NOT NULL,
+    partei_id BIGINT  NOT NULL,
+    jahr      INTEGER NOT NULL,
+    CONSTRAINT pk_partei_wahl_teilnahme PRIMARY KEY (id)
 );
 
 CREATE TABLE wahl_teilnahme
@@ -135,8 +154,14 @@ ALTER TABLE kandidatur
 ALTER TABLE kandidatur
     ADD CONSTRAINT FK_KANDIDATUR_ON_WAHLKREIS FOREIGN KEY (wahlkreis_id) REFERENCES wahlkreis (id);
 
+ALTER TABLE minderheitspartei
+    ADD CONSTRAINT FK_MINDERHEITSPARTEI_ON_PARTEI FOREIGN KEY (partei_id) REFERENCES partei (id);
+
 ALTER TABLE partei
     ADD CONSTRAINT FK_PARTEI_ON_WAHLKREIS FOREIGN KEY (wahlkreis_id) REFERENCES wahlkreis (id);
+
+ALTER TABLE partei_wahl_teilnahme
+    ADD CONSTRAINT FK_PARTEI_WAHL_TEILNAHME_ON_PARTEI FOREIGN KEY (partei_id) REFERENCES partei (id);
 
 ALTER TABLE wahlkreis
     ADD CONSTRAINT FK_WAHLKREIS_ON_BUNDESLAND FOREIGN KEY (bundesland_id) REFERENCES bundesland (id);

@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static db.in.tum.de.datenbanken.utils.ParseAndInsertCSV.readCsv;
 
 public class V4__init_bevoelkerung extends BaseJavaMigration {
-    private static final String CSV_FILE_PATH = "src/main/resources/electionData/targetCSV/bevoelkerung.csv";
+    private static final String CSV_FILE_PATH = "backend-datenbanken/src/main/resources/electionData/targetCSV/bevoelkerung.csv";
 
     @Override
     public void migrate(Context context) {

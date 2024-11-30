@@ -13,8 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class V5__init_parteien_kurz extends BaseJavaMigration {
 
     private static final String[] CSV_FILE_PATH = {
-            "src/main/resources/electionData/targetCSV/2017/parteien.csv",
-            "src/main/resources/electionData/targetCSV/2021/parteien.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2017/parteien.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2021/parteien.csv",
     };
 
     @Override
