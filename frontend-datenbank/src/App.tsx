@@ -19,8 +19,6 @@ const pages: page[] = [
     {'title': 'Überhangmandate', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
     {'title': 'Knappste Sieger', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
     {'title': 'Wahlkreisübersicht Einzelstimmen', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
-    {'title': 'Sitzverteilung', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
-    {'title': 'Sitzverteilung', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
 ]
 
 function App() {

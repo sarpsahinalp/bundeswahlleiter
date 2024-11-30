@@ -60,4 +60,11 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
             "    join wahlkreis w on gz.wahlkreis_id = w.id;", 
             nativeQuery = true)
     List<Object[]> getWahlkreisSieger(@Param("year") int year);
+
+    @Query(value = "select p.kurzbezeichnung, zo.sitze " +
+            "FROM zweiter_oberverteilung  zo " +
+            "    join partei p on p.id = zo.partei_id " +
+            "WHERE zo.jahr = :year",
+            nativeQuery = true)
+    List<Object[]> getSitzverteilung(@Param("year") int year);
 }
