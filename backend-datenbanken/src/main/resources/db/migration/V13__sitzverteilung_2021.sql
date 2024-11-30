@@ -36,7 +36,7 @@ create table mindestSitzanspruch
 
 create table zweiter_oberverteilung
 (
-    partei_id INT unique,
+    partei_id INT,
     sitze     INT,
     jahr      INT,
     primary key (partei_id, jahr)
@@ -62,8 +62,8 @@ BEGIN
             UNION
             -- Recursive case: updating the divisor based on previous iteration
             (SELECT CASE
-                        WHEN (zielwert - vk.sitzeverteilt) > 0 THEN vk.divisor - 1000
-                        ELSE vk.divisor + 1000
+                        WHEN (zielwert - vk.sitzeverteilt) > 0 THEN vk.divisor - 10
+                        ELSE vk.divisor + 10
                         END                    AS divisor,
                     (SELECT sum(round(b.bevoelkerung / vk.divisor))
                      FROM bevoelkerung b
@@ -79,7 +79,7 @@ BEGIN
     -- Assign the result from the final iteration of the recursive query
     INSERT
     INTO erste_oberverteilung (bundesland_id, sitze, jahr)
-    select b.bundesland_id, round(b.bevoelkerung / d.divisor_final) as sitze, 2021
+    select b.bundesland_id, round(b.bevoelkerung / d.divisor_final) as sitze, paramJahr
     from bevoelkerung b,
          divisor_end d
     where b.jahr = paramJahr
@@ -427,50 +427,6 @@ $$ LANGUAGE plpgsql;
 -- Calculates the zweite oberverteilung and inserts into the table
 select *
 from calculate_divisor_min_seat_claims();
-
-CREATE
-    OR REPLACE FUNCTION calculate_divisor_zweite_unterverteilung(parteiId BIGINT, paramJahr INT)
-    RETURNS VOID AS
-$$
-BEGIN
-    -- Using WITH RECURSIVE to calculate the divisor iteratively
-    WITH RECURSIVE
-        gesamtStimmenProPartei as (select za.partei_id, sum(za.gesamtStimmen) as gesamt
-                                   from sumzweitestimmeproparteiinbundesland za
-                                   where jahr = 2021
-                                   group by za.partei_id),
-        divisor_verfahren (bundesland_id, partei_id, divisor, sitzeverteilt, zielwert, iteration) AS (
-            -- Base case: initial values
-            select g.bundesland                            as bundesland_id,
-                   g.partei_id                             as partei_id,
-                   g.gesamtStimmen / zo.sitze::FLOAT       as divisor,
-                   (select sum(round(g2.gesamtStimmen / (g2.gesamtStimmen / zo2.sitze::FLOAT)))
-                    from zweiter_oberverteilung zo2,
-                         sumZweiteStimmeProParteiInBundesland g2
-                    where zo2.partei_id = g2.partei_id
-                      and zo2.jahr = g2.jahr
-                      and zo2.jahr = 2021
-                      and zo2.partei_id = 1
-                    group by zo2.partei_id, g2.bundesland) as sitzeverteilt,
-                   zo.sitze                                as zielwert,
-                   0                                       as iteration
-            from zweiter_oberverteilung zo,
-                 sumZweiteStimmeProParteiInBundesland g
-            where zo.partei_id = g.partei_id
-              and zo.partei_id = 1
-              and zo.jahr = g.jahr
-              and zo.jahr = 2021),
-        test as (select *
-                 from zweiter_oberverteilung zo
-                 where zo.partei_id = 1
-                   and zo.jahr = 2021)
-
-    select *
-    from divisor_verfahren;
-
-END;
-$$
-    LANGUAGE plpgsql;
 
 create table zweite_unterverteilung
 (

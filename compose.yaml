@@ -40,7 +40,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: backend-datenbanken/Dockerfile  # Path to your Dockerfile
+      dockerfile: ./frontend-datenbanken/Dockerfile  # Path to your Dockerfile
     ports:
       - "3000:3000"  # Map the container port to a local port
     networks:

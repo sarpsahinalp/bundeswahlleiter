@@ -1,4 +1,4 @@
-import { PieChart } from '@mui/x-charts/PieChart';
+import {PieChart} from '@mui/x-charts/PieChart';
 import {useEffect, useState} from "react";
 import {FormControl, InputLabel, MenuItem, Select, SelectChangeEvent} from "@mui/material";
 
@@ -11,7 +11,7 @@ type sitzverteilung = {
 
 type row = {
     value: number,
-    label:string,
+    label: string,
     color: string,
 }
 
@@ -22,7 +22,7 @@ const colors: Map<string, string> = new Map([
     ['AfD', '#0021c8'],
     ['SPD', '#d71f1d'],
     ['CSU', '#121212'],
-    ['CDU', '#121212'],
+    ['CDU', '#125000'],
 ])
 
 export default function SitzVerteilung() {
@@ -32,7 +32,7 @@ export default function SitzVerteilung() {
     const [loading, setLoading] = useState(true);
     const [year, setYear] = useState(2021);
 
-    const updateYear = (event:  SelectChangeEvent<unknown>) => {
+    const updateYear = (event: SelectChangeEvent<unknown>) => {
         const value = event.target.value as number;
         setYear(value);
     };
@@ -73,14 +73,14 @@ export default function SitzVerteilung() {
                 </Select>
             </FormControl>
             <PieChart
-                sx = {{width: 500, height: 500}}
+                sx={{width: 500, height: 500}}
                 series={[{
                     data: data,
                     startAngle: -90,
                     endAngle: 90,
                     innerRadius: 30,
                     outerRadius: 300,
-                    highlightScope: { fade: 'global', highlight: 'item' },
+                    highlightScope: {fade: 'global', highlight: 'item'},
                 }]}
                 width={1000}
                 height={700}

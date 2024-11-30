@@ -26,7 +26,7 @@ export default function WahlKreisSieger() {
     const [loading, setLoading] = useState(true);
     const [year, setYear] = useState(2021);
 
-    const updateYear = (event:  SelectChangeEvent<unknown>) => {
+    const updateYear = (event: SelectChangeEvent<unknown>) => {
         const value = event.target.value as number;
         setYear(value);
     };
@@ -57,7 +57,7 @@ export default function WahlKreisSieger() {
                     ))}
                 </Select>
             </FormControl>
-            <TableContainer sx={{width:'80%'}}>
+            <TableContainer sx={{width: '80%'}}>
                 <Table>
                     <TableHead>
                         <TableRow>

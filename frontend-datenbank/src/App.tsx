@@ -9,10 +9,12 @@ import InboxIcon from "@mui/icons-material/MoveToInbox";
 import {page} from "./models/page.tsx";
 import PieChartIcon from '@mui/icons-material/PieChart';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
+import SitzverteilungPieChart from "./pages/testSitzVerteilung.tsx";
 
 // die namen können noch angepasst werden und wenn es passt, kann man auch unterschiedliche Seiten zusammenfügen
 const pages: page[] = [
     {'title': 'Sitzverteilung', 'link': <SitzVerteilung />, 'icon': <PieChartIcon/>},
+    {'title': 'Test', 'link': <SitzverteilungPieChart />, 'icon': <InboxIcon />},
     {'title': 'Mitglieder des Bundestages', 'link': <BundestagsMitglieder />, 'icon': <InboxIcon />},
     {'title': 'Wahlkreisübersicht', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
     {'title': 'WahlkreisSieger', 'link': <WahlKreisSieger />, 'icon': <HowToRegIcon />},
