@@ -5,7 +5,6 @@ import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.util.Collection;
 import java.util.List;
 
 @org.springframework.stereotype.Repository
@@ -91,4 +90,66 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
                        GROUP BY group_field
             """, nativeQuery = true)
     List<Object[]> getUberhangmandate(int year, String grouping);
+
+    @Query(value = """
+        SELECT id, name
+        FROM wahlkreis;
+    """, nativeQuery = true)
+    List<Object[]> getWahlkreise();
+
+    @Query(value = """
+        WITH stimmen_max AS (
+            SELECT max(stimmen)
+            FROM erststimme_aggr
+            WHERE wahlkreis_id = :wahlkreis_id and jahr = :year
+        )
+        SELECT k.vorname, k.nachname, p.kurzbezeichnung
+        FROM erststimme_aggr ea
+        join kandidatur k using (partei_id, wahlkreis_id, jahr)
+        join partei p on p.id = k.partei_id
+        WHERE ea.wahlkreis_id = :wahlkreis_id
+            AND ea.stimmen = (SELECT * FROM stimmen_max)
+            AND ea.jahr = :year;
+    """, nativeQuery = true)
+    List<Object[]> getGewaehltenDirektkandidaten(@Param("year") int year,@Param("wahlkreis_id") int wahlkreis_id);
+
+    @Query(value = """
+        WITH vorjahr AS (
+                SELECT max(jahr)
+                FROM kandidatur
+                WHERE jahr < :year
+            ),
+                stimmen AS (
+                SELECT *
+                FROM zweitestimme_aggr za
+                WHERE za.wahlkreis_id = :wahlkreis_id
+            ),
+             stimmen_gesamt AS (
+                 SELECT sum(stimmen) as gesamtStimmen, jahr
+                 FROM stimmen
+                 GROUP BY jahr
+             ),
+             ergebnis AS (
+                 SELECT
+                     s.partei_id,
+                     s.stimmen as Stimmen_Absolut,
+                     ((s.stimmen * 1.0 / sg.gesamtStimmen) * 100) as Stimmen_Prozentual,
+                     jahr
+                 FROM stimmen s
+                    JOIN stimmen_gesamt sg using (jahr)
+             )
+        SELECT
+            p.kurzbezeichnung,
+            now.Stimmen_Absolut,
+            now.Stimmen_Prozentual,
+            (now.Stimmen_Absolut - last.Stimmen_Absolut) as Stimmen_Zuwachs_Absolut,
+            (now.Stimmen_Prozentual - last.Stimmen_Prozentual) as Stimmen_Zuwachs_Prozentual
+        FROM
+            (SELECT * FROM ergebnis WHERE jahr = :year) as now
+            join partei p on p.id = now.partei_id
+            left join (SELECT * FROM ergebnis WHERE jahr = (SELECT * FROM vorjahr)) as last on now.partei_id = last.partei_id;
+    """, nativeQuery = true)
+    List<Object[]> getWahlkreisUebersicht(int year, int wahlkreis_id);
+
+
 }

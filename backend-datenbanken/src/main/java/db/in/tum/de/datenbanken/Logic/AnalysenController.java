@@ -1,8 +1,6 @@
 package db.in.tum.de.datenbanken.Logic;
 
-import db.in.tum.de.datenbanken.Logic.DTOs.SitzverteilungDTO;
-import db.in.tum.de.datenbanken.Logic.DTOs.UberhangMandateDTO;
-import db.in.tum.de.datenbanken.Logic.DTOs.WahlkreisSiegerDTO;
+import db.in.tum.de.datenbanken.Logic.DTOs.*;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +28,19 @@ public class AnalysenController {
     @GetMapping("/ueberhangmandate/{year}/{grouping}")
     public ResponseEntity<List<UberhangMandateDTO>> getUeberhangmandate(@PathVariable("year") int year, @PathVariable("grouping") String grouping) {
         return ResponseEntity.ok(wahlkreisAnalysenService.getUeberhangmandate(year, grouping));
+    }
+
+    @GetMapping("/wahlkreise")
+    public ResponseEntity<List<WahlkreiseDTO>> getWahlkreise() {
+        return ResponseEntity.ok(wahlkreisAnalysenService.getWahlkreise());
+    }
+
+    @GetMapping("/wahlkreis/uebersicht/{year}/{wahlkreis_id}")
+    public ResponseEntity<WahlkreisUebersichtDTO> getWahlkreisUebersicht(
+            @PathVariable("year") int year,
+            @PathVariable("wahlkreis_id") int wahlkreis_id
+    ) {
+        return ResponseEntity.ok(wahlkreisAnalysenService.getWahlkreisUebersicht(year, wahlkreis_id));
     }
 
 }

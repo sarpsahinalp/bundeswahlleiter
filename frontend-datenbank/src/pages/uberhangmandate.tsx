@@ -25,7 +25,6 @@ const OverhangMandateChart: React.FC = () => {
         setLoading(true);
         try {
             const response = await fetchUberhangMandates(year, groupBy);
-            console.log('Response:', response);
             setData(response);
         } catch (error) {
             console.error('Failed to fetch grouped data:', error);

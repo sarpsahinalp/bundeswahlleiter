@@ -1,8 +1,6 @@
 package db.in.tum.de.datenbanken.Logic;
 
-import db.in.tum.de.datenbanken.Logic.DTOs.SitzverteilungDTO;
-import db.in.tum.de.datenbanken.Logic.DTOs.UberhangMandateDTO;
-import db.in.tum.de.datenbanken.Logic.DTOs.WahlkreisSiegerDTO;
+import db.in.tum.de.datenbanken.Logic.DTOs.*;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
@@ -31,4 +29,18 @@ public class AnalysenService {
         return analysenRepository.getUberhangmandate(year, grouping)
                 .stream().map(UberhangMandateDTO::new).toList();
     }
+
+    public List<WahlkreiseDTO> getWahlkreise(){
+        return analysenRepository.getWahlkreise()
+                .stream().map(WahlkreiseDTO::new).toList();
+    }
+
+    public WahlkreisUebersichtDTO getWahlkreisUebersicht(int year, int wahlkreis_id){
+        System.out.println(year + " " + wahlkreis_id);
+        List<Object[]> gewaehltenDirektkandidaten = analysenRepository.getGewaehltenDirektkandidaten(year, wahlkreis_id);
+        System.out.println("erg:" + gewaehltenDirektkandidaten);
+        List<Object[]> wahlkreisUebersicht = analysenRepository.getWahlkreisUebersicht(year, wahlkreis_id);
+        return new WahlkreisUebersichtDTO(gewaehltenDirektkandidaten.getFirst(), wahlkreisUebersicht);
+    }
+
 }

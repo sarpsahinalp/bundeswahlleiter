@@ -2,6 +2,8 @@ import axios from 'axios';
 import {Sitzverteilung} from "../models/sitzverteilung.ts";
 import {WahlkreisSieger} from "../models/wahlkreissieger.ts";
 import {UberhangMandate} from "../models/uberhandmandate.ts";
+import {Wahlkreis} from "../models/wahlkreis.ts";
+import {WahlkreisUebersicht} from "../models/wahlkreisUebersicht.ts";
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -24,3 +26,23 @@ export const fetchUberhangMandates = async (year: number, grouping: string): Pro
         throw error;
     }
 };
+
+export const fetchWahlkreise = async (): Promise<Wahlkreis[]> => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/ergebnisse/wahlkreise`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching wahlkreise:', error);
+        throw error;
+    }
+}
+
+export const fetchWahlkreisUebersicht = async (year: number, wahlkreis_id: number): Promise<WahlkreisUebersicht>  => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/ergebnisse/wahlkreis/uebersicht/${year}/${wahlkreis_id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching Wahlkreis Uebersicht:', error);
+        throw error;
+    }
+}
