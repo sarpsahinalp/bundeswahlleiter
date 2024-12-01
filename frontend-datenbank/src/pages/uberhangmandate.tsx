@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Box, CircularProgress, Typography, MenuItem, Select, FormControl, InputLabel, Button, ButtonGroup } from '@mui/material';
+import {
+    Box,
+    CircularProgress,
+    Typography,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel,
+    Button,
+    ButtonGroup,
+    SelectChangeEvent
+} from '@mui/material';
 import { BarChart } from '@mui/x-charts';
 import {UberhangMandate} from "../models/uberhandmandate.ts";
 import {fetchUberhangMandates} from "../services/AnalyseService.ts";
@@ -24,10 +35,10 @@ const OverhangMandateChart: React.FC = () => {
     };
 
     useEffect(() => {
-        loadData(selectedYear, viewBy);
+        loadData(selectedYear, viewBy).then();
     }, [selectedYear, viewBy]);
 
-    const handleYearChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const handleYearChange = (event: SelectChangeEvent<unknown>) => {
         setSelectedYear(event.target.value as number);
     };
 

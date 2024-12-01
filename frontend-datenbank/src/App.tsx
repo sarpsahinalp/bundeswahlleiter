@@ -1,7 +1,6 @@
 import './App.css'
 import WISToolbar from "./Components/header.tsx";
 import {useState} from "react";
-import SitzVerteilung from "./pages/sitzVerteilung.tsx";
 import BundestagsMitglieder from "./pages/bundestagsMitglieder.tsx";
 import WahlKreisSieger from "./pages/wahlKreisSieger.tsx";
 import WISDrawer from "./Components/drawer.tsx";
@@ -14,8 +13,7 @@ import OverhangMandateChart from "./pages/uberhangmandate.tsx";
 
 // die namen können noch angepasst werden und wenn es passt, kann man auch unterschiedliche Seiten zusammenfügen
 const pages: page[] = [
-    {'title': 'Sitzverteilung', 'link': <SitzVerteilung />, 'icon': <PieChartIcon/>},
-    {'title': 'Test', 'link': <SitzverteilungPieChart />, 'icon': <InboxIcon />},
+    {'title': 'Sitzverteilung', 'link': <SitzverteilungPieChart />, 'icon': <PieChartIcon/>},
     {'title': 'Mitglieder des Bundestages', 'link': <BundestagsMitglieder />, 'icon': <InboxIcon />},
     {'title': 'Wahlkreisübersicht', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
     {'title': 'WahlkreisSieger', 'link': <WahlKreisSieger />, 'icon': <HowToRegIcon />},

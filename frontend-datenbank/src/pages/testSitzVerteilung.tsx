@@ -1,7 +1,16 @@
 import React, {useEffect, useState} from 'react';
 import {fetchSitzverteilung} from '../services/AnalyseService.ts';
 import {PieChart, Pie, Cell, Tooltip, Legend} from 'recharts';
-import {Box, CircularProgress, Typography, MenuItem, Select, FormControl, InputLabel} from '@mui/material';
+import {
+    Box,
+    CircularProgress,
+    Typography,
+    MenuItem,
+    Select,
+    FormControl,
+    InputLabel,
+    SelectChangeEvent
+} from '@mui/material';
 import {Sitzverteilung} from "../models/sitzverteilung.ts";
 
 // Extended color palette to handle more than 9 items
@@ -10,6 +19,16 @@ const COLORS = [
     '#33FF96', '#9633FF', '#FF3333', '#3333FF', '#33FF33', '#A1FF33', '#33A1FF', '#FFA733',
     '#73FF33', '#3373FF', '#FF3373', '#FF33FF', '#33FFFF', '#FFFF33', '#A1A1FF', '#FFA1A1',
 ];
+
+const colorsMap: Map<string, string> = new Map([
+    ['GRÜNE', '#78bc1b'],
+    ['DIE LINKE', '#bd3075'],
+    ['FDP', '#ffcc00'],
+    ['AfD', '#0021c8'],
+    ['SPD', '#d71f1d'],
+    ['CSU', '#121212'],
+    ['CDU', '#121212'],
+])
 
 const SitzverteilungPieChart: React.FC = () => {
     const [data, setData] = useState<Sitzverteilung[]>([]);
@@ -27,12 +46,12 @@ const SitzverteilungPieChart: React.FC = () => {
             setLoading(false);
         }
     };
-;
+
     useEffect(() => {
-        loadData(selectedYear); // Fetch data when the selected year changes
+        loadData(selectedYear).then(); // Fetch data when the selected year changes
     }, [selectedYear]);
 
-    const handleYearChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    const handleYearChange = (event: SelectChangeEvent<unknown>) => {
         setSelectedYear(event.target.value as number);
     };
 
@@ -55,6 +74,7 @@ const SitzverteilungPieChart: React.FC = () => {
                 <InputLabel id="year-select-label">Select Year</InputLabel>
                 <Select
                     labelId="year-select-label"
+                    label="Select Year"
                     value={selectedYear}
                     onChange={handleYearChange}
                 >
@@ -81,9 +101,10 @@ const SitzverteilungPieChart: React.FC = () => {
                     fill="#8884d8"
                     label={(entry) => `${entry.kurzbezeichnung}: ${entry.sitze}`}
                 >
-                    {data.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]}/>
-                    ))}
+                    {data.map((sV, index) => {
+                        const color = colorsMap.get(sV.kurzbezeichnung) ?? COLORS[index % COLORS.length];
+                        return <Cell key={`cell-${index}`} fill={color}/>
+                    })}
                 </Pie>
                 <Tooltip/>
                 <Legend verticalAlign="bottom" height={36}/>
