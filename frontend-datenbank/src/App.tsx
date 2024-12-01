@@ -10,6 +10,7 @@ import {page} from "./models/page.tsx";
 import PieChartIcon from '@mui/icons-material/PieChart';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 import SitzverteilungPieChart from "./pages/testSitzVerteilung.tsx";
+import OverhangMandateChart from "./pages/uberhangmandate.tsx";
 
 // die namen können noch angepasst werden und wenn es passt, kann man auch unterschiedliche Seiten zusammenfügen
 const pages: page[] = [
@@ -18,7 +19,7 @@ const pages: page[] = [
     {'title': 'Mitglieder des Bundestages', 'link': <BundestagsMitglieder />, 'icon': <InboxIcon />},
     {'title': 'Wahlkreisübersicht', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
     {'title': 'WahlkreisSieger', 'link': <WahlKreisSieger />, 'icon': <HowToRegIcon />},
-    {'title': 'Überhangmandate', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
+    {'title': 'Überhangmandate', 'link': <OverhangMandateChart />, 'icon': <InboxIcon/>},
     {'title': 'Knappste Sieger', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
     {'title': 'Wahlkreisübersicht Einzelstimmen', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
 ]

@@ -1,6 +1,7 @@
 package db.in.tum.de.datenbanken.Logic;
 
 import db.in.tum.de.datenbanken.Logic.DTOs.SitzverteilungDTO;
+import db.in.tum.de.datenbanken.Logic.DTOs.UberhangMandateDTO;
 import db.in.tum.de.datenbanken.Logic.DTOs.WahlkreisSiegerDTO;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +25,11 @@ public class AnalysenController {
     @GetMapping("/sitzverteilung/{year}")
     public ResponseEntity<List<SitzverteilungDTO>> getSitzverteilung(@PathVariable("year") int year) {
         return ResponseEntity.ok(wahlkreisAnalysenService.getSitzverteilung(year));
+    }
+
+    @GetMapping("/ueberhangmandate/{year}/{grouping}")
+    public ResponseEntity<List<UberhangMandateDTO>> getUeberhangmandate(@PathVariable("year") int year, @PathVariable("grouping") String grouping) {
+        return ResponseEntity.ok(wahlkreisAnalysenService.getUeberhangmandate(year, grouping));
     }
 
 }

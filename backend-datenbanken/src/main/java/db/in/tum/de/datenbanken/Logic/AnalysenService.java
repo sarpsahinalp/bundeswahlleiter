@@ -1,6 +1,7 @@
 package db.in.tum.de.datenbanken.Logic;
 
 import db.in.tum.de.datenbanken.Logic.DTOs.SitzverteilungDTO;
+import db.in.tum.de.datenbanken.Logic.DTOs.UberhangMandateDTO;
 import db.in.tum.de.datenbanken.Logic.DTOs.WahlkreisSiegerDTO;
 import lombok.AllArgsConstructor;
 
@@ -20,5 +21,14 @@ public class AnalysenService {
     public List<SitzverteilungDTO> getSitzverteilung(int jahr){
         return analysenRepository.getSitzverteilung(jahr)
                 .stream().map(SitzverteilungDTO::new).toList();
+    }
+
+    public List<UberhangMandateDTO> getUeberhangmandate(int year, String grouping){
+        if (!grouping.equals("bundesland") && !grouping.equals("partei")) {
+            throw new IllegalArgumentException("Invalid groupBy parameter. Must be 'bundesland' or 'partei'.");
+        }
+
+        return analysenRepository.getUberhangmandate(year, grouping)
+                .stream().map(UberhangMandateDTO::new).toList();
     }
 }

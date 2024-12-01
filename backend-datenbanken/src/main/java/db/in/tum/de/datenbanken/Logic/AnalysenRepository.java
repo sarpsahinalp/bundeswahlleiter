@@ -5,6 +5,7 @@ import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Collection;
 import java.util.List;
 
 @org.springframework.stereotype.Repository
@@ -61,10 +62,33 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
             nativeQuery = true)
     List<Object[]> getWahlkreisSieger(@Param("year") int year);
 
-    @Query(value = "select p.kurzbezeichnung, zo.sitze " +
-            "FROM zweiter_oberverteilung  zo " +
-            "    join partei p on p.id = zo.partei_id " +
-            "WHERE zo.jahr = :year",
-            nativeQuery = true)
+    @Query(value = """
+            select p.kurzbezeichnung, zo.sitze
+            FROM zweiter_oberverteilung  zo
+            join partei p on p.id = zo.partei_id
+            WHERE zo.jahr = :year
+            """, nativeQuery = true)
     List<Object[]> getSitzverteilung(@Param("year") int year);
+
+    @Query(value = """
+            SELECT
+                           CASE
+                               WHEN :grouping = 'bundesland' THEN b.name
+                               ELSE p.kurzbezeichnung
+                           END AS group_field,
+                           SUM(u.drohendeuberhang) AS mandates
+                       FROM (
+                           SELECT *
+                           FROM uberhangandmindestsiztanzahl2021
+                           UNION
+                           SELECT *
+                           FROM uberhangandmindestsiztanzahl2017
+                       ) AS u
+                       JOIN gultigeparties gp ON u.partei_id = gp.partei_id
+                       JOIN partei p ON gp.partei_id = p.id
+                       JOIN bundesland b ON b.id = u.bundesland_id
+                       WHERE u.jahr = :year
+                       GROUP BY group_field
+            """, nativeQuery = true)
+    List<Object[]> getUberhangmandate(int year, String grouping);
 }
