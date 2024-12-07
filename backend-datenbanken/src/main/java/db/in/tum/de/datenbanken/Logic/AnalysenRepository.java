@@ -114,6 +114,14 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
     List<Object[]> getGewaehltenDirektkandidaten(@Param("year") int year,@Param("wahlkreis_id") int wahlkreis_id);
 
     @Query(value = """
+        SELECT GREATEST(stimmen1.sum, stimmen2.sum) as wahlbeteiligung, gesamt.wahlberechtigte as wahlberechtigte
+        FROM (SELECT wahlberechtigte.wahlberechtigte FROM wahlberechtigte WHERE wahlkreis_id = :wahlkreis_id AND jahr = :year) AS gesamt,
+             (SELECT SUM(stimmen) AS sum FROM erststimme_aggr WHERE wahlkreis_id = :wahlkreis_id AND jahr = :year) AS stimmen1,
+             (SELECT SUM(stimmen) AS sum FROM zweitestimme_aggr WHERE wahlkreis_id = :wahlkreis_id AND jahr = :year) AS stimmen2;
+    """, nativeQuery = true)
+    List<Object[]> getWahlbeteiligung(int year, long wahlkreis_id);
+
+    @Query(value = """
         WITH vorjahr AS (
                 SELECT max(jahr)
                 FROM kandidatur

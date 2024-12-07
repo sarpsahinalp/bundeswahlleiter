@@ -4,6 +4,10 @@ export interface WahlkreisUebersicht  {
         nachname: string;
         partei: string;
     };
+    wahlbeteiligung: {
+        teilgenommen: number;
+        berechtigt: number;
+    };
     parteiErgebnis: {
         name: string;
         stimmen_abs: number;
