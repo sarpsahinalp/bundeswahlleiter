@@ -10,16 +10,18 @@ import {
     TableHead,
     TableRow,
     Paper,
+    TableSortLabel,
 } from "@mui/material";
-import {KnappsteSieger} from "../models/knappsteSieger.ts";
-import {fetchKnappsteSieger} from "../services/AnalyseService.ts";
+import { KnappsteSieger } from "../models/knappsteSieger";
+import { fetchKnappsteSieger } from "../services/AnalyseService";
 
 const KnappsteSiegerPage: React.FC = () => {
-    const [year, setYear] = useState<number>(2023); // Default year
+    const [year, setYear] = useState<number>(2021); // Default year
     const [partyFilter, setPartyFilter] = useState<string>("");
     const [wahlkreisFilter, setWahlkreisFilter] = useState<string>("");
     const [data, setData] = useState<KnappsteSieger[]>([]);
     const [filteredData, setFilteredData] = useState<KnappsteSieger[]>([]);
+    const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); // Default sorting order
 
     useEffect(() => {
         const fetchData = async () => {
@@ -45,6 +47,19 @@ const KnappsteSiegerPage: React.FC = () => {
         );
     }, [partyFilter, wahlkreisFilter, data]);
 
+    // Handle sorting by "Difference"
+    const handleSort = () => {
+        const sortedData = [...filteredData].sort((a, b) => {
+            if (sortOrder === "asc") {
+                return a.differenz - b.differenz;
+            } else {
+                return b.differenz - a.differenz;
+            }
+        });
+        setFilteredData(sortedData);
+        setSortOrder(sortOrder === "asc" ? "desc" : "asc"); // Toggle sort order
+    };
+
     return (
         <Box sx={{ padding: 4 }}>
             <Box sx={{ marginBottom: 4, display: "flex", gap: 2 }}>
@@ -65,9 +80,7 @@ const KnappsteSiegerPage: React.FC = () => {
                     label="Wahlkreis"
                     type="string"
                     value={wahlkreisFilter}
-                    onChange={(e) =>
-                        setWahlkreisFilter(e.target.value)
-                    }
+                    onChange={(e) => setWahlkreisFilter(e.target.value)}
                     sx={{ width: 200 }}
                 />
                 <Button
@@ -86,7 +99,15 @@ const KnappsteSiegerPage: React.FC = () => {
                             <TableCell>Wahlkreis</TableCell>
                             <TableCell>Type</TableCell>
                             <TableCell>Votes</TableCell>
-                            <TableCell>Difference</TableCell>
+                            <TableCell>
+                                <TableSortLabel
+                                    active={true}
+                                    direction={sortOrder}
+                                    onClick={handleSort}
+                                >
+                                    Difference
+                                </TableSortLabel>
+                            </TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
