@@ -3,6 +3,7 @@ package db.in.tum.de.datenbanken.Logic;
 import db.in.tum.de.datenbanken.Logic.DTOs.*;
 import lombok.AllArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @org.springframework.stereotype.Service
@@ -44,6 +45,23 @@ public class AnalysenService {
                 wahlbeteiligung.getFirst(),
                 wahlkreisUebersicht
         );
+    }
+
+    public List<KnappsteSiegerDTO> getKnappsteSieger(int year){
+        List<KnappsteSiegerDTO> results = new ArrayList<>();
+        List<Object[]> queryResults = analysenRepository.getKnappsteSiegerErstStimme(year);
+
+        for (Object[] row : queryResults) {
+            String parteiName = (String) row[0];
+            String  wahlkreisId = ((String) row[1]);
+            String typ = (String) row[2];
+            int stimmen = ((Number) row[3]).intValue();
+            int differenz = ((Number) row[4]).intValue();
+
+            results.add(new KnappsteSiegerDTO(parteiName, wahlkreisId, typ, stimmen, differenz));
+        }
+
+        return results;
     }
 
 }

@@ -4,6 +4,7 @@ import {WahlkreisSieger} from "../models/wahlkreissieger.ts";
 import {UberhangMandate} from "../models/uberhandmandate.ts";
 import {Wahlkreis} from "../models/wahlkreis.ts";
 import {WahlkreisUebersicht} from "../models/wahlkreisUebersicht.ts";
+import {KnappsteSieger} from "../models/knappsteSieger.ts";
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -43,6 +44,16 @@ export const fetchWahlkreisUebersicht = async (year: number, wahlkreis_id: numbe
         return response.data;
     } catch (error) {
         console.error('Error fetching Wahlkreis Uebersicht:', error);
+        throw error;
+    }
+}
+
+export const fetchKnappsteSieger = async (year: number): Promise<KnappsteSieger[]> => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/ergebnisse/knappsteSieger/${year}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching knappste Sieger:', error);
         throw error;
     }
 }

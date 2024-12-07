@@ -43,4 +43,9 @@ public class AnalysenController {
         return ResponseEntity.ok(wahlkreisAnalysenService.getWahlkreisUebersicht(year, wahlkreis_id));
     }
 
+    @GetMapping("/knappsteSieger/{year}")
+    public ResponseEntity<List<KnappsteSiegerDTO>> getKnappsteSieger(@PathVariable("year") int year) {
+        return ResponseEntity.ok(wahlkreisAnalysenService.getKnappsteSieger(year));
+    }
+
 }

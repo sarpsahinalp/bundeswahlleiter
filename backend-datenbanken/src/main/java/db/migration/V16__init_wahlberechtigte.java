@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class V16__init_wahlberechtigte extends BaseJavaMigration {
 
     private static final String[] CSV_FILE_PATH = {
-            "src/main/resources/electionData/targetCSV/wahlberechtigte.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/wahlberechtigte.csv",
     };
 
     @Override

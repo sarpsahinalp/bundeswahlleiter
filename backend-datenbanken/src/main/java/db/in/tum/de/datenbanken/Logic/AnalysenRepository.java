@@ -159,5 +159,98 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
     """, nativeQuery = true)
     List<Object[]> getWahlkreisUebersicht(int year, int wahlkreis_id);
 
+    @Query(value = """
+
+            WITH RankedVotes AS (
+        -- Rank the votes in each Wahlkreis to determine the winner and other parties
+        SELECT
+            e.Wahlkreis_ID,
+            e.Partei_ID,
+            p.kurzbezeichnung,
+            e.Stimmen,
+            RANK() OVER (PARTITION BY e.Wahlkreis_ID ORDER BY e.Stimmen DESC) AS Stimmen_Rang
+        FROM
+            erststimme_aggr e
+                JOIN
+            Partei p ON e.Partei_ID = p.id
+        where e.jahr = :year
+    ),
+         Winners AS (
+             -- Extract the winner for each Wahlkreis
+             SELECT
+                 r.Wahlkreis_ID,
+                 r.Partei_ID AS Gewinner_Partei_ID,
+                 r.kurzbezeichnung AS Gewinner_Partei_Name,
+                 r.Stimmen AS Gewinner_Stimmen
+             FROM
+                 RankedVotes r
+             WHERE
+                 r.Stimmen_Rang = 1
+         ),
+         KnappsteSiege AS (
+             -- Get all victories, calculating the difference between the winner and second place
+             SELECT
+                 w.Gewinner_Partei_ID AS Partei_ID,
+                 w.Gewinner_Partei_Name AS Partei_Name,
+                 w.Wahlkreis_ID,
+                 w.Gewinner_Stimmen AS Stimmen,
+                 w.Gewinner_Stimmen - r.Stimmen AS Differenz,
+                 'Sieg' AS Typ
+             FROM
+                 Winners w
+                     JOIN
+                 RankedVotes r
+                 ON w.Wahlkreis_ID = r.Wahlkreis_ID AND r.Stimmen_Rang = 2
+         ),
+         KnappsteNiederlagen AS (
+             -- Get all losses, calculating the difference to the winner for each party
+             SELECT
+                 r.Partei_ID,
+                 r.kurzbezeichnung,
+                 r.Wahlkreis_ID,
+                 r.Stimmen AS Stimmen,
+                 w.Gewinner_Stimmen - r.Stimmen AS Differenz,
+                 'Niederlage' AS Typ
+             FROM
+                 RankedVotes r
+                     JOIN
+                 Winners w
+                 ON r.Wahlkreis_ID = w.Wahlkreis_ID AND r.Partei_ID != w.Gewinner_Partei_ID
+         ),
+         CombinedResults AS (
+             -- Combine victories and losses
+             SELECT * FROM KnappsteSiege
+             UNION ALL
+             SELECT * FROM KnappsteNiederlagen
+         ),
+         RankedResults AS (
+             -- Rank the combined results (victories first, sorted by smallest difference)
+             SELECT
+                 Partei_Name,
+                 Wahlkreis_ID,
+                 Typ,
+                 Stimmen,
+                 Differenz,
+                 ROW_NUMBER() OVER (PARTITION BY Partei_Name ORDER BY Typ, Differenz ASC) AS Rang
+             FROM
+                 CombinedResults
+         )
+    SELECT
+        r.Partei_Name,
+        w.name,
+        r.Typ,
+        r.Stimmen,
+        r.Differenz
+    FROM
+        RankedResults r, wahlkreis w
+    WHERE
+        r.wahlkreis_id = w.id
+        and
+        Rang <= 10
+    ORDER BY
+        Partei_Name, Rang;
+    """, nativeQuery = true)
+    List<Object[]> getKnappsteSiegerErstStimme(int year);
+
 
 }
