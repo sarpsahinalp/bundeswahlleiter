@@ -36,11 +36,14 @@ public class AnalysenService {
     }
 
     public WahlkreisUebersichtDTO getWahlkreisUebersicht(int year, int wahlkreis_id){
-        System.out.println(year + " " + wahlkreis_id);
         List<Object[]> gewaehltenDirektkandidaten = analysenRepository.getGewaehltenDirektkandidaten(year, wahlkreis_id);
-        System.out.println("erg:" + gewaehltenDirektkandidaten);
+        List<Object[]> wahlbeteiligung = analysenRepository.getWahlbeteiligung(year, wahlkreis_id);
         List<Object[]> wahlkreisUebersicht = analysenRepository.getWahlkreisUebersicht(year, wahlkreis_id);
-        return new WahlkreisUebersichtDTO(gewaehltenDirektkandidaten.getFirst(), wahlkreisUebersicht);
+        return new WahlkreisUebersichtDTO(
+                gewaehltenDirektkandidaten.getFirst(),
+                wahlbeteiligung.getFirst(),
+                wahlkreisUebersicht
+        );
     }
 
 }

@@ -84,6 +84,62 @@ export default function WahlkreisUebersichtPage() {
         );
     }
 
+    const render = (wU: WahlkreisUebersicht) => {
+        return <div>
+            <div><h3>gewählter Direktkandidat:</h3></div>
+            <div>
+                <h1>{wU.direktMandat.vorname} {wU.direktMandat.nachname} ({wU.direktMandat.partei})</h1>
+            </div>
+            <div><h3>Wahlbeteiligung:</h3></div>
+            <div><h2>
+                {wU.wahlbeteiligung.teilgenommen}/{wU.wahlbeteiligung.berechtigt}
+                &nbsp;
+                ({(100 * wU.wahlbeteiligung.teilgenommen / wU.wahlbeteiligung.berechtigt).toFixed(2)}%)
+            </h2></div>
+            <Table>
+                <TableHead>
+                    <TableRow>
+                        <TableCell>Partei</TableCell>
+                        <TableCell align={'right'}>Stimmen</TableCell>
+                        <TableCell align={'right'}>diff</TableCell>
+                        <TableCell align={'right'}>Stimmen %</TableCell>
+                        <TableCell align={'right'}>diff %</TableCell>
+                    </TableRow>
+                </TableHead>
+                <TableBody>
+                    {wU.parteiErgebnis.map(row => (
+                        <TableRow>
+                            <TableCell>{row.name}</TableCell>
+                            <TableCell align={'right'}>{row.stimmen_abs} </TableCell>
+                            <TableCell align={'right'}>
+                                {!row.stimmen_abs_vergleich
+                                    ? ''
+                                    :
+                                    <label
+                                        style={row.stimmen_abs_vergleich < 0 ? {color: 'red'} : {color: 'green'}}>
+                                        {(row.stimmen_abs_vergleich > 0) ? '+' : ''}{row.stimmen_abs_vergleich}
+                                    </label>
+
+                                }
+                            </TableCell>
+                            <TableCell align={'right'}>{row.stimmen_prozent.toFixed(2)}%</TableCell>
+                            <TableCell align={'right'}>
+                                {!row.stimmen_prozent_vergleich
+                                    ? ''
+                                    :
+                                    <label
+                                        style={row.stimmen_prozent_vergleich < 0 ? {color: 'red'} : {color: 'green'}}>
+                                        {(row.stimmen_prozent_vergleich > 0) ? '+' : ''}{row.stimmen_prozent_vergleich.toFixed(2)}%
+                                    </label>
+                                }
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </div>
+    }
+
     return (
         <div>
             <FormControl>
@@ -104,64 +160,14 @@ export default function WahlkreisUebersichtPage() {
                     value={wahlkreis?.id}
                     label="Wahlkreis"
                     onChange={updateWahlkreis}
-                    sx={{width:200}}
+                    sx={{width: 200}}
                 >
                     {wahlkreise.map(wk => (
                         <MenuItem value={wk.id}>{wk.name}</MenuItem>
                     ))}
                 </Select>
             </FormControl>
-            <br/>
-
-            <label>gewählter Direktkandidat: {wahlkreisUebersicht?.direktMandat.vorname} {wahlkreisUebersicht?.direktMandat.nachname} ({wahlkreisUebersicht?.direktMandat.partei})</label>
-            <Table>
-                <TableHead>
-                    <TableRow>
-                        <TableCell>Partei</TableCell>
-                        <TableCell align={'right'}>Stimmen</TableCell>
-                        <TableCell align={'right'}>diff</TableCell>
-                        <TableCell align={'right'}>Stimmen %</TableCell>
-                        <TableCell align={'right'}>diff %</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {wahlkreisUebersicht?.parteiErgebnis.map(row => (
-                        <TableRow>
-                            <TableCell>{row.name}</TableCell>
-                            <TableCell align={'right'}>{row.stimmen_abs} </TableCell>
-                            <TableCell align={'right'}>
-                                {!row.stimmen_abs_vergleich
-                                    ? ''
-                                    :
-                                    <label>
-                                        (
-                                        <label style={row.stimmen_abs_vergleich < 0 ? {color: 'red'} :  {color: 'green'}}>
-                                            {(row.stimmen_abs_vergleich > 0) ? '+' : ''}{row.stimmen_abs_vergleich}
-                                        </label>
-                                        )
-                                    </label>
-                                }
-                            </TableCell>
-                            <TableCell align={'right'}>{row.stimmen_prozent.toFixed(2)}%</TableCell>
-                            <TableCell align={'right'}>
-                                {!row.stimmen_prozent_vergleich
-                                    ? ''
-                                    :
-                                    <label>
-                                        (
-                                        <label style={row.stimmen_prozent_vergleich < 0 ? {color: 'red'} :  {color: 'green'}}>
-                                            {(row.stimmen_prozent_vergleich > 0) ? '+' : ''}{row.stimmen_prozent_vergleich.toFixed(2)}%
-                                        </label>
-                                        )
-                                    </label>
-                                }
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-
-
+            {wahlkreisUebersicht ? render(wahlkreisUebersicht) : ''}
         </div>
     );
 };
