@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { KnappsteSieger } from "../models/knappsteSieger";
 import { fetchKnappsteSieger } from "../services/AnalyseService";
+import PaginationComponent from "../Components/PaginationComponent.tsx";
 
 const KnappsteSiegerPage: React.FC = () => {
     const [year, setYear] = useState<number>(2021); // Default year
@@ -22,6 +23,8 @@ const KnappsteSiegerPage: React.FC = () => {
     const [data, setData] = useState<KnappsteSieger[]>([]);
     const [filteredData, setFilteredData] = useState<KnappsteSieger[]>([]);
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); // Default sorting order
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 10; // Number of rows per page
 
     useEffect(() => {
         const fetchData = async () => {
@@ -42,7 +45,7 @@ const KnappsteSiegerPage: React.FC = () => {
             data.filter(
                 (row) =>
                     (partyFilter === "" || row.parteiName.includes(partyFilter)) &&
-                    (wahlkreisFilter === "" || row.wahlKreisName === wahlkreisFilter)
+                    (wahlkreisFilter === "" || row.wahlKreisName.includes(wahlkreisFilter))
             )
         );
     }, [partyFilter, wahlkreisFilter, data]);
@@ -60,9 +63,15 @@ const KnappsteSiegerPage: React.FC = () => {
         setSortOrder(sortOrder === "asc" ? "desc" : "asc"); // Toggle sort order
     };
 
+    // Paginated data
+    const paginatedData = filteredData.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
+    );
+
     return (
         <Box sx={{ padding: 4 }}>
-            <Box sx={{ marginBottom: 4, display: "flex", gap: 2 }}>
+            <Box sx={{ marginBottom: 4, display: "flex", gap: 0 }}>
                 <TextField
                     label="Year"
                     type="number"
@@ -111,7 +120,7 @@ const KnappsteSiegerPage: React.FC = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {filteredData.map((row, index) => (
+                        {paginatedData.map((row, index) => (
                             <TableRow key={index}>
                                 <TableCell>{row.parteiName}</TableCell>
                                 <TableCell>{row.wahlKreisName}</TableCell>
@@ -123,6 +132,13 @@ const KnappsteSiegerPage: React.FC = () => {
                     </TableBody>
                 </Table>
             </TableContainer>
+
+            <PaginationComponent
+                totalItems={filteredData.length}
+                itemsPerPage={rowsPerPage}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+            />
         </Box>
     );
 };

@@ -16,19 +16,9 @@ import {Sitzverteilung} from "../models/sitzverteilung.ts";
 // Extended color palette to handle more than 9 items
 const COLORS = [
     '#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#33FFA7', '#A133FF', '#FFD433', '#FF9633',
-    '#33FF96', '#9633FF', '#FF3333', '#3333FF', '#33FF33', '#A1FF33', '#33A1FF', '#FFA733',
+    '#33FF96', '#000000', '#FF3333', '#3333FF', '#33FF33', '#A1FF33', '#33A1FF', '#FFA733',
     '#73FF33', '#3373FF', '#FF3373', '#FF33FF', '#33FFFF', '#FFFF33', '#A1A1FF', '#FFA1A1',
 ];
-
-const colorsMap: Map<string, string> = new Map([
-    ['GRÜNE', '#78bc1b'],
-    ['DIE LINKE', '#bd3075'],
-    ['FDP', '#ffcc00'],
-    ['AfD', '#0021c8'],
-    ['SPD', '#d71f1d'],
-    ['CSU', '#121212'],
-    ['CDU', '#121212'],
-])
 
 const SitzverteilungPieChart: React.FC = () => {
     const [data, setData] = useState<Sitzverteilung[]>([]);
@@ -101,8 +91,8 @@ const SitzverteilungPieChart: React.FC = () => {
                     fill="#8884d8"
                     label={(entry) => `${entry.kurzbezeichnung}: ${entry.sitze}`}
                 >
-                    {data.map((sV, index) => {
-                        const color = colorsMap.get(sV.kurzbezeichnung) ?? COLORS[index % COLORS.length];
+                    {data.map((_, index) => {
+                        const color = COLORS[index % COLORS.length];
                         return <Cell key={`cell-${index}`} fill={color}/>
                     })}
                 </Pie>
