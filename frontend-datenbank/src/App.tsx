@@ -21,7 +21,6 @@ const pages: page[] = [
     {'title': 'WahlkreisSieger', 'link': <WahlKreisSieger />, 'icon': <HowToRegIcon />},
     {'title': 'Überhangmandate', 'link': <OverhangMandateChart />, 'icon': <InboxIcon/>},
     {'title': 'Knappste Sieger', 'link': <KnappsteSiegerPage />, 'icon': <InboxIcon/>},
-    {'title': 'Wahlkreisübersicht Einzelstimmen', 'link': <label>Not implemented!</label>, 'icon': <InboxIcon/>},
 ]
 
 function App() {

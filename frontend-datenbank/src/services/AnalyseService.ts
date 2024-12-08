@@ -38,9 +38,9 @@ export const fetchWahlkreise = async (): Promise<Wahlkreis[]> => {
     }
 }
 
-export const fetchWahlkreisUebersicht = async (year: number, wahlkreis_id: number): Promise<WahlkreisUebersicht>  => {
+export const fetchWahlkreisUebersicht = async (year: number, wahlkreis_id: number, useAggregation: boolean): Promise<WahlkreisUebersicht>  => {
     try {
-        const response = await axios.get(`${API_BASE_URL}/ergebnisse/wahlkreis/uebersicht/${year}/${wahlkreis_id}`);
+        const response = await axios.get(`${API_BASE_URL}/ergebnisse/wahlkreis/uebersicht/${year}/${wahlkreis_id}/${useAggregation}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching Wahlkreis Uebersicht:', error);

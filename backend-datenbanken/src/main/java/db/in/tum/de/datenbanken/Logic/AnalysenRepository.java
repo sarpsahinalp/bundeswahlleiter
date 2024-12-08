@@ -29,7 +29,7 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
             "        WHERE EXISTS (" +
             "            SELECT 1" +
             "            FROM zweitestimme_aggr za" +
-            "            WHERE za.wahlkreis_id = sv.wahlkreis_id AND za.jahr = 2021" +
+            "            WHERE za.wahlkreis_id = sv.wahlkreis_id AND za.jahr = :year" +
             "        )" +
             "        GROUP BY sv.wahlkreis_id, p.kurzbezeichnung" +
             "    )," +
@@ -50,7 +50,7 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
             "        WHERE EXISTS (" +
             "            SELECT 1" +
             "            FROM erststimme_aggr za" +
-            "            WHERE za.wahlkreis_id = sv.wahlkreis_id AND za.jahr = 2021" +
+            "            WHERE za.wahlkreis_id = sv.wahlkreis_id AND za.jahr = :year" +
             "        )" +
             "        GROUP BY sv.wahlkreis_id, p.kurzbezeichnung" +
             "    )" +
@@ -98,66 +98,87 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
     List<Object[]> getWahlkreise();
 
     @Query(value = """
-        WITH stimmen_max AS (
-            SELECT max(stimmen)
+        WITH stimmen_Aggregation AS (
+            SELECT wahlkreis_id, partei_id, jahr, stimmen
             FROM erststimme_aggr
+            WHERE :useAggregation
+            UNION ALL
+            SELECT wahlkreis_id, partei_id, jahr, count(*) as stimmen
+            FROM erststimme
+            WHERE NOT :useAggregation
+            GROUP BY wahlkreis_id, partei_id, jahr
+        ),
+            stimmen_max AS (
+            SELECT max(stimmen)
+            FROM stimmen_Aggregation
             WHERE wahlkreis_id = :wahlkreis_id and jahr = :year
         )
         SELECT k.vorname, k.nachname, p.kurzbezeichnung
-        FROM erststimme_aggr ea
-        join kandidatur k using (partei_id, wahlkreis_id, jahr)
-        join partei p on p.id = k.partei_id
-        WHERE ea.wahlkreis_id = :wahlkreis_id
-            AND ea.stimmen = (SELECT * FROM stimmen_max)
-            AND ea.jahr = :year;
+        FROM stimmen_Aggregation sA
+                 join kandidatur k using (partei_id, wahlkreis_id, jahr)
+                 join partei p on p.id = k.partei_id
+        WHERE sA.wahlkreis_id = :wahlkreis_id
+          AND sA.stimmen = (SELECT * FROM stimmen_max)
+          AND sA.jahr = :year;
     """, nativeQuery = true)
-    List<Object[]> getGewaehltenDirektkandidaten(@Param("year") int year,@Param("wahlkreis_id") int wahlkreis_id);
+    List<Object[]> getGewaehltenDirektkandidaten(int year, int wahlkreis_id, boolean useAggregation);
 
     @Query(value = """
         SELECT GREATEST(stimmen1.sum, stimmen2.sum) as wahlbeteiligung, gesamt.wahlberechtigte as wahlberechtigte
         FROM (SELECT wahlberechtigte.wahlberechtigte FROM wahlberechtigte WHERE wahlkreis_id = :wahlkreis_id AND jahr = :year) AS gesamt,
              (SELECT SUM(stimmen) AS sum FROM erststimme_aggr WHERE wahlkreis_id = :wahlkreis_id AND jahr = :year) AS stimmen1,
-             (SELECT SUM(stimmen) AS sum FROM zweitestimme_aggr WHERE wahlkreis_id = :wahlkreis_id AND jahr = :year) AS stimmen2;
+             (SELECT SUM(stimmen) AS sum FROM zweitestimme_aggr WHERE wahlkreis_id = :wahlkreis_id AND jahr = :year) AS stimmen2
+        WHERE :useAggregation
+        UNION ALL
+        SELECT GREATEST(stimmen1.sum, stimmen2.sum) as wahlbeteilgung, gesamt.wahlberechtigte as wahlberechtigte
+        FROM (SELECT wahlberechtigte.wahlberechtigte FROM wahlberechtigte WHERE wahlkreis_id = :wahlkreis_id AND jahr = :year) AS gesamt,
+             (SELECT COUNT(*) AS sum FROM erststimme WHERE wahlkreis_id = :wahlkreis_id AND jahr = :year) AS stimmen1,
+             (SELECT COUNT(*) AS sum FROM zweitestimme WHERE wahlkreis_id = :wahlkreis_id AND jahr = :year) AS stimmen2
+        WHERE NOT :useAggregation;
     """, nativeQuery = true)
-    List<Object[]> getWahlbeteiligung(int year, long wahlkreis_id);
+    List<Object[]> getWahlbeteiligung(int year, long wahlkreis_id,  boolean useAggregation);
 
     @Query(value = """
-        WITH vorjahr AS (
-                SELECT max(jahr)
-                FROM kandidatur
-                WHERE jahr < :year
-            ),
-                stimmen AS (
-                SELECT *
-                FROM zweitestimme_aggr za
-                WHERE za.wahlkreis_id = :wahlkreis_id
-            ),
-             stimmen_gesamt AS (
-                 SELECT sum(stimmen) as gesamtStimmen, jahr
-                 FROM stimmen
-                 GROUP BY jahr
-             ),
-             ergebnis AS (
-                 SELECT
-                     s.partei_id,
-                     s.stimmen as Stimmen_Absolut,
-                     ((s.stimmen * 1.0 / sg.gesamtStimmen) * 100) as Stimmen_Prozentual,
-                     jahr
-                 FROM stimmen s
-                    JOIN stimmen_gesamt sg using (jahr)
-             )
-        SELECT
-            p.kurzbezeichnung,
-            now.Stimmen_Absolut,
-            now.Stimmen_Prozentual,
-            (now.Stimmen_Absolut - last.Stimmen_Absolut) as Stimmen_Zuwachs_Absolut,
-            (now.Stimmen_Prozentual - last.Stimmen_Prozentual) as Stimmen_Zuwachs_Prozentual
-        FROM
-            (SELECT * FROM ergebnis WHERE jahr = :year) as now
-            join partei p on p.id = now.partei_id
-            left join (SELECT * FROM ergebnis WHERE jahr = (SELECT * FROM vorjahr)) as last on now.partei_id = last.partei_id;
+        WITH stimmen AS (
+              SELECT partei_id, jahr, stimmen
+              FROM zweitestimme_aggr
+              WHERE :useAggregation AND wahlkreis_id = :wahlkreis_id
+              UNION ALL
+              SELECT  partei_id, jahr, count(*) as stimmen
+              FROM zweitestimme
+              WHERE (NOT :useAggregation) AND wahlkreis_id = :wahlkreis_id
+              GROUP BY partei_id, jahr
+          ),vorjahr AS (
+              SELECT max(jahr)
+              FROM kandidatur
+              WHERE jahr < :year
+          ),
+           stimmen_gesamt AS (
+               SELECT sum(stimmen) as gesamtStimmen, jahr
+               FROM stimmen
+               GROUP BY jahr
+           ),
+           ergebnis AS (
+               SELECT
+                   s.partei_id,
+                   s.stimmen as Stimmen_Absolut,
+                   ((s.stimmen * 1.0 / sg.gesamtStimmen) * 100) as Stimmen_Prozentual,
+                   jahr
+               FROM stimmen s
+                        JOIN stimmen_gesamt sg using (jahr)
+           )
+      SELECT
+          p.kurzbezeichnung,
+          now.Stimmen_Absolut,
+          now.Stimmen_Prozentual,
+          (now.Stimmen_Absolut - last.Stimmen_Absolut) as Stimmen_Zuwachs_Absolut,
+          (now.Stimmen_Prozentual - last.Stimmen_Prozentual) as Stimmen_Zuwachs_Prozentual
+      FROM
+          (SELECT * FROM ergebnis WHERE jahr = :year) as now
+              join partei p on p.id = now.partei_id
+              left join (SELECT * FROM ergebnis WHERE jahr = (SELECT * FROM vorjahr)) as last on now.partei_id = last.partei_id;
     """, nativeQuery = true)
-    List<Object[]> getWahlkreisUebersicht(int year, int wahlkreis_id);
+    List<Object[]> getWahlkreisUebersicht(int year, int wahlkreis_id, boolean useAggregation);
 
     @Query(value = """
 
