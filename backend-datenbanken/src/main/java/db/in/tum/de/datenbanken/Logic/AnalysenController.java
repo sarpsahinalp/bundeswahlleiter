@@ -35,12 +35,13 @@ public class AnalysenController {
         return ResponseEntity.ok(wahlkreisAnalysenService.getWahlkreise());
     }
 
-    @GetMapping("/wahlkreis/uebersicht/{year}/{wahlkreis_id}")
+    @GetMapping("/wahlkreis/uebersicht/{year}/{wahlkreis_id}/{useAggregation}")
     public ResponseEntity<WahlkreisUebersichtDTO> getWahlkreisUebersicht(
             @PathVariable("year") int year,
-            @PathVariable("wahlkreis_id") int wahlkreis_id
+            @PathVariable("wahlkreis_id") int wahlkreis_id,
+            @PathVariable("useAggregation") boolean useAggregation
     ) {
-        return ResponseEntity.ok(wahlkreisAnalysenService.getWahlkreisUebersicht(year, wahlkreis_id));
+        return ResponseEntity.ok(wahlkreisAnalysenService.getWahlkreisUebersicht(year, wahlkreis_id, useAggregation));
     }
 
     @GetMapping("/knappsteSieger/{year}")
