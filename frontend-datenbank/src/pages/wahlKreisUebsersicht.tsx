@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Box,
     CircularProgress,
@@ -11,6 +11,7 @@ import {
     TableCell,
     TableHead,
     TableRow,
+    Switch, FormControlLabel,
 
 } from '@mui/material';
 import {fetchWahlkreise, fetchWahlkreisUebersicht} from "../services/AnalyseService.ts";
@@ -28,6 +29,9 @@ export default function WahlkreisUebersichtPage() {
     const [year, setYear] = useState(2021);
 
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
+    const [useAggregation, setUseAggregation] = useState<boolean>(true);
 
     const loadWahlkreise = async () => {
         setLoading(true);
@@ -42,14 +46,16 @@ export default function WahlkreisUebersichtPage() {
         }
     }
 
-    const loadWahlkreisUebersicht = async (year: number, wahlkreis_id: number) => {
+    const loadWahlkreisUebersicht = async (year: number, wahlkreis_id: number, useAggregation: boolean) => {
         setLoading(true);
+        setError(false);
         try {
-            const response = await fetchWahlkreisUebersicht(year, wahlkreis_id);
+            const response = await fetchWahlkreisUebersicht(year, wahlkreis_id, useAggregation);
             response.parteiErgebnis.sort((ergA, ergB) => ergB.stimmen_abs - ergA.stimmen_abs);
             setWahlkreisUebersicht(response);
         } catch (error) {
             console.error('Failed to fetch grouped data:', error);
+            setError(true);
         } finally {
             setLoading(false);
         }
@@ -61,9 +67,9 @@ export default function WahlkreisUebersichtPage() {
 
     useEffect(() => {
         if(wahlkreis) {
-            loadWahlkreisUebersicht(year, wahlkreis.id).then()
+            loadWahlkreisUebersicht(year, wahlkreis.id, useAggregation).then()
         }
-    }, [year, wahlkreis]);
+    }, [year, wahlkreis, useAggregation]);
 
     const updateYear = (event: SelectChangeEvent<unknown>) => {
         const value = event.target.value as number;
@@ -76,15 +82,23 @@ export default function WahlkreisUebersichtPage() {
         setWahlkreis(wahlkreis);
     }
 
-    if (loading) {
-        return (
-            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-                <CircularProgress />
-            </Box>
-        );
+    const updateUseAggregation = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUseAggregation(event.target.checked)
     }
 
     const render = (wU: WahlkreisUebersicht) => {
+        if (loading) {
+            return (
+                <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+                    <CircularProgress />
+                </Box>
+            );
+        }
+
+        if (error) {
+            return (<h1>Error</h1>)
+        }
+
         return <div>
             <div><h3>gewählter Direktkandidat:</h3></div>
             <div>
@@ -167,6 +181,16 @@ export default function WahlkreisUebersichtPage() {
                     ))}
                 </Select>
             </FormControl>
+            <FormControlLabel
+                control={
+                     <Switch
+                         checked={useAggregation}
+                         onChange={updateUseAggregation}
+                     ></Switch>
+
+                 }
+                 label="Aggregation benutzen"
+            ></FormControlLabel>
             {wahlkreisUebersicht ? render(wahlkreisUebersicht) : ''}
         </div>
     );

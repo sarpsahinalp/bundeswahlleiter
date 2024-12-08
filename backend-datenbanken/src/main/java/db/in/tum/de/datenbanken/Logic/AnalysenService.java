@@ -36,10 +36,10 @@ public class AnalysenService {
                 .stream().map(WahlkreiseDTO::new).toList();
     }
 
-    public WahlkreisUebersichtDTO getWahlkreisUebersicht(int year, int wahlkreis_id){
-        List<Object[]> gewaehltenDirektkandidaten = analysenRepository.getGewaehltenDirektkandidaten(year, wahlkreis_id);
-        List<Object[]> wahlbeteiligung = analysenRepository.getWahlbeteiligung(year, wahlkreis_id);
-        List<Object[]> wahlkreisUebersicht = analysenRepository.getWahlkreisUebersicht(year, wahlkreis_id);
+    public WahlkreisUebersichtDTO getWahlkreisUebersicht(int year, int wahlkreis_id, boolean useAggregation){
+        List<Object[]> gewaehltenDirektkandidaten = analysenRepository.getGewaehltenDirektkandidaten(year, wahlkreis_id, useAggregation);
+        List<Object[]> wahlbeteiligung = analysenRepository.getWahlbeteiligung(year, wahlkreis_id, useAggregation);
+        List<Object[]> wahlkreisUebersicht = analysenRepository.getWahlkreisUebersicht(year, wahlkreis_id, useAggregation);
         return new WahlkreisUebersichtDTO(
                 gewaehltenDirektkandidaten.getFirst(),
                 wahlbeteiligung.getFirst(),
