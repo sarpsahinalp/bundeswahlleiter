@@ -18,7 +18,7 @@ public class AnalysenController {
 
     @GetMapping("/wahlkreisSieger/{year}")
     public ResponseEntity<List<WahlkreisSiegerDTO>> getBundesland(@PathVariable("year") int year) {
-        return ResponseEntity.ok(wahlkreisAnalysenService.getBundesland(year));
+        return ResponseEntity.ok(wahlkreisAnalysenService.getWahlkreisSieger(year));
     }
 
     @GetMapping("/sitzverteilung/{year}")
@@ -56,6 +56,19 @@ public class AnalysenController {
             @PathVariable("erststimme") String erststimme
     ) {
         return analysenService.getNonVoters(year, erststimme);
+    }
+
+    @GetMapping("/bundestagsmitglieder/{year}/{bundesland_id}")
+    public ResponseEntity<List<MandateDTO>> getBundestagsMitglieder(
+            @PathVariable("year") int year,
+            @PathVariable("bundesland_id") long bundesland_id
+    ) {
+        return ResponseEntity.ok(wahlkreisAnalysenService.getBundesTagsMitglieder(year, bundesland_id));
+    }
+
+    @GetMapping("/bundeslander")
+    public ResponseEntity<List<BundeslandDTO>> getBundeslander() {
+        return ResponseEntity.ok(wahlkreisAnalysenService.getBundesLander());
     }
 
 }

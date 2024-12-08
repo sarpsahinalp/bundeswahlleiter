@@ -117,11 +117,9 @@ group by partei_id, jahr
 having
     sum(stimmen) >= (select Fünprozentklausel.vote_threshold from Fünprozentklausel where jahr = zweitestimme_aggr.jahr)
 union
-select m.partei_id, p.jahr
-from minderheitspartei m,
-     partei_wahl_teilnahme p
-where m.partei_id = p.partei_id
-    );
+select m.partei_id, 2021
+from minderheitspartei m
+);
 
 create or replace view sumZweiteStimmeProParteiInBundesland as
 (
@@ -140,12 +138,6 @@ FROM (SELECT DISTINCT partei_id, jahr FROM gultigeparties) gp
          AND za.jahr = gp.jahr
 GROUP BY gp.partei_id, b.id, gp.jahr
     );
-
-select *
-from bundesland b
-         join wahlkreis w on w.bundesland_id = b.id
-         left join zweitestimme_aggr za on za.wahlkreis_id = w.id
-where partei_id is null;
 
 -- Divisor erste unterverteilung function
 CREATE
