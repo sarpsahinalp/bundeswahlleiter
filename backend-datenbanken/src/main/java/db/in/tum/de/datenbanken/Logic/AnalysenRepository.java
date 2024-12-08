@@ -273,5 +273,28 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
     """, nativeQuery = true)
     List<Object[]> getKnappsteSiegerErstStimme(int year);
 
+    @Query(value = """
+
+            with nonVotersErsteStimme as (
+        select  ea.wahlkreis_id, wb.wahlberechtigte - ea.stimmen as nonVoters, 'erststimme' as type
+        from wahlberechtigte wb join erststimme_aggr ea on ea.wahlkreis_id = wb.wahlkreis_id and ea.jahr = wb.jahr
+        where ea.jahr = :year
+    ), nonVotersZweiteStimme as (
+        select za.wahlkreis_id, wb.wahlberechtigte - za.stimmen as nonVoters, 'zweitstimme' as type
+        from wahlberechtigte wb join zweitestimme_aggr za on za.wahlkreis_id = wb.wahlkreis_id and za.jahr = wb.jahr
+        where za.jahr = :year
+    )
+    select w.name, sum(nve.nonVoters), nve.type
+    from nonVotersErsteStimme nve join wahlkreis w on nve.wahlkreis_id = w.id
+    where nve.type = :erststimme
+    group by w.name, nve.type
+    union all
+    select w.name, sum(nvz.nonVoters), nvz.type
+    from nonVotersZweiteStimme nvz join wahlkreis w on nvz.wahlkreis_id = w.id
+    where nvz.type = :erststimme
+    group by w.name, nvz.type;
+    """ , nativeQuery = true)
+    List<Object[]> getNonVotersProStimmen(int year, String erststimme);
+
 
 }

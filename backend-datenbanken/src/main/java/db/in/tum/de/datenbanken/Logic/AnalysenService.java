@@ -64,4 +64,15 @@ public class AnalysenService {
         return results;
     }
 
+    public List<NonVoterDTO> getNonVoters(int year, String erststimme) {
+        List<Object[]> results = analysenRepository.getNonVotersProStimmen(year, erststimme);
+        return results.stream().map(record ->
+                new NonVoterDTO(
+                        (String) record[0], // wahlkreis name
+                        ((Number) record[1]).intValue(), // nonVoters
+                        (String) record[2]  // type
+                )
+        ).toList();
+    }
+
 }

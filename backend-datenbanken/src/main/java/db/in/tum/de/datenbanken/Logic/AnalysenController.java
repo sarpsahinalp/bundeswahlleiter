@@ -14,6 +14,7 @@ import java.util.List;
 public class AnalysenController {
 
     private final AnalysenService wahlkreisAnalysenService;
+    private final AnalysenService analysenService;
 
     @GetMapping("/wahlkreisSieger/{year}")
     public ResponseEntity<List<WahlkreisSiegerDTO>> getBundesland(@PathVariable("year") int year) {
@@ -47,6 +48,14 @@ public class AnalysenController {
     @GetMapping("/knappsteSieger/{year}")
     public ResponseEntity<List<KnappsteSiegerDTO>> getKnappsteSieger(@PathVariable("year") int year) {
         return ResponseEntity.ok(wahlkreisAnalysenService.getKnappsteSieger(year));
+    }
+
+    @GetMapping("/nonVoters/{year}/{erststimme}")
+    public List<NonVoterDTO> getNonVoters(
+            @PathVariable("year") int year,
+            @PathVariable("erststimme") String erststimme
+    ) {
+        return analysenService.getNonVoters(year, erststimme);
     }
 
 }

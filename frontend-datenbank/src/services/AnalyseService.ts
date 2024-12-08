@@ -5,6 +5,7 @@ import {UberhangMandate} from "../models/uberhandmandate.ts";
 import {Wahlkreis} from "../models/wahlkreis.ts";
 import {WahlkreisUebersicht} from "../models/wahlkreisUebersicht.ts";
 import {KnappsteSieger} from "../models/knappsteSieger.ts";
+import {NonVoters} from "../models/nonVoters.ts";
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -54,6 +55,16 @@ export const fetchKnappsteSieger = async (year: number): Promise<KnappsteSieger[
         return response.data;
     } catch (error) {
         console.error('Error fetching knappste Sieger:', error);
+        throw error;
+    }
+}
+
+export const fetchNonVoters = async (year: number, erststimme: string): Promise<NonVoters[]> => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/ergebnisse/nonVoters/${year}/${erststimme}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching non voters:', error);
         throw error;
     }
 }
