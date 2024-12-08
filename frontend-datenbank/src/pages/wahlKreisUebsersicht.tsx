@@ -37,7 +37,6 @@ export default function WahlkreisUebersichtPage() {
         setLoading(true);
         try {
             const response = await fetchWahlkreise();
-            console.log('Response:', response);
             setWahlkreise(response);
         } catch (error) {
             console.error('Failed to fetch grouped data:', error);
@@ -177,7 +176,7 @@ export default function WahlkreisUebersichtPage() {
                     sx={{width: 200}}
                 >
                     {wahlkreise.map(wk => (
-                        <MenuItem value={wk.id}>{wk.name}</MenuItem>
+                        <MenuItem value={wk.id}>{wk.id} {wk.name}</MenuItem>
                     ))}
                 </Select>
             </FormControl>

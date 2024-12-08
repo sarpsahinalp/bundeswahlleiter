@@ -5,6 +5,8 @@ import {UberhangMandate} from "../models/uberhandmandate.ts";
 import {Wahlkreis} from "../models/wahlkreis.ts";
 import {WahlkreisUebersicht} from "../models/wahlkreisUebersicht.ts";
 import {KnappsteSieger} from "../models/knappsteSieger.ts";
+import {Mandat} from "../models/mandat.ts";
+import {Bundesland} from "../models/Bundesland.ts";
 import {NonVoters} from "../models/nonVoters.ts";
 
 const API_BASE_URL = 'http://localhost:8080';
@@ -55,6 +57,26 @@ export const fetchKnappsteSieger = async (year: number): Promise<KnappsteSieger[
         return response.data;
     } catch (error) {
         console.error('Error fetching knappste Sieger:', error);
+        throw error;
+    }
+}
+
+export const fetchMandate = async (year: number, bundesland_id: number): Promise<Mandat[]> => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/ergebnisse/bundestagsmitglieder/${year}/${bundesland_id}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching Mandate:', error);
+        throw error;
+    }
+}
+
+export const fetchBundesLander = async (): Promise<Bundesland[]> => {
+    try {
+        const response = await axios.get(`${API_BASE_URL}/ergebnisse/bundeslander`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching Bundesländer:', error);
         throw error;
     }
 }
