@@ -8,6 +8,7 @@ import {KnappsteSieger} from "../models/knappsteSieger.ts";
 import {Mandat} from "../models/mandat.ts";
 import {Bundesland} from "../models/Bundesland.ts";
 import {NonVoters} from "../models/nonVoters.ts";
+import {SocioCulturalStats} from "../models/SocioCulturalStats.ts";
 
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -90,3 +91,13 @@ export const fetchNonVoters = async (year: number, erststimme: string): Promise<
         throw error;
     }
 }
+
+export const fetchSocioCulturalStats = async (year: number): Promise<SocioCulturalStats[]> => {
+    try {
+        const response = await axios.get<SocioCulturalStats[]>(`${API_BASE_URL}/ergebnisse/socioCulturalStats/${year}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching socio-cultural stats:', error);
+        throw error;
+    }
+};

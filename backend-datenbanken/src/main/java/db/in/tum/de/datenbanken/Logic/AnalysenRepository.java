@@ -372,7 +372,96 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
     """, nativeQuery = true)
     List<Object[]> getBundesLander();
 
+    @Query(value = """
 
+            WITH winning_parties AS (
+                -- Determine the winning party for each wahlkreis and year in erststimme and zweitestimme
+                SELECT
+                    w.wahlkreis_id,
+                    w.jahr,
+                    w.partei_id AS winning_partei_id,
+                    w.stimmen,
+                    'erststimme' AS type
+                FROM erststimme_aggr w
+                WHERE w.stimmen = (SELECT MAX(ea.stimmen)
+                                   FROM erststimme_aggr ea
+                                   WHERE ea.wahlkreis_id = w.wahlkreis_id AND ea.jahr = w.jahr)
+                
+                UNION ALL
+                
+                SELECT
+                    z.wahlkreis_id,
+                    z.jahr,
+                    z.partei_id AS winning_partei_id,
+                    z.stimmen,
+                    'zweitestimme' AS type
+                FROM zweitestimme_aggr z
+                WHERE z.stimmen = (SELECT MAX(za.stimmen)
+                                   FROM zweitestimme_aggr za
+                                   WHERE za.wahlkreis_id = z.wahlkreis_id AND za.jahr = z.jahr)
+            ),
+                
+                 weighted_data AS (
+                     -- Combine socio-cultural info with population and winning party
+                     SELECT
+                         ws.wahlkreis_id,
+                         ws.year,
+                         ws.SVB_insgesamt,
+                         ws.SVB_landw_fischerei,
+                         ws.SVB_produz_gewerbe,
+                         ws.SVB_handel_gast_verkehr,
+                         ws.SVB_dienstleister,
+                         ws.Alter_unter_18,
+                         ws.Alter_18_24,
+                         ws.Alter_25_34,
+                         ws.Alter_35_59,
+                         ws.Alter_60_74,
+                         ws.Alter_75_plus,
+                         ws.ALQ_frauen,
+                         ws.ALQ_15_24,
+                         ws.ALQ_55_64,
+                         ws.ALQ_insgesamt,
+                         ws.ALQ_maenner,
+                         pw.population,
+                         wp.winning_partei_id,
+                         wp.type
+                     FROM wahlkreis_soziokulturell_info ws
+                              JOIN population_wahlkreis pw
+                                   ON ws.wahlkreis_id = pw.wahlkreis_id AND ws.year = pw.year
+                              JOIN winning_parties wp
+                                   ON ws.wahlkreis_id = wp.wahlkreis_id AND ws.year = wp.jahr
+                 ),
+                
+                 averages AS (
+                     -- Calculate population-weighted averages for each winning party and type (erst/zweit)
+                     SELECT
+                         wd.winning_partei_id,
+                         wd.year,
+                         wd.type,
+                         AVG(wd.SVB_insgesamt / 10) AS avg_SVB_insgesamt,
+                         AVG(wd.SVB_landw_fischerei) AS avg_SVB_landw_fischerei,
+                         AVG(wd.SVB_produz_gewerbe) AS avg_SVB_produz_gewerbe,
+                         AVG(wd.SVB_handel_gast_verkehr) AS avg_SVB_handel_gast_verkehr,
+                         AVG(wd.SVB_dienstleister) AS avg_SVB_dienstleister,
+                         AVG(wd.Alter_unter_18) AS avg_Alter_unter_18,
+                         AVG(wd.Alter_18_24) AS avg_Alter_18_24,
+                         AVG(wd.Alter_25_34) AS avg_Alter_25_34,
+                         AVG(wd.Alter_35_59) AS avg_Alter_35_59,
+                         AVG(wd.Alter_60_74) AS avg_Alter_60_74,
+                         AVG(wd.Alter_75_plus) AS avg_Alter_75_plus,
+                         AVG(wd.ALQ_frauen) AS avg_ALQ_frauen,
+                         AVG(wd.ALQ_15_24) AS avg_ALQ_15_24,
+                         AVG(wd.ALQ_55_64) AS avg_ALQ_55_64,
+                         AVG(wd.ALQ_insgesamt) AS avg_ALQ_insgesamt,
+                         AVG(wd.ALQ_maenner) AS avg_ALQ_maenner
+                     FROM weighted_data wd
+                     GROUP BY wd.winning_partei_id, wd.type, wd.year
+                 )
+                
+            SELECT * from averages a
+                    where a.year = :year;
+            """, nativeQuery = true)
+    List<Object[]> getSozioKulturellProPartei(int year);
 
 
 }

@@ -71,4 +71,9 @@ public class AnalysenController {
         return ResponseEntity.ok(wahlkreisAnalysenService.getBundesLander());
     }
 
+    @GetMapping("/socioCulturalStats/{year}")
+    public ResponseEntity<List<SocioCulturalStatsDTO>> getSocioCulturalStats(@PathVariable("year") int year) {
+        return ResponseEntity.ok(wahlkreisAnalysenService.getSocioCulturalStats(year));
+    }
+
 }

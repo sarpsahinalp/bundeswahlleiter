@@ -3,9 +3,7 @@ package db.in.tum.de.datenbanken.Logic;
 import db.in.tum.de.datenbanken.Logic.DTOs.*;
 import lombok.AllArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
@@ -91,6 +89,19 @@ public class AnalysenService {
 
     public List<BundeslandDTO> getBundesLander(){
         return analysenRepository.getBundesLander().stream().map(BundeslandDTO::new).toList();
+    }
+
+    public List<SocioCulturalStatsDTO> getSocioCulturalStats(int year){
+        List<Object[]> results = analysenRepository.getSozioKulturellProPartei(year);
+        return results.stream().map(record -> {
+            String winningParty = (String) record[0];
+            String type = (String) record[1];
+            Map<String, Double> averages = new HashMap<>();
+            for (int i = 2; i < record.length; i += 2) {
+                averages.put((String) record[i], (Double) record[i + 1]);
+            }
+            return new SocioCulturalStatsDTO(winningParty, type, averages);
+        }).toList();
     }
 
 }
