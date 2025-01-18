@@ -1,0 +1,1 @@
+jmeter -n -t testPlan.jmx -l log.jtl -e -o output
