@@ -45,6 +45,7 @@ create table zweiter_oberverteilung
 -- Year 2021
 
 -- Divisor erste oberverteilung function
+-- TODO: Turn this to procedure and optimize according to finding the lowest boundry
 CREATE
     OR REPLACE FUNCTION calculate_divisor_erste_oberverteilung(divisorParam FLOAT, zielWert INT, paramJahr INT)
     RETURNS VOID AS
@@ -88,6 +89,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- TODO: Try out materialized views
 create or replace view parties_mind3 as
 (
 select ea.partei_id, ea.jahr
