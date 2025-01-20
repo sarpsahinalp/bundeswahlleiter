@@ -405,7 +405,6 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
                      -- Combine socio-cultural info with population and winning party
                      SELECT
                          ws.wahlkreis_id,
-                         ws.year,
                          ws.SVB_insgesamt,
                          ws.SVB_landw_fischerei,
                          ws.SVB_produz_gewerbe,
@@ -430,13 +429,13 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
                                    ON ws.wahlkreis_id = pw.wahlkreis_id AND ws.year = pw.year
                               JOIN winning_parties wp
                                    ON ws.wahlkreis_id = wp.wahlkreis_id AND ws.year = wp.jahr
+                    where ws.year = :year
                  ),
                 
                  averages AS (
                      -- Calculate population-weighted averages for each winning party and type (erst/zweit)
                      SELECT
                          wd.winning_partei_id,
-                         wd.year,
                          wd.type,
                          AVG(wd.SVB_insgesamt / 10) AS avg_SVB_insgesamt,
                          AVG(wd.SVB_landw_fischerei) AS avg_SVB_landw_fischerei,
@@ -455,11 +454,10 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
                          AVG(wd.ALQ_insgesamt) AS avg_ALQ_insgesamt,
                          AVG(wd.ALQ_maenner) AS avg_ALQ_maenner
                      FROM weighted_data wd
-                     GROUP BY wd.winning_partei_id, wd.type, wd.year
+                     GROUP BY wd.winning_partei_id, wd.type
                  )
                 
-            SELECT * from averages a
-                    where a.year = :year;
+            SELECT * from averages a;
             """, nativeQuery = true)
     List<Object[]> getSozioKulturellProPartei(int year);
 

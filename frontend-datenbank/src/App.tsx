@@ -13,6 +13,7 @@ import OverhangMandateChart from "./pages/uberhangmandate.tsx";
 import WahlkreisUebersichtPage from "./pages/wahlKreisUebsersicht.tsx";
 import KnappsteSiegerPage from "./pages/knappsteSiegerPage.tsx";
 import NonVoterChartPage from "./pages/nonVotersPage.tsx";
+import SocioCulturalStatsChart from "./pages/socioCulturalStatsPage.tsx";
 
 // die namen können noch angepasst werden und wenn es passt, kann man auch unterschiedliche Seiten zusammenfügen
 const pages: page[] = [
@@ -23,6 +24,7 @@ const pages: page[] = [
     {'title': 'Überhangmandate', 'link': <OverhangMandateChart />, 'icon': <InboxIcon/>},
     {'title': 'Knappste Sieger', 'link': <KnappsteSiegerPage />, 'icon': <InboxIcon/>},
     {'title': 'Nichwähler', 'link': <NonVoterChartPage />, 'icon': <InboxIcon/>},
+    {'title': 'Soziokulturelle Daten', 'link': <SocioCulturalStatsChart availableYears={[2017, 2021]} />, 'icon': <InboxIcon/>},
 ]
 
 function App() {

@@ -1,29 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { Box, Typography, CircularProgress, FormControl, InputLabel, Select, MenuItem } from "@mui/material";
-import {SocioCulturalStats} from "../models/SocioCulturalStats.ts";
-import {fetchSocioCulturalStats} from "../services/AnalyseService.ts";
+import { SocioCulturalStats } from "../models/SocioCulturalStats.ts";
+import { fetchSocioCulturalStats } from "../services/AnalyseService.ts";
 
 const SocioCulturalStatsChart: React.FC<{ availableYears: number[] }> = ({ availableYears }) => {
     const [year, setYear] = useState<number>(availableYears[0]);
     const [stats, setStats] = useState<SocioCulturalStats[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
 
-
     const loadData = async (year: number) => {
         setLoading(true);
         try {
-            const response = await fetchSocioCulturalStats(year); // Pass the year to the backend API
+            const response = await fetchSocioCulturalStats(year); // Fetch data from backend
             setStats(response);
         } catch (error) {
-            console.error('Failed to fetch Sitzverteilung data:', error);
+            console.error('Failed to fetch socio-cultural statistics:', error);
         } finally {
             setLoading(false);
         }
     };
 
     useEffect(() => {
-        loadData(year).then(); // Fetch data when the selected year changes
+        loadData(year).then(); // Load data when the selected year changes
     }, [year]);
 
     const handleYearChange = (event: React.ChangeEvent<{ value: unknown }>) => {
@@ -38,7 +37,7 @@ const SocioCulturalStatsChart: React.FC<{ availableYears: number[] }> = ({ avail
         );
     }
 
-    if (stats.length === 0) {
+    if (!stats) {
         return (
             <Typography variant="h6" align="center">
                 No data available for the year {year}.
@@ -46,17 +45,10 @@ const SocioCulturalStatsChart: React.FC<{ availableYears: number[] }> = ({ avail
         );
     }
 
-    const labels = Object.keys(stats[0].averages);
-    const datasets = stats.map((stat) => ({
-        label: `${stat.winningParty} (${stat.type})`,
-        averages: stat.averages,
-    }));
-
-    const chartData = labels.map((label) => ({
-        name: label,
-        ...Object.fromEntries(
-            datasets.map((dataset) => [dataset.label, dataset.averages[label] || 0])
-        ),
+    // Preparing data for the chart
+    const chartData = stats.map((item) => ({
+        name: item.winningParty,
+        value: item.alqInsgesamt,
     }));
 
     const colors = [
@@ -68,8 +60,6 @@ const SocioCulturalStatsChart: React.FC<{ availableYears: number[] }> = ({ avail
         "#FF9F40",
     ];
 
-    // @ts-ignore
-    // @ts-ignore
     return (
         <Box>
             <Typography variant="h5" align="center" gutterBottom>
@@ -92,22 +82,13 @@ const SocioCulturalStatsChart: React.FC<{ availableYears: number[] }> = ({ avail
                 </Select>
             </FormControl>
 
-            <BarChart
-                data={chartData}
-                width={800}
-                height={500}
-                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-            >
+            <BarChart width={800} height={400} data={chartData}>
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                {datasets.map((dataset, index) => (
-                    <Bar
-                        key={dataset.label}
-                        dataKey={dataset.label}
-                        fill={colors[index % colors.length]}
-                    />
+                {chartData.map((_entry, index) => (
+                    <Bar key={index} dataKey="value" fill={colors[index % colors.length]} />
                 ))}
             </BarChart>
         </Box>

@@ -1,5 +1,21 @@
 export interface SocioCulturalStats {
-    winningParty: string;
+    winningParty: number;
     type: string;
-    averages: Record<string, number>;
+    svbInsgesamt: number;
+    svbLandwFischerei: number;
+    svbProduzGewerbe: number;
+    svbHandelGastVerkehr: number;
+    svbDienstleister: number;
+    svbUebrigeDienstleister: number;
+    alterUnter18: number;
+    alter1824: number;
+    alter2534: number;
+    alter3559: number;
+    alter6074: number;
+    alter75Plus: number;
+    alqFrauen: number;
+    alq1524: number;
+    alq5564: number;
+    alqInsgesamt: number;
+    alqMaenner: number;
 }
