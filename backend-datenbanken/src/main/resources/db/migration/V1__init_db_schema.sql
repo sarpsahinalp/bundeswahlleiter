@@ -16,6 +16,8 @@ CREATE SEQUENCE IF NOT EXISTS partei_wahl_teilnahme_seq START WITH 1 INCREMENT B
 
 CREATE SEQUENCE IF NOT EXISTS wahl_teilnahme_seq START WITH 1 INCREMENT BY 50;
 
+CREATE SEQUENCE IF NOT EXISTS wahlberechtigte_seq START WITH 1 INCREMENT BY 1;
+
 CREATE SEQUENCE IF NOT EXISTS wahlkreis_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE IF NOT EXISTS zweitestimme_aggr_seq START WITH 1 INCREMENT BY 50;
@@ -97,10 +99,26 @@ CREATE TABLE partei_wahl_teilnahme
     CONSTRAINT pk_partei_wahl_teilnahme PRIMARY KEY (id)
 );
 
+CREATE TABLE vote_code
+(
+    code               VARCHAR(255) NOT NULL,
+    last_modified_date TIMESTAMP WITHOUT TIME ZONE,
+    CONSTRAINT pk_vote_code PRIMARY KEY (code)
+);
+
 CREATE TABLE wahl_teilnahme
 (
     id BIGINT NOT NULL,
     CONSTRAINT pk_wahl_teilnahme PRIMARY KEY (id)
+);
+
+CREATE TABLE wahlberechtigte
+(
+    id              BIGINT  NOT NULL,
+    wahlkreis_id    BIGINT  NOT NULL,
+    jahr            INTEGER NOT NULL,
+    wahlberechtigte INTEGER NOT NULL,
+    CONSTRAINT pk_wahlberechtigte PRIMARY KEY (id)
 );
 
 CREATE TABLE wahlkreis
@@ -162,6 +180,9 @@ ALTER TABLE partei
 
 ALTER TABLE partei_wahl_teilnahme
     ADD CONSTRAINT FK_PARTEI_WAHL_TEILNAHME_ON_PARTEI FOREIGN KEY (partei_id) REFERENCES partei (id);
+
+ALTER TABLE wahlberechtigte
+    ADD CONSTRAINT FK_WAHLBERECHTIGTE_ON_WAHLKREIS FOREIGN KEY (wahlkreis_id) REFERENCES wahlkreis (id);
 
 ALTER TABLE wahlkreis
     ADD CONSTRAINT FK_WAHLKREIS_ON_BUNDESLAND FOREIGN KEY (bundesland_id) REFERENCES bundesland (id);

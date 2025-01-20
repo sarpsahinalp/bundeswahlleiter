@@ -1,15 +1,17 @@
 package db.in.tum.de.datenbanken.logic;
 
 import db.in.tum.de.datenbanken.schema.erststimme.Erststimme;
+import db.in.tum.de.datenbanken.schema.voting.VoteCode;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@org.springframework.stereotype.Repository
-
-public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
+@Repository
+public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
 
     @Query(value = "WITH jahr AS (VALUES (:year))," +
             "    summed_votes_zweitstimme AS (" +
@@ -405,6 +407,7 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
                      -- Combine socio-cultural info with population and winning party
                      SELECT
                          ws.wahlkreis_id,
+                         ws.year,
                          ws.SVB_insgesamt,
                          ws.SVB_landw_fischerei,
                          ws.SVB_produz_gewerbe,
@@ -436,6 +439,7 @@ public interface AnalysenRepository extends JpaRepository<Erststimme, Long> {
                      -- Calculate population-weighted averages for each winning party and type (erst/zweit)
                      SELECT
                          wd.winning_partei_id,
+                         wd.year,
                          wd.type,
                          AVG(wd.SVB_insgesamt / 10) AS avg_SVB_insgesamt,
                          AVG(wd.SVB_landw_fischerei) AS avg_SVB_landw_fischerei,
