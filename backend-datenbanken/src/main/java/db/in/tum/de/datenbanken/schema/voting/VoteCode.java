@@ -17,5 +17,7 @@ public class VoteCode {
     @Id
     private String code;
 
+    // TODO: Add wahlkreis
+
     private ZonedDateTime lastModifiedDate;
 }

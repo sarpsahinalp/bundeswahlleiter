@@ -6,12 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 public class PdfController {
 
     private final PdfService pdfService;
@@ -25,7 +23,7 @@ public class PdfController {
     @Transactional
     public ResponseEntity<byte[]> downloadPdf() {
         try {
-            byte[] pdfBytes = pdfService.generatePdf();
+            byte[] pdfBytes = pdfService.generateVotingPdf();
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_PDF);

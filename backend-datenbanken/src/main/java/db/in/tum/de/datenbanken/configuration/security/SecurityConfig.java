@@ -26,7 +26,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers("/secure/vote").authenticated();
-                    auth.requestMatchers("/secure/download/pdf").authenticated();
+//                    auth.requestMatchers("/secure/download/pdf").authenticated();
                     auth.anyRequest().permitAll();
                 })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
