@@ -1,4 +1,4 @@
-package db.in.tum.de.datenbanken.Logic.DTOs;
+package db.in.tum.de.datenbanken.logic.DTOs;
 
 import lombok.Getter;
 import lombok.Setter;

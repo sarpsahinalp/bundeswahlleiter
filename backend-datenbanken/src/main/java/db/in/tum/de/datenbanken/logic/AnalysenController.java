@@ -1,6 +1,6 @@
-package db.in.tum.de.datenbanken.Logic;
+package db.in.tum.de.datenbanken.logic;
 
-import db.in.tum.de.datenbanken.Logic.DTOs.*;
+import db.in.tum.de.datenbanken.logic.DTOs.*;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,4 +1,4 @@
-package db.in.tum.de.datenbanken.Logic;
+package db.in.tum.de.datenbanken.logic;
 
 import db.in.tum.de.datenbanken.schema.erststimme.Erststimme;
 import io.lettuce.core.dynamic.annotation.Param;

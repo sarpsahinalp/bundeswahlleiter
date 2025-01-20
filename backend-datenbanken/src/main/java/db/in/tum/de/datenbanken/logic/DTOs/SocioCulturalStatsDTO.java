@@ -1,10 +1,8 @@
-package db.in.tum.de.datenbanken.Logic.DTOs;
+package db.in.tum.de.datenbanken.logic.DTOs;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.Map;
 
 @Data
 @AllArgsConstructor
