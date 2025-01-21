@@ -121,7 +121,7 @@ having
 union
 select m.partei_id, 2021
 from minderheitspartei m
-);
+    );
 
 create or replace view sumZweiteStimmeProParteiInBundesland as
 (
@@ -432,75 +432,92 @@ create table zweite_unterverteilung
 
 -- Zweite Unterverteilung
 with recursive
-    anfangDivisor as (select szb.partei_id,
-                             sum(szb.gesamtStimmen) / (select zo.sitze
-                                                       from zweiter_oberverteilung zo
-                                                       where zo.partei_id = szb.partei_id
-                                                         and zo.jahr = szb.jahr) ::float as divisor
-                      from sumzweitestimmeproparteiinbundesland szb
-                      where szb.jahr = 2021
-                      group by szb.partei_id, szb.jahr),
-    iterations as (select szb.partei_id,
-                          szb.jahr,
-                          (select divisor
-                           from anfangDivisor a
-                           where a.partei_id = szb.partei_id) as divisor,
-                          (select zo.sitze
-                           from zweiter_oberverteilung zo
-                           where zo.partei_id = szb.partei_id
-                             and zo.jahr = szb.jahr)          as zielWert,
-                          (sum(case
-                                   when round(szb.gesamtStimmen / (select divisor
-                                                                   from anfangDivisor a
-                                                                   where a.partei_id = szb.partei_id)) <
-                                        m.mindesSitzAnspruch
+    anfangDivisor as (
+        select
+            szb.partei_id,
+            szb.jahr,
+            sum(szb.gesamtStimmen) /
+            (select zo.sitze
+             from zweiter_oberverteilung zo
+             where zo.partei_id = szb.partei_id
+               and zo.jahr = szb.jahr
+            )::float as divisor
+        from sumzweitestimmeproparteiinbundesland szb
+        where szb.jahr = 2021
+        group by szb.partei_id, szb.jahr
+    ),
+    initialIteration as (
+        select
+            szb.partei_id,
+            szb.jahr,
+            ad.divisor,
+            zo.sitze as zielWert,
+            sum(case
+                    when round(szb.gesamtStimmen / ad.divisor) < m.mindesSitzAnspruch
+                        then m.mindesSitzAnspruch
+                    else round(szb.gesamtStimmen / ad.divisor)
+                end) as verteilteSitze,
+            0 as iteration
+        from sumzweitestimmeproparteiinbundesland szb
+                 join uberhangAndMindestsiztanzahl2021 m
+                      on m.partei_id = szb.partei_id
+                          and m.jahr = szb.jahr
+                          and szb.bundesland = m.bundesland_id
+                 join anfangDivisor ad
+                      on ad.partei_id = szb.partei_id
+                          and ad.jahr = szb.jahr
+                 join zweiter_oberverteilung zo
+                      on zo.partei_id = szb.partei_id
+                          and zo.jahr = szb.jahr
+        where szb.jahr = 2021
+        group by szb.partei_id, szb.jahr, ad.divisor, zo.sitze
+    ),
+    iterations as (
+        -- Anchor member
+        select * from initialIteration
+        union all
+        -- Recursive member
+        select
+            i.partei_id,
+            i.jahr,
+            -- Adjust divisor based on sign of remaining seats
+            case
+                when (i.zielWert - i.verteilteSitze) > 0 then i.divisor - 10
+                else i.divisor + 10
+                end as divisor,
+            i.zielWert,
+            (
+                select sum(
+                               case
+                                   when round(szb.gesamtStimmen / (case
+                                                                       when (i.zielWert - i.verteilteSitze) > 0 then i.divisor - 10
+                                                                       else i.divisor + 10 end)) < m.mindesSitzAnspruch
                                        then m.mindesSitzAnspruch
-                                   else round(szb.gesamtStimmen / (select divisor
-                                                                   from anfangDivisor a
-                                                                   where a.partei_id = szb.partei_id))
-                              end))                           as verteilteSitze,
-                          0                                   as iteration
-                   from sumzweitestimmeproparteiinbundesland szb,
-                        uberhangAndMindestsiztanzahl2021 m
-                   where m.partei_id = szb.partei_id
-                     and m.jahr = szb.jahr
-                     and szb.bundesland = m.bundesland_id
-                     and szb.jahr = 2021
-                   group by szb.partei_id, szb.jahr
-
-                   union all
-
-                   select i.partei_id,
-                          i.jahr,
-                          case
-                              when (i.zielWert - i.verteilteSitze) > 0 then i.divisor - 10
-                              else i.divisor + 10 end        as divisor,
-                          i.zielWert,
-                          (select (sum(case
-                                           when round(szb.gesamtStimmen / i.divisor) <
-                                                m.mindesSitzAnspruch
-                                               then m.mindesSitzAnspruch
-                                           else round(szb.gesamtStimmen / i.divisor)
-                              end))
-                           from sumzweitestimmeproparteiinbundesland szb,
-                                uberhangAndMindestsiztanzahl2021 m
-                           where m.partei_id = szb.partei_id
-                             and m.jahr = szb.jahr
-                             and szb.bundesland = m.bundesland_id
-                             and szb.jahr = 2021
-                             and szb.partei_id = i.partei_id
-                             and szb.jahr = i.jahr
-                           group by szb.partei_id, szb.jahr) as verteilteSitze,
-                          i.iteration + 1                    as iteration
-                   from iterations i
-                   where i.verteilteSitze != i.zielWert)
+                                   else round(szb.gesamtStimmen / (case
+                                                                       when (i.zielWert - i.verteilteSitze) > 0 then i.divisor - 10
+                                                                       else i.divisor + 10 end))
+                                   end)
+                from sumzweitestimmeproparteiinbundesland szb
+                         join uberhangAndMindestsiztanzahl2021 m
+                              on m.partei_id = szb.partei_id
+                                  and m.jahr = szb.jahr
+                                  and szb.bundesland = m.bundesland_id
+                where szb.partei_id = i.partei_id
+                  and szb.jahr = i.jahr
+            ) as verteilteSitze,
+            i.iteration + 1 as iteration
+        from iterations i
+        where i.verteilteSitze != i.zielWert
+        -- Optionally add a condition to limit maximum iterations to safeguard
+        -- e.g. and i.iteration < 1000
+    )
 -- Final output
-
-insert
-into zweite_unterverteilung (partei_id, divisor, jahr)
+insert into zweite_unterverteilung (partei_id, divisor, jahr)
 select i.partei_id, i.divisor, i.jahr
 from iterations i
-where i.iteration = (select max(iteration)
-                     from iterations i2
-                     where i2.partei_id = i.partei_id
-                       and i2.jahr = i.jahr);
+where i.iteration = (
+    select max(i2.iteration)
+    from iterations i2
+    where i2.partei_id = i.partei_id
+      and i2.jahr = i.jahr
+);

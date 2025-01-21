@@ -1,9 +1,7 @@
 package db.in.tum.de.datenbanken.logic;
 
-import db.in.tum.de.datenbanken.schema.erststimme.Erststimme;
 import db.in.tum.de.datenbanken.schema.voting.VoteCode;
 import io.lettuce.core.dynamic.annotation.Param;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -458,7 +456,7 @@ public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
                          AVG(wd.ALQ_insgesamt) AS avg_ALQ_insgesamt,
                          AVG(wd.ALQ_maenner) AS avg_ALQ_maenner
                      FROM weighted_data wd
-                     GROUP BY wd.winning_partei_id, wd.type
+                     GROUP BY wd.winning_partei_id, wd.year, wd.type
                  )
                 
             SELECT * from averages a;
