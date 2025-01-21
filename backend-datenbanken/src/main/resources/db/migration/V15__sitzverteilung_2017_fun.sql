@@ -87,7 +87,7 @@ from calculate_divisor_erste_unterverteilung(16, (select erste_oberverteilung.si
                                                   where bundesland_id = 16
                                                     and jahr = 2017), 2017);
 
-create or replace view uberhangAndMindestsiztanzahl2017 as
+create materialized view IF NOT EXISTS uberhangAndMindestsiztanzahl2017 as
 (
 select w.partei_id,
        w.jahr,
@@ -104,6 +104,7 @@ from wahlkreisSitze w
     and w.jahr = eu.jahr
 where w.jahr = 2017
     );
+
 -- Bestimmung der zweite oberverteilung
 CREATE
     OR REPLACE FUNCTION calculate_divisor_min_seat_claims_2017()
@@ -213,8 +214,8 @@ with recursive
                    select i.partei_id,
                           i.jahr,
                           case
-                              when (i.zielWert - i.verteilteSitze) > 0 then i.divisor - 10
-                              else i.divisor + 10 end        as divisor,
+                              when (i.zielWert - i.verteilteSitze) > 0 then i.divisor - 100
+                              else i.divisor + 100 end        as divisor,
                           i.zielWert,
                           (select (sum(case
                                            when round(szb.gesamtStimmen / i.divisor) <
@@ -243,4 +244,6 @@ from iterations i
 where i.iteration = (select max(iteration)
                      from iterations i2
                      where i2.partei_id = i.partei_id
-                       and i2.jahr = i.jahr);
+                       and i2.jahr = i.jahr)
+ON CONFLICT (partei_id, jahr)
+    DO UPDATE SET divisor = EXCLUDED.divisor;
