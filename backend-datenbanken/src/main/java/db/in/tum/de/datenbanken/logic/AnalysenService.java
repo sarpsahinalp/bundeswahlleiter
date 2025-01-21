@@ -97,27 +97,28 @@ public class AnalysenService {
     }
 
     private SocioCulturalStatsDTO mapObjectArrayToDto(Object[] obj) {
-        SocioCulturalStatsDTO dto = new SocioCulturalStatsDTO();
-        dto.setWinningParty((Long) obj[0]);
-        dto.setType((String) obj[1]);
-        dto.setSvbInsgesamt((Double) obj[2]);
-        dto.setSvbLandwFischerei((Double) obj[3]);
-        dto.setSvbProduzGewerbe((Double) obj[4]);
-        dto.setSvbHandelGastVerkehr((Double) obj[5]);
-        dto.setSvbDienstleister((Double) obj[6]);
-        dto.setSvbUebrigeDienstleister((Double) obj[7]);
-        dto.setAlterUnter18((Double) obj[8]);
-        dto.setAlter1824((Double) obj[9]);
-        dto.setAlter2534((Double) obj[10]);
-        dto.setAlter3559((Double) obj[11]);
-        dto.setAlter6074((Double) obj[12]);
-        dto.setAlter75Plus((Double) obj[13]);
-        dto.setAlqFrauen((Double) obj[14]);
-        dto.setAlq1524((Double) obj[15]);
-        dto.setAlq5564((Double) obj[16]);
-        dto.setAlqInsgesamt((Double) obj[17]);
-        dto.setAlqMaenner((Double) obj[18]);
-        return dto;
+//        SocioCulturalStatsDTO dto = new SocioCulturalStatsDTO();
+//        dto.setWinningParty((Long) obj[0]);
+//        dto.setType((String) obj[1]);
+//        dto.setSvbInsgesamt((Double) obj[2]);
+//        dto.setSvbLandwFischerei((Double) obj[3]);
+//        dto.setSvbProduzGewerbe((Double) obj[4]);
+//        dto.setSvbHandelGastVerkehr((Double) obj[5]);
+//        dto.setSvbDienstleister((Double) obj[6]);
+//        dto.setSvbUebrigeDienstleister((Double) obj[7]);
+//        dto.setAlterUnter18((Double) obj[8]);
+//        dto.setAlter1824((Double) obj[9]);
+//        dto.setAlter2534((Double) obj[10]);
+//        dto.setAlter3559((Double) obj[11]);
+//        dto.setAlter6074((Double) obj[12]);
+//        dto.setAlter75Plus((Double) obj[13]);
+//        dto.setAlqFrauen((Double) obj[14]);
+//        dto.setAlq1524((Double) obj[15]);
+//        dto.setAlq5564((Double) obj[16]);
+//        dto.setAlqInsgesamt((Double) obj[17]);
+//        dto.setAlqMaenner((Double) obj[18]);
+//        return dto;
+        return null;
     }
 
 }
