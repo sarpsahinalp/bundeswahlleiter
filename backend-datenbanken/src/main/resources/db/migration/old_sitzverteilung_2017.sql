@@ -88,27 +88,6 @@ from calculate_divisor_erste_unterverteilung(16, (select erste_oberverteilung.si
                                                     and jahr = 2017), 2017);
 
 
--- Zweite Oberverteilung
--- Bestimmung Uberhang
-create or replace view uberhangAndMindestsiztanzahl2017 as
-(
-select w.partei_id,
-       w.jahr,
-       w.bundesland_id,
-       (case
-            when w.wahlkreisSitze - coalesce(eu.sitze, 0) > 0 then w.wahlkreisSitze - eu.sitze
-            else 0 end)                                                       as drohendeUberhang,
-       (case
-            when w.wahlkreisSitze >= coalesce(eu.sitze, 0) then w.wahlkreisSitze
-            else coalesce(eu.sitze, 0) end) as mindesSitzAnspruch
-from wahlkreisSitze w
-         left join erste_unterverteilung eu on w.bundesland_id = eu.bundesland_id
-    and w.partei_id = eu.partei_id
-    and w.jahr = eu.jahr
-where w.jahr = 2017
-    );
-
-
 -- Bestimmung der zweite oberverteilung
 CREATE
     OR REPLACE FUNCTION calculate_divisor_min_seat_claims_2017()
