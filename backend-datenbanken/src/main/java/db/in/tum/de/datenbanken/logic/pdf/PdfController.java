@@ -19,7 +19,7 @@ public class PdfController {
         this.pdfService = pdfService;
     }
 
-    @GetMapping("/secure/download/pdf")
+    @GetMapping("/download/pdf")
     @Transactional
     public ResponseEntity<byte[]> downloadPdf() {
         try {

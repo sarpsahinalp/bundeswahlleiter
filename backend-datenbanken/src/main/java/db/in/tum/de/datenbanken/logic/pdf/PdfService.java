@@ -10,7 +10,7 @@ import com.itextpdf.layout.element.LineSeparator;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Text;
 import com.itextpdf.layout.properties.TextAlignment;
-import db.in.tum.de.datenbanken.logic.security.VoteCodeRepository;
+import db.in.tum.de.datenbanken.logic.voting.VoteCodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -59,7 +59,7 @@ public class PdfService {
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             // Create PDF writer and document
             // Create a random token for voting (for instance, a UUID)
-            String voteToken = voteRepo.findFirst().orElseThrow();
+            String voteToken = UUID.randomUUID().toString();
 
             // Initialize PDF writer and document
             PdfWriter writer = new PdfWriter(baos);

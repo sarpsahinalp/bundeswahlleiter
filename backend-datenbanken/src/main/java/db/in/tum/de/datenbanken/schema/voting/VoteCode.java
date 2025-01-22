@@ -1,8 +1,7 @@
 package db.in.tum.de.datenbanken.schema.voting;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import db.in.tum.de.datenbanken.schema.kreise.Wahlkreis;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,7 +16,9 @@ public class VoteCode {
     @Id
     private String code;
 
-    // TODO: Add wahlkreis
+    @ManyToOne
+    @JoinColumn(name = "wahlkreis_id", nullable = false)
+    private Wahlkreis wahlkreisId;
 
     private ZonedDateTime lastModifiedDate;
 }

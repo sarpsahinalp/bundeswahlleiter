@@ -40,7 +40,7 @@ with recursive
 
 select *
 from divisorSpanne
-where iteration = (select max(iteration) from divisorSpanne)
+where iteration = (select max(iteration) from divisorSpanne);
 --                             UNION ALL
 --                             ( with
 --                                 SELECT ds.iteration + 1,
@@ -66,3 +66,5 @@ where iteration = (select max(iteration) from divisorSpanne)
 --                       ds.total_pop
 --                FROM divisorSpanne ds
 --                where ds.sumSeats != 598) as zwischen))
+
+SELECT calculate_all_unterverteilung(2017);

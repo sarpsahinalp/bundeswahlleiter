@@ -38,11 +38,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 DecodedJWT decodedJWT = verifier.verify(token);
 
                 // If verification succeeds, you can read claims:
-                String hash = decodedJWT.getClaim("hash").asString();
+                String code = decodedJWT.getClaim("code").asString();
 
                 // Build an anonymous Authentication (no roles). The principal is the 'hash'.
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(hash, null, null);
+                        new UsernamePasswordAuthenticationToken(code, null, null);
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JWTVerificationException ex) {

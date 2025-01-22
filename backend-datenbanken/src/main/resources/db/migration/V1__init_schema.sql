@@ -14,8 +14,6 @@ CREATE SEQUENCE IF NOT EXISTS partei_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE IF NOT EXISTS partei_wahl_teilnahme_seq START WITH 1 INCREMENT BY 1;
 
-CREATE SEQUENCE IF NOT EXISTS wahl_teilnahme_seq START WITH 1 INCREMENT BY 50;
-
 CREATE SEQUENCE IF NOT EXISTS wahlberechtigte_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE IF NOT EXISTS wahlkreis_seq START WITH 1 INCREMENT BY 1;
@@ -102,14 +100,9 @@ CREATE TABLE partei_wahl_teilnahme
 CREATE TABLE vote_code
 (
     code               VARCHAR(255) NOT NULL,
+    wahlkreis_id       BIGINT       NOT NULL,
     last_modified_date TIMESTAMP WITHOUT TIME ZONE,
     CONSTRAINT pk_vote_code PRIMARY KEY (code)
-);
-
-CREATE TABLE wahl_teilnahme
-(
-    id BIGINT NOT NULL,
-    CONSTRAINT pk_wahl_teilnahme PRIMARY KEY (id)
 );
 
 CREATE TABLE wahlberechtigte
@@ -181,6 +174,9 @@ ALTER TABLE partei
 ALTER TABLE partei_wahl_teilnahme
     ADD CONSTRAINT FK_PARTEI_WAHL_TEILNAHME_ON_PARTEI FOREIGN KEY (partei_id) REFERENCES partei (id);
 
+ALTER TABLE vote_code
+    ADD CONSTRAINT FK_VOTE_CODE_ON_WAHLKREIS FOREIGN KEY (wahlkreis_id) REFERENCES wahlkreis (id);
+
 ALTER TABLE wahlberechtigte
     ADD CONSTRAINT FK_WAHLBERECHTIGTE_ON_WAHLKREIS FOREIGN KEY (wahlkreis_id) REFERENCES wahlkreis (id);
 
@@ -192,3 +188,39 @@ ALTER TABLE zweitestimme
 
 ALTER TABLE zweitestimme
     ADD CONSTRAINT FK_ZWEITESTIMME_ON_WAHLKREIS FOREIGN KEY (wahlkreis_id) REFERENCES wahlkreis (id);
+
+-- Core Tables ----------------------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_bevoelkerung_bundesland_jahr
+    ON bevoelkerung (bundesland_id, jahr);
+
+CREATE INDEX IF NOT EXISTS idx_erststimme_aggr_main
+    ON erststimme_aggr (jahr, wahlkreis_id, partei_id);
+
+CREATE INDEX IF NOT EXISTS idx_zweitstimme_aggr_main
+    ON zweitestimme_aggr (jahr, partei_id, wahlkreis_id);
+
+CREATE INDEX IF NOT EXISTS idx_kandidatur_search
+    ON kandidatur (jahr, partei_id, wahlkreis_id);
+
+-- Foreign Key Indexes --------------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_wahlkreis_bundesland
+    ON wahlkreis (bundesland_id);
+
+CREATE INDEX IF NOT EXISTS idx_erststimme_partei
+    ON erststimme (partei_id);
+
+CREATE INDEX IF NOT EXISTS idx_zweitestimme_partei
+    ON zweitestimme (partei_id);
+
+CREATE INDEX IF NOT EXISTS idx_wahlberechtigte_wk
+    ON wahlberechtigte (wahlkreis_id);
+
+-- Critical Query Support -----------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_partei_name
+    ON partei (name);
+
+CREATE INDEX IF NOT EXISTS idx_kandidatur_jahr
+    ON kandidatur (jahr);
+
+CREATE INDEX IF NOT EXISTS idx_minderheitspartei_partei
+    ON minderheitspartei (partei_id);

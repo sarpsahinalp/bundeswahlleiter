@@ -25,8 +25,7 @@ public class SecurityConfig {
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/secure/vote").authenticated();
-//                    auth.requestMatchers("/secure/download/pdf").authenticated();
+                    auth.requestMatchers("/secure/**").authenticated();
                     auth.anyRequest().permitAll();
                 })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

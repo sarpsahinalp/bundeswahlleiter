@@ -2,16 +2,117 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import Image from "next/image"
+import { ChevronDown } from "lucide-react"
 
-const parties = [
-  { id: "cdu", name: "CDU/CSU", candidate: "Friedrich Merz" },
-  { id: "spd", name: "SPD", candidate: "Olaf Scholz" },
-  { id: "afd", name: "AfD", candidate: "Alice Weidel" },
-  { id: "fdp", name: "FDP", candidate: "Christian Lindner" },
-  { id: "linke", name: "LINKE", candidate: "Janine Wissler" },
-  { id: "gruene", name: "GRÜNE", candidate: "Annalena Baerbock" },
-  { id: "other", name: "Other", candidate: "Independent Candidate" },
+interface Candidate {
+  id: number
+  name: string
+  occupation: string
+  city: string
+  party: string
+  partyFull: string
+}
+
+interface Party {
+  id: number
+  name: string
+  fullName: string
+  candidates: string[]
+}
+
+const candidates: Candidate[] = [
+  {
+    id: 1,
+    name: "Dr. Westerwelle, Angelika",
+    occupation: "Unternehmerin",
+    city: "Bielefeld",
+    party: "CDU",
+    partyFull: "Christlich Demokratische Union Deutschlands",
+  },
+  {
+    id: 2,
+    name: "Dr. Esdar, Wiebke",
+    occupation: "Diplom-Psychologin",
+    city: "Bielefeld",
+    party: "SPD",
+    partyFull: "Sozialdemokratische Partei Deutschlands",
+  },
+  {
+    id: 3,
+    name: "Schlifter-de la Fontaine, Jan Maik",
+    occupation: "Unternehmer",
+    city: "Bielefeld",
+    party: "FDP",
+    partyFull: "Freie Demokratische Partei",
+  },
+  {
+    id: 4,
+    name: "Kneller, Maximilian",
+    occupation: "Wissenschaftlicher Mitarbeiter",
+    city: "Bielefeld",
+    party: "AfD",
+    partyFull: "Alternative für Deutschland",
+  },
+  {
+    id: 5,
+    name: "Haßelmann, Britta",
+    occupation: "Diplom-Sozialarbeiterin",
+    city: "Bielefeld",
+    party: "GRÜNE",
+    partyFull: "BÜNDNIS 90/DIE GRÜNEN",
+  },
+  {
+    id: 6,
+    name: "Straetmanns, Friedrich",
+    occupation: "Bundestagsabgeordneter",
+    city: "Bielefeld",
+    party: "DIE LINKE",
+    partyFull: "DIE LINKE",
+  },
+]
+
+const parties: Party[] = [
+  {
+    id: 1,
+    name: "CDU",
+    fullName: "Christlich Demokratische Union Deutschlands",
+    candidates: ["Armin Laschet", "Anja Karliczek", "Ralph Brinkhaus", "Jens Spahn", "Elisabeth Winkelmeier-Becker"],
+  },
+  {
+    id: 2,
+    name: "SPD",
+    fullName: "Sozialdemokratische Partei Deutschlands",
+    candidates: ["Dr. Rolf Mützenich", "Svenja Schulze", "Sebastian Hartmann", "Kerstin Griese", "Dirk Wiese"],
+  },
+  {
+    id: 3,
+    name: "FDP",
+    fullName: "Freie Demokratische Partei",
+    candidates: [
+      "Christian Lindner",
+      "Dr. Marie-Agnes Strack-Zimmermann",
+      "Alexander Graf Lambsdorff",
+      "Dr. Marco Buschmann",
+    ],
+  },
+  {
+    id: 4,
+    name: "AfD",
+    fullName: "Alternative für Deutschland",
+    candidates: ["Rüdiger Lucassen", "Dr. Martin Vincentz", "Matthias Helferich"],
+  },
+  {
+    id: 5,
+    name: "GRÜNE",
+    fullName: "BÜNDNIS 90/DIE GRÜNEN",
+    candidates: ["Mona Neubaur", "Felix Banaszak", "Sven Lehmann", "Irene Mihalic"],
+  },
+  {
+    id: 6,
+    name: "DIE LINKE",
+    fullName: "DIE LINKE",
+    candidates: ["Dr. Sahra Wagenknecht", "Sevim Dagdelen", "Nina Eumann"],
+  },
 ]
 
 export default function VotingInterface({ params }: { params: { token: string } }) {
@@ -25,147 +126,154 @@ export default function VotingInterface({ params }: { params: { token: string } 
     router.push("/vote/confirmation")
   }
 
-  const CandidateCard = ({
-    partyId,
-    name,
-    candidate,
-    selected,
-    onClick,
-  }: {
-    partyId: string
-    name: string
-    candidate: string
-    selected: boolean
-    onClick: () => void
-  }) => (
-    <div className="flex-1 min-w-[250px] max-w-[300px]">
-      <button
-        type="button"
-        onClick={onClick}
-        className={`w-full p-4 rounded-lg transition-all duration-200 ${
-          selected
-            ? "bg-blue-50 ring-2 ring-blue-500 ring-offset-2"
-            : "bg-white hover:bg-gray-50 border border-gray-200"
-        }`}
-      >
-        <div className="flex flex-col items-center space-y-3">
-          <div className="relative w-32 h-32 border-2 border-gray-300">
-            <Image
-              src={`/placeholder.svg?height=128&width=128`}
-              alt={`Candidate ${candidate}`}
-              fill
-              className="object-cover"
-            />
-          </div>
-          <div className="text-center">
-            <div className="font-bold text-lg">{candidate}</div>
-            <div className="text-sm text-gray-600">{name}</div>
-          </div>
-          <div
-            className={`w-8 h-8 rounded-full border-2 ${selected ? "border-blue-500 bg-blue-500" : "border-gray-300"}`}
-          >
-            {selected && (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="w-4 h-4 rounded-full bg-white" />
-              </div>
-            )}
-          </div>
-        </div>
-      </button>
-    </div>
-  )
-
   return (
-    <div className="px-4 py-6 sm:px-0">
-      <h2 className="text-2xl font-bold mb-4">Cast Your Vote</h2>
-      <div className="bg-white shadow-lg rounded-lg px-8 pt-6 pb-8 mb-4">
-        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-          <h3 className="font-semibold text-gray-700">Important Information</h3>
-          <p className="text-gray-600">
-            You may choose to leave either or both votes empty. An empty vote is valid and will be counted as an
-            abstention.
-          </p>
+      <div className="px-4 py-6 sm:px-0">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+            <div className="p-6 bg-gray-50 border-b">
+              <h1 className="text-2xl font-bold text-center">Stimmzettel</h1>
+              <p className="text-center text-gray-600 mt-2">
+                für die Wahl zum Deutschen Bundestag im Wahlkreis 132 Bielefeld
+              </p>
+              <div className="text-center font-bold text-xl mt-4">
+                Sie haben 2 Stimmen
+                <div className="flex justify-center items-center mt-2 space-x-8">
+                  <div className="flex items-center">
+                    <div className="w-16 h-0.5 bg-black"></div>
+                    <ChevronDown className="w-6 h-6 -ml-3" />
+                  </div>
+                  <div className="flex items-center">
+                    <div className="w-16 h-0.5 bg-blue-600"></div>
+                    <ChevronDown className="w-6 h-6 -ml-3 text-blue-600" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Erststimme (Left Column) */}
+                <div className="border-r border-gray-200">
+                  <div className="text-center mb-4">
+                    <h2 className="font-bold text-lg">hier 1 Stimme</h2>
+                    <p className="text-sm text-gray-600">für die Wahl eines/einer Wahlkreisabgeordneten</p>
+                    <p className="font-bold mt-2">Erststimme</p>
+                  </div>
+                  <div className="space-y-4">
+                    {candidates.map((candidate) => (
+                        <div
+                            key={candidate.id}
+                            className={`p-4 rounded-lg border ${
+                                erststimme === candidate.party
+                                    ? "border-black bg-gray-50"
+                                    : "border-gray-200 hover:border-gray-300"
+                            }`}
+                        >
+                          <label className="flex items-start space-x-4 cursor-pointer">
+                            <div className="flex-shrink-0 mt-1">
+                              <div
+                                  className={`w-6 h-6 rounded-full border-2 ${
+                                      erststimme === candidate.party ? "border-black" : "border-gray-300"
+                                  } flex items-center justify-center`}
+                              >
+                                {erststimme === candidate.party && <div className="w-4 h-4 rounded-full bg-black" />}
+                              </div>
+                            </div>
+                            <div className="flex-grow">
+                              <input
+                                  type="radio"
+                                  name="erststimme"
+                                  value={candidate.party}
+                                  checked={erststimme === candidate.party}
+                                  onChange={(e) => setErststimme(e.target.value)}
+                                  className="sr-only"
+                              />
+                              <div className="font-bold">{candidate.name}</div>
+                              <div className="text-sm text-gray-600">
+                                {candidate.occupation}
+                                <br />
+                                {candidate.city}
+                              </div>
+                              <div className="mt-1">
+                                <span className="font-bold">{candidate.party}</span>
+                                <br />
+                                <span className="text-sm">{candidate.partyFull}</span>
+                              </div>
+                            </div>
+                          </label>
+                        </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Zweitstimme (Right Column) */}
+                <div>
+                  <div className="text-center mb-4">
+                    <h2 className="font-bold text-lg text-blue-600">hier 1 Stimme</h2>
+                    <p className="text-sm text-gray-600">für die Wahl einer Landesliste (Partei)</p>
+                    <p className="font-bold mt-2 text-blue-600">Zweitstimme</p>
+                  </div>
+                  <div className="space-y-4">
+                    {parties.map((party) => (
+                        <div
+                            key={party.id}
+                            className={`p-4 rounded-lg border ${
+                                zweitstimme === party.name
+                                    ? "border-blue-600 bg-blue-50"
+                                    : "border-gray-200 hover:border-gray-300"
+                            }`}
+                        >
+                          <label className="flex items-start space-x-4 cursor-pointer">
+                            <div className="flex-shrink-0 mt-1">
+                              <div
+                                  className={`w-6 h-6 rounded-full border-2 ${
+                                      zweitstimme === party.name ? "border-blue-600" : "border-gray-300"
+                                  } flex items-center justify-center`}
+                              >
+                                {zweitstimme === party.name && <div className="w-4 h-4 rounded-full bg-blue-600" />}
+                              </div>
+                            </div>
+                            <div className="flex-grow">
+                              <input
+                                  type="radio"
+                                  name="zweitstimme"
+                                  value={party.name}
+                                  checked={zweitstimme === party.name}
+                                  onChange={(e) => setZweitstimme(e.target.value)}
+                                  className="sr-only"
+                              />
+                              <div>
+                                <span className="font-bold text-blue-600">{party.name}</span>
+                                <br />
+                                <span className="text-sm">{party.fullName}</span>
+                              </div>
+                              <div className="mt-2 text-sm text-gray-600">
+                                {party.candidates.map((candidate, index) => (
+                                    <div key={index}>{candidate}</div>
+                                ))}
+                              </div>
+                            </div>
+                          </label>
+                        </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-center">
+                <button
+                    type="submit"
+                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg
+                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                  transition-all duration-300 text-lg"
+                >
+                  Submit Vote
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-8">
-            <h3 className="text-xl font-bold mb-4 text-center">Erststimme (First Vote)</h3>
-            <p className="text-center mb-6 text-gray-600">
-              Select your candidate for direct mandate
-              {erststimme && (
-                <button
-                  type="button"
-                  onClick={() => setErststimme("")}
-                  className="ml-2 text-blue-500 hover:text-blue-700 underline"
-                >
-                  Clear selection
-                </button>
-              )}
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {parties.map((party) => (
-                <CandidateCard
-                  key={`first-${party.id}`}
-                  partyId={party.id}
-                  name={party.name}
-                  candidate={party.candidate}
-                  selected={erststimme === party.id}
-                  onClick={() => setErststimme(party.id)}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="mb-8">
-            <h3 className="text-xl font-bold mb-4 text-center">Zweitstimme (Second Vote)</h3>
-            <p className="text-center mb-6 text-gray-600">
-              Select your party vote
-              {zweitstimme && (
-                <button
-                  type="button"
-                  onClick={() => setZweitstimme("")}
-                  className="ml-2 text-blue-500 hover:text-blue-700 underline"
-                >
-                  Clear selection
-                </button>
-              )}
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {parties.map((party) => (
-                <CandidateCard
-                  key={`second-${party.id}`}
-                  partyId={party.id}
-                  name={party.name}
-                  candidate={party.candidate}
-                  selected={zweitstimme === party.id}
-                  onClick={() => setZweitstimme(party.id)}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col items-center justify-center space-y-4">
-            <div className="text-center text-gray-600">
-              {!erststimme && !zweitstimme
-                ? "You haven't made any selections. Submitting will count as a complete abstention."
-                : !erststimme
-                  ? "You haven't selected a candidate for your first vote. It will be counted as an abstention."
-                  : !zweitstimme
-                    ? "You haven't selected a party for your second vote. It will be counted as an abstention."
-                    : "You have made selections for both votes."}
-            </div>
-            <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg
-                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                transition-all duration-300 transform hover:scale-105 text-lg"
-              type="submit"
-            >
-              Submit Vote
-            </button>
-          </div>
-        </form>
       </div>
-    </div>
   )
 }
 

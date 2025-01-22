@@ -1,6 +1,9 @@
-package db.in.tum.de.datenbanken.logic.security;
+package db.in.tum.de.datenbanken.logic.voting;
 
 import db.in.tum.de.datenbanken.configuration.security.TokenService;
+import db.in.tum.de.datenbanken.logic.DTOs.token.VotingToken;
+import db.in.tum.de.datenbanken.logic.DTOs.voting.ErstestimmeOptionen;
+import db.in.tum.de.datenbanken.logic.DTOs.voting.ZweitestimmeOptionen;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -9,10 +12,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -21,26 +26,31 @@ import org.springframework.web.server.ResponseStatusException;
 public class VotingController {
 
     private final TokenService tokenService;
-    private final VoteCodeRepository codeRepo;
+    private final VotingService votingService;
 
-    @PostMapping("/validate-hash-and-issue-token")
+    public static void main(String[] args) {
+        System.out.println(BCrypt.gensalt());
+    }
+
+    @PostMapping("/validate-hash-and-issue-token/{code}")
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public ResponseEntity<String> validateHashAndIssueToken(
-            @RequestParam String code,
+            @PathVariable String code,
             HttpServletResponse response) {
+
+        String hashed = BCrypt.hashpw(code, TokenService.securityProperties.get("BCRYPT_SALT").toString());
 
         // 1. Lookup the code in the DB
         //    If you store the code in plain text, just do findByCode(code).
         //    If you store a hashed version, you must hash the incoming `code` first and query by that.
-        String voterCode = codeRepo.findByCode(code)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Invalid code."));
+        VotingToken votingToken = votingService.validateCode(hashed);
 
         // 3. Mark code as used to prevent re-issuance
 
         // 4. Generate short-lived JWT (with random or minimal claim)
         //    Instead of using the user’s original code, generate a new random claim
         //    to avoid storing the user’s code in the token. This helps anonymity.
-        String token = tokenService.createTokenForVoting(voterCode);
+        String token = tokenService.createTokenForVoting(code, votingToken.wahlkreis_id(), votingToken.last_modified_date());
 
         // 5. Create secure cookie
         Cookie cookie = new Cookie("vote_jwt", token);
@@ -56,6 +66,22 @@ public class VotingController {
 
         // 6. Return success or some minimal body
         return ResponseEntity.ok("Voting token issued. Proceed to /secure/vote");
+    }
+
+    @GetMapping("/secure/vote/erstestimme")
+    public ResponseEntity<List<ErstestimmeOptionen>> getErstestimmeForWahlkreis() {
+        // Retrieve the wahlkreisId and year from the JWT
+        int wahlkreisId = 1;
+        int year = 2025;
+        return ResponseEntity.ok(votingService.getErststimmeOptionen(wahlkreisId, year));
+    }
+
+    @GetMapping("/secure/vote/zweitestimme")
+    public ResponseEntity<List<ZweitestimmeOptionen>> getZweitestimmeForWahlkreis() {
+        // Retrieve the wahlkreisId and year from the JWT
+        int wahlkreisId = 1;
+        int year = 2025;
+        return ResponseEntity.ok(votingService.getZweitestimmeOptionen(wahlkreisId, year));
     }
 
     @PostMapping("/secure/vote")
@@ -77,8 +103,7 @@ public class VotingController {
 //        if (hasAlreadyVoted(ephemeralClaim)) {
 //            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have already voted!");
 //        }
-        String voterCode = codeRepo.findByCode(ephemeralClaim)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "You have already voted!"));
+        VotingToken votingToken = votingService.validateCode(ephemeralClaim);
 
         // 3. Record the vote in your DB
         //    Importantly, store it WITHOUT linking to ephemeralClaim or user data
@@ -89,7 +114,7 @@ public class VotingController {
         log.info(voteData.toString());
 
         // Delete from the DB, so the user can't vote again
-        codeRepo.deleteByCode(voterCode);
+        votingService.deleteCode(votingToken.code());
 
         Cookie cookie = new Cookie("vote_jwt", "");
         cookie.setHttpOnly(true);
