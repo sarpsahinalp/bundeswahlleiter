@@ -4,7 +4,6 @@ import db.in.tum.de.datenbanken.logic.DTOs.*;
 import lombok.AllArgsConstructor;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @org.springframework.stereotype.Service
 @AllArgsConstructor
@@ -76,15 +75,8 @@ public class AnalysenService {
     }
 
     public List<MandateDTO> getBundesTagsMitglieder(int year, long bundesland_id) {
-        List<MandateDTO> listenPlatze = analysenRepository.getListenPlatze(year, bundesland_id)
-                .stream()
-                .filter(o -> o[4] != null && o[5] != null && (long) o[4] <= (double) o[5])
-                .map(MandateDTO::new)
-                .collect(Collectors.toCollection(LinkedList::new));
-        List<MandateDTO> wahlkreisPlatze = analysenRepository.getWahlkreisPlatze(year, bundesland_id).stream().map(MandateDTO::new).toList();
-
-        listenPlatze.addAll(wahlkreisPlatze);
-        return listenPlatze;
+        return analysenRepository.getListenPlatze(year, bundesland_id).stream()
+                .map(MandateDTO::new).toList();
     }
 
     public List<BundeslandDTO> getBundesLander(){

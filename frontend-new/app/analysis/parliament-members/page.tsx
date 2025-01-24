@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import {ChangeEvent, useEffect, useState} from "react"
 import {
   Table,
   TableBody,
@@ -14,6 +14,8 @@ import {
 } from "@mui/material"
 import { visuallyHidden } from "@mui/utils"
 import { Box } from "@mui/system"
+import {Bundesland} from "@/models/models";
+import {electionApi} from "@/services/api";
 
 type ParliamentMember = {
   id: number
@@ -22,19 +24,6 @@ type ParliamentMember = {
 }
 
 type Order = "asc" | "desc"
-
-// Mock data for parliament members
-const generateMockData = (year: number) =>
-  Array.from({ length: 100 }, (_, i) => ({
-    id: i + 1,
-    name: `Member ${i + 1} (${year})`,
-    party: ["CDU/CSU", "SPD", "AfD", "FDP", "Die Linke", "Grüne"][Math.floor(Math.random() * 6)],
-  }))
-
-const mockData = {
-  2017: generateMockData(2017),
-  2021: generateMockData(2021),
-}
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -126,9 +115,45 @@ export default function ParliamentMembers() {
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(15)
 
-  const data = mockData[year]
+  const [mandate, setMandate] = useState<ParliamentMember[]>([])
+  const [bundeslander, setBundeslander] = useState<Bundesland[]>([])
+  const [land , setLand] = useState<Bundesland | null>(null)
 
-  const filteredData = data.filter(
+  const loadBundesLander = async () => {
+    try {
+      const response = await electionApi.getAllBundeslander();
+      setBundeslander(response);
+    } catch (error) {
+      console.error('Failed to fetch grouped data:', error);
+    }
+  }
+
+  const loadMandate = async (year: number, bundesland_id: number) => {
+    try {
+      const response = await electionApi.getParliamentMembers(year, bundesland_id);
+      response.sort((mA, mB) => mA.partei.localeCompare(mB.partei));
+      setMandate(response.map((mandat, index) => ({
+        party: mandat.partei,
+        name: mandat.nachname + ', ' + mandat.vorname,
+        id: index
+      })));
+    } catch (error) {
+      console.error('Failed to fetch mandate:', error);
+    }
+  }
+
+  useEffect(() => {
+    loadBundesLander().then();
+  }, []);
+
+  useEffect(() => {
+    if(!land) {
+      return;
+    }
+    loadMandate(year, land.id).then();
+  }, [year, land]);
+
+  const filteredData = mandate.filter(
     (member) =>
       member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.party.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -149,6 +174,12 @@ export default function ParliamentMembers() {
     setPage(0)
   }
 
+  const updateLand = (event:ChangeEvent<HTMLSelectElement>) => {
+    const bundesland_id = parseInt(event.target.value);
+    const land = bundeslander.find(b => b.id === bundesland_id) ?? null;
+    setLand(land);
+  }
+
   const sortedRows = stableSort(filteredData, getComparator(order, orderBy))
   const visibleRows = sortedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
@@ -161,33 +192,50 @@ export default function ParliamentMembers() {
             Select Year:
           </label>
           <select
-            id="year-select"
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value) as 2017 | 2021)}
-            className="p-2 border rounded"
+              id="year-select"
+              value={year}
+              onChange={(e) => setYear(Number(e.target.value) as 2017 | 2021)}
+              className="p-2 border rounded"
           >
             <option value={2017}>2017</option>
             <option value={2021}>2021</option>
           </select>
         </div>
+        <div>
+          <label htmlFor="bundesland-select" className="mr-2">
+            Select Constituency:
+          </label>
+          <select
+              id="bundesland-select"
+              value={land?.id}
+              onChange={updateLand}
+              className="p-2 border rounded"
+          >
+            {bundeslander.map((land) => (
+                <option key={land.id} value={land.id}>
+                  {land.name}
+                </option>
+            ))}
+          </select>
+        </div>
         <div className="flex-grow">
           <input
-            type="text"
-            placeholder="Search members..."
-            className="w-full p-2 border rounded"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+              type="text"
+              placeholder="Search members..."
+              className="w-full p-2 border rounded"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
       </div>
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <TableContainer component={Paper}>
-          <Table size="small" aria-label="a dense table" sx={{ minWidth: 650 }}>
-            <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
+          <Table size="small" aria-label="a dense table" sx={{minWidth: 650}}>
+            <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort}/>
             <TableBody>
               {visibleRows.map((row) => (
-                <TableRow key={row.id} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                  <TableCell component="th" scope="row" sx={{ whiteSpace: "nowrap" }}>
+                  <TableRow key={row.id} sx={{"&:last-child td, &:last-child th": {border: 0}}}>
+                    <TableCell component="th" scope="row" sx={{whiteSpace: "nowrap"}}>
                     {row.name}
                   </TableCell>
                   <TableCell sx={{ whiteSpace: "nowrap" }}>{row.party}</TableCell>

@@ -194,7 +194,7 @@ public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
             erststimme_aggr e
                 JOIN
             Partei p ON e.Partei_ID = p.id
-        where e.jahr = :year
+        where e.jahr = :year AND NOT p.is_einzelbewerber
     ),
          Winners AS (
              -- Extract the winner for each Wahlkreis
@@ -237,6 +237,11 @@ public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
                      JOIN
                  Winners w
                  ON r.Wahlkreis_ID = w.Wahlkreis_ID AND r.Partei_ID != w.Gewinner_Partei_ID
+                 AND NOT EXISTS(
+                     SELECT *
+                     FROM KnappsteSiege k
+                     WHERE k.Partei_ID = r.partei_id
+                 )
          ),
          CombinedResults AS (
              -- Combine victories and losses
@@ -298,73 +303,53 @@ public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
 
     @Query(value = """
         with sitzProPartei AS(
-            SELECT
-                zu.partei_id,
-                s.bundesland as bundesland_id,
-                GREATEST(round(gesamtstimmen / divisor),
+                SELECT
+                    zu.partei_id,
+                    GREATEST(
+                        round(gesamtstimmen / divisor),
                          (SELECT u.mindessitzanspruch FROM uberhangandmindestsiztanzahl2021 u WHERE u.partei_id = s.partei_id and u.jahr = s.jahr and u.bundesland_id = s.bundesland),
                          (SELECT u.mindessitzanspruch FROM uberhangandmindestsiztanzahl2017 u WHERE u.partei_id = s.partei_id and u.jahr = s.jahr and u.bundesland_id = s.bundesland)
-                ) as sitze
-            FROM zweite_unterverteilung zu
-                     join sumzweitestimmeproparteiinbundesland s using (partei_id, jahr)
-            WHERE jahr = :year and s.bundesland = :bundesland_id
-        ),
-         erststimme_max AS (
-             SELECT MAX(stimmen) as anz, wahlkreis_id
-             FROM erststimme_aggr ea join wahlkreis w on ea.wahlkreis_id = w.id
-             WHERE jahr = :year and w.bundesland_id = :bundesland_id
-             GROUP BY wahlkreis_id
-         ),
-         direktmandate(partei_id, wahlkreis_id) AS (
-             SELECT partei_id, wahlkreis_id
-             FROM erststimme_aggr ea join wahlkreis w on ea.wahlkreis_id = w.id
-             WHERE stimmen = (SELECT anz FROM erststimme_max em WHERE em.wahlkreis_id = ea.wahlkreis_id)
-               and jahr = :year and w.bundesland_id = :bundesland_id
-         ),
-         wahlkreis_mandate AS (
-             SELECT k.id as kandidatur_id, vorname, nachname, partei_id, wahlkreis_id, landesliste_platz
-             FROM direktmandate join kandidatur k using (partei_id, wahlkreis_id)
-             WHERE jahr = :year
-         ),
-        landesliste_mandate AS (
-            SELECT k.id as kandidatur_id, vorname, nachname, partei_id, wahlkreis_id,
-                   (landesliste_platz -
-                    (SELECT count(*) FROM wahlkreis_mandate wm WHERE wm.partei_id = k.partei_id and wm.landesliste_platz < k.landesliste_platz)
-                    ) as listenplatz,
-                    ((SELECT s.sitze FROM sitzProPartei s WHERE s.partei_id = k.partei_id) -
-                     (SELECT count(*) from direktmandate d where d.partei_id = k.partei_id)) as sitze
-            FROM kandidatur k join wahlkreis w on k.wahlkreis_id = w.id
-            WHERE jahr = :year and w.bundesland_id = :bundesland_id
-              and not exists(SELECT * FROM wahlkreis_mandate wm WHERE wm.kandidatur_id = k.id)
-        )
-        SELECT vorname, nachname, p.kurzbezeichnung, lm.wahlkreis_id, listenplatz, sitze
-        FROM landesliste_mandate lm join partei p on lm.partei_id = p.id
-        WHERE listenplatz is not null;
+                    ) as sitze
+                FROM zweite_unterverteilung zu
+                         join sumzweitestimmeproparteiinbundesland s using (partei_id, jahr)
+                WHERE jahr = :year and s.bundesland = :bundesland_id
+            ),
+            direktmandate AS (
+                SELECT  k.id as kandidatur_id
+                FROM (
+                    SELECT partei_id, wahlkreis_id, ROW_NUMBER() OVER w as rank
+                    FROM erststimme_aggr ea join wahlkreis w on ea.wahlkreis_id = w.id
+                    WHERE w.bundesland_id = :bundesland_id and jahr = :year
+                    WINDOW w as (
+                      partition by wahlkreis_id
+                      order by stimmen desc
+                    )
+                ) AS a
+                join kandidatur k using (partei_id, wahlkreis_id)
+                WHERE rank = :bundesland_id and jahr = :year
+            ),
+            angepasset_kandidaten AS (
+                SELECT k.id as kandidatur_id, vorname, nachname, partei_id, wahlkreis_id,
+                    CASE WHEN EXISTS(SELECT * FROM direktmandate d WHERE d.kandidatur_id = k.id)
+                        THEN 0 ELSE k.landesliste_platz END as landesliste_platz
+                FROM kandidatur k
+                WHERE jahr = :year and bundesland_id = :bundesland_id
+            ),
+            ranked_kandidaten AS (
+                SELECT *, row_number() over w as rank
+                FROM angepasset_kandidaten
+                WINDOW w as (
+                        PARTITION BY partei_id
+                        ORDER BY landesliste_platz
+                        )
+            )
+        SELECT r.vorname, r.nachname, p.kurzbezeichnung
+        FROM ranked_kandidaten r join sitzProPartei using (partei_id)
+        join partei p on r.partei_id = p.id
+        WHERE rank <= sitze
+        ORDER BY partei_id, landesliste_platz;
     """, nativeQuery = true)
     List<Object[]> getListenPlatze(int year, long bundesland_id);
-
-    @Query(value = """
-        with erststimme_max AS (
-                 SELECT MAX(stimmen) as anz, wahlkreis_id
-                 FROM erststimme_aggr ea join wahlkreis w on ea.wahlkreis_id = w.id
-                 WHERE jahr = :year and w.bundesland_id = :bundesland_id
-                 GROUP BY wahlkreis_id
-             ),
-             direktmandate(partei_id, wahlkreis_id) AS (
-                 SELECT partei_id, wahlkreis_id
-                 FROM erststimme_aggr ea join wahlkreis w on ea.wahlkreis_id = w.id
-                 WHERE stimmen = (SELECT anz FROM erststimme_max em WHERE em.wahlkreis_id = ea.wahlkreis_id)
-                   and jahr = :year and w.bundesland_id = :bundesland_id
-             ),
-             wahlkreis_mandate AS (
-                 SELECT k.id as kandidatur_id, vorname, nachname, partei_id, wahlkreis_id, landesliste_platz
-                 FROM direktmandate join kandidatur k using (partei_id, wahlkreis_id)
-                 WHERE jahr = :year
-             )
-        SELECT vorname, nachname, p.kurzbezeichnung, wm.wahlkreis_id
-        FROM wahlkreis_mandate wm join partei p on partei_id = p.id;
-    """, nativeQuery = true)
-    List<Object[]> getWahlkreisPlatze(int year, long bundesland_id);
 
     @Query(value = """
         SELECT id, name

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import {useEffect, useState} from "react"
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts"
 import {
   Table,
@@ -15,36 +15,21 @@ import {
 } from "@mui/material"
 import { visuallyHidden } from "@mui/utils"
 import { Box } from "@mui/system"
+import {Sitzverteilung} from "@/models/models";
+import {electionApi} from "@/services/api";
 
-const COLORS = ["#000000", "#E3000F", "#009EE0", "#FFED00", "#BE3075", "#64A12D", "#CCCCCC"]
+const colorsMap: Map<string, [string, number]> = new Map([
+  ['GRÜNE',     ['#78bc1b', 3]],
+  ['DIE LINKE', ['#bd3075', 1]],
+  ['FDP',       ['#ffcc00', 4]],
+  ['AfD',       ['#0021c8', 6]],
+  ['SPD',       ['#d71f1d', 2]],
+  ['Union',     ['#121212', 5]],
+])
 
-type SeatData = {
-  name: string
-  seats: number
-}
+type SeatData = Sitzverteilung
 
 type Order = "asc" | "desc"
-
-const mockData = {
-  2017: [
-    { name: "CDU/CSU", seats: 246 },
-    { name: "SPD", seats: 153 },
-    { name: "AfD", seats: 94 },
-    { name: "FDP", seats: 80 },
-    { name: "Die Linke", seats: 69 },
-    { name: "Grüne", seats: 67 },
-    { name: "Other", seats: 2 },
-  ],
-  2021: [
-    { name: "CDU/CSU", seats: 197 },
-    { name: "SPD", seats: 206 },
-    { name: "AfD", seats: 83 },
-    { name: "FDP", seats: 92 },
-    { name: "Die Linke", seats: 39 },
-    { name: "Grüne", seats: 118 },
-    { name: "Other", seats: 1 },
-  ],
-}
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -56,7 +41,7 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   return 0
 }
 
-function getComparator<Key extends keyof any>(
+function getComparator<Key extends keyof never>(
     order: Order,
     orderBy: Key,
 ): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
@@ -84,8 +69,8 @@ interface HeadCell {
 }
 
 const headCells: readonly HeadCell[] = [
-  { id: "name", numeric: false, label: "Party" },
-  { id: "seats", numeric: true, label: "Seats" },
+  { id: "kurzbezeichnung", numeric: false, label: "Party" },
+  { id: "sitze", numeric: true, label: "Seats" },
 ]
 
 interface EnhancedTableProps {
@@ -133,12 +118,24 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 export default function SeatDistribution() {
   const [year, setYear] = useState<2017 | 2021>(2021)
   const [order, setOrder] = useState<Order>("desc")
-  const [orderBy, setOrderBy] = useState<keyof SeatData>("seats")
+  const [orderBy, setOrderBy] = useState<keyof SeatData>("sitze")
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(15)
+  const [data, setData] = useState<Sitzverteilung[]>([]);
 
-  const data = mockData[year]
+  const loadData = async (year: number) => {
+    try {
+      const response = await electionApi.getSeatDistribution(year);
+      setData(response);
+    } catch (error) {
+      console.error('Failed to fetch Sitzverteilung data:', error);
+    }
+  };
 
+  useEffect(() => {
+    loadData(year).then();
+  }, [year]);
+  
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof SeatData) => {
     const isAsc = orderBy === property && order === "asc"
     setOrder(isAsc ? "desc" : "asc")
@@ -156,6 +153,17 @@ export default function SeatDistribution() {
 
   const sortedRows = stableSort(data, getComparator(order, orderBy))
   const visibleRows = sortedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+
+  const dataPipe = data.filter(val => !['CDU', 'CSU'].includes(val.kurzbezeichnung));
+  dataPipe.push({
+    kurzbezeichnung: 'Union',
+    sitze: data.reduce((accumulator, currentValue) => ['CDU', 'CSU'].includes(currentValue.kurzbezeichnung) ?  accumulator + currentValue.sitze : accumulator, 0)
+  })
+  dataPipe.sort((a, b) => {
+    const aNum = colorsMap.get(a.kurzbezeichnung);
+    const bNum = colorsMap.get(b.kurzbezeichnung);
+    return (aNum ? aNum[1] : 10 )- (bNum ? bNum[1] : 10);
+  })
 
   return (
       <div className="px-4 py-6 sm:px-0">
@@ -180,7 +188,7 @@ export default function SeatDistribution() {
             <ResponsiveContainer width="100%" height={400}>
               <PieChart>
                 <Pie
-                    data={data}
+                    data={dataPipe}
                     cx="50%"
                     cy="100%"
                     startAngle={180}
@@ -188,12 +196,14 @@ export default function SeatDistribution() {
                     innerRadius={60}
                     outerRadius={180}
                     paddingAngle={2}
-                    dataKey="seats"
+                    dataKey="sitze"
+                    nameKey="kurzbezeichnung"
                     label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                 >
-                  {data.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
+                  {dataPipe.map((entry, index) => {
+                      const color = colorsMap.get(entry.kurzbezeichnung) ?? ['#8d8d8d'];
+                      return <Cell key={`cell-${index}`} fill={color[0]} />
+                  })}
                 </Pie>
                 <Tooltip />
                 <Legend verticalAlign="top" height={36} />
@@ -207,12 +217,12 @@ export default function SeatDistribution() {
                 <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
                 <TableBody>
                   {visibleRows.map((row) => (
-                      <TableRow key={row.name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                      <TableRow key={row.kurzbezeichnung} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                         <TableCell component="th" scope="row" size="small" sx={{ whiteSpace: "nowrap" }}>
-                          {row.name}
+                          {row.kurzbezeichnung}
                         </TableCell>
                         <TableCell align="right" size="small" sx={{ whiteSpace: "nowrap" }}>
-                          {row.seats}
+                          {row.sitze}
                         </TableCell>
                       </TableRow>
                   ))}
