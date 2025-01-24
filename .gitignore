@@ -39,6 +39,6 @@ out/
 .vscode/
 
 ### JMeter
-/load-test/output/
+/load-test/output*/
 /load-test/log.jtl
 /load-test/jmeter.log

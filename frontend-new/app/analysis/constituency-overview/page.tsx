@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import {ChangeEvent, useEffect, useState} from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import {
   Table,
@@ -11,58 +11,12 @@ import {
   TableRow,
   Paper,
   TablePagination,
-  TableSortLabel,
+  TableSortLabel, FormControlLabel, Switch,
 } from "@mui/material"
 import { visuallyHidden } from "@mui/utils"
 import { Box } from "@mui/system"
-
-// Mock data for constituencies
-const constituencies = [
-  { id: "1", name: "Berlin-Mitte" },
-  { id: "2", name: "Hamburg-Mitte" },
-  { id: "3", name: "München-Nord" },
-]
-
-// Mock data for constituency details
-const constituencyData = {
-  2017: {
-    "1": {
-      turnout: 75.9,
-      directCandidate: "John Doe (CDU)",
-      votes: [
-        { party: "CDU/CSU", votes: 28000, percentage: 31.8, change: -3.5 },
-        { party: "SPD", votes: 25000, percentage: 28.4, change: -5.2 },
-        { party: "AfD", votes: 9000, percentage: 10.2, change: 8.9 },
-        { party: "FDP", votes: 8000, percentage: 9.1, change: 5.2 },
-        { party: "Die Linke", votes: 9000, percentage: 10.2, change: 0.8 },
-        { party: "Grüne", votes: 9000, percentage: 10.2, change: -0.5 },
-      ],
-    },
-    // Add similar data for other constituencies
-  },
-  2021: {
-    "1": {
-      turnout: 76.5,
-      directCandidate: "Jane Doe (SPD)",
-      votes: [
-        { party: "CDU/CSU", votes: 25000, percentage: 28.4, change: -3.4 },
-        { party: "SPD", votes: 30000, percentage: 34.1, change: 5.7 },
-        { party: "AfD", votes: 8000, percentage: 9.1, change: -1.1 },
-        { party: "FDP", votes: 10000, percentage: 11.4, change: 2.3 },
-        { party: "Die Linke", votes: 7000, percentage: 8.0, change: -2.2 },
-        { party: "Grüne", votes: 8000, percentage: 9.1, change: -1.1 },
-      ],
-    },
-    // Add similar data for other constituencies
-  },
-}
-
-type VoteData = {
-  party: string
-  votes: number
-  percentage: number
-  change: number
-}
+import {Stimmen, Wahlkreis, WahlkreisUebersicht} from "@/models/models";
+import {electionApi} from "@/services/api";
 
 type Order = "asc" | "desc"
 
@@ -76,7 +30,7 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   return 0
 }
 
-function getComparator<Key extends keyof any>(
+function getComparator<Key extends keyof never>(
   order: Order,
   orderBy: Key,
 ): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
@@ -98,27 +52,27 @@ function stableSort<T>(array: readonly T[], comparator: (a: T, b: T) => number) 
 }
 
 interface HeadCell {
-  id: keyof VoteData
+  id: keyof Stimmen
   label: string
   numeric: boolean
 }
 
 const headCells: readonly HeadCell[] = [
-  { id: "party", numeric: false, label: "Party" },
-  { id: "votes", numeric: true, label: "Votes" },
-  { id: "percentage", numeric: true, label: "Percentage" },
-  { id: "change", numeric: true, label: "Change" },
+  { id: "name", numeric: false, label: "Party" },
+  { id: "stimmen_abs", numeric: true, label: "Votes" },
+  { id: "stimmen_prozent", numeric: true, label: "Percentage" },
+  { id: "stimmen_abs_vergleich", numeric: true, label: "Change" },
 ]
 
 interface EnhancedTableProps {
-  onRequestSort: (event: React.MouseEvent<unknown>, property: keyof VoteData) => void
+  onRequestSort: (event: React.MouseEvent<unknown>, property: keyof Stimmen) => void
   order: Order
   orderBy: string
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { order, orderBy, onRequestSort } = props
-  const createSortHandler = (property: keyof VoteData) => (event: React.MouseEvent<unknown>) => {
+  const createSortHandler = (property: keyof Stimmen) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property)
   }
 
@@ -152,15 +106,47 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 
 export default function ConstituencyOverview() {
   const [year, setYear] = useState<2017 | 2021>(2021)
-  const [selectedConstituency, setSelectedConstituency] = useState("1")
+  const [selectedConstituency, setSelectedConstituency] = useState<Wahlkreis | null>(null)
   const [order, setOrder] = useState<Order>("asc")
-  const [orderBy, setOrderBy] = useState<keyof VoteData>("party")
+  const [orderBy, setOrderBy] = useState<keyof Stimmen>("name")
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(15)
 
-  const data = constituencyData[year][selectedConstituency]
+  const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>([]);
+  const [wahlkreisUebersicht, setWahlkreisUebersicht] = useState<WahlkreisUebersicht | null>(null);
+  const [useAggregation, setUseAggregation] = useState<boolean>(true);
 
-  const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof VoteData) => {
+  const loadWahlkreise = async () => {
+    try {
+      const response = await electionApi.getAllConstituencies();
+      setWahlkreise(response);
+      setSelectedConstituency(response[0]);
+    } catch (error) {
+      console.error('Failed to fetch grouped data:', error);
+    }
+  }
+
+  useEffect(() => {
+    loadWahlkreise().then();
+  }, []);
+
+  const loadWahlkreisUebersicht = async (year: number, wahlkreis_id: number, useAggregation: boolean) => {
+    try {
+      const response = await electionApi.getConstituencyOverview(year, wahlkreis_id, useAggregation);
+      response?.parteiErgebnis.sort((ergA, ergB) => ergB.stimmen_abs - ergA.stimmen_abs);
+      setWahlkreisUebersicht(response);
+    } catch (error) {
+      console.error('Failed to fetch grouped data:', error);
+    }
+  }
+
+  useEffect(() => {
+    if(selectedConstituency) {
+      loadWahlkreisUebersicht(year, selectedConstituency.id, useAggregation).then()
+    }
+  }, [year, selectedConstituency, useAggregation]);
+
+  const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof Stimmen) => {
     const isAsc = orderBy === property && order === "asc"
     setOrder(isAsc ? "desc" : "asc")
     setOrderBy(property)
@@ -175,8 +161,20 @@ export default function ConstituencyOverview() {
     setPage(0)
   }
 
-  const sortedRows = stableSort(data.votes, getComparator(order, orderBy))
+  const updateWahlkreis = (event: ChangeEvent<HTMLSelectElement>) => {
+    const wahlkreis_id = parseInt(event.target.value);
+    const wahlkreis = wahlkreise.find(wk => wk.id === wahlkreis_id) ?? null;
+    setSelectedConstituency(wahlkreis);
+  }
+
+  const sortedRows = wahlkreisUebersicht?.parteiErgebnis ? stableSort(wahlkreisUebersicht?.parteiErgebnis, getComparator(order, orderBy)) : []
   const visibleRows = sortedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+
+  const barData = wahlkreisUebersicht?.parteiErgebnis.map(erg => ({
+    party: erg.name,
+    percentage: erg.stimmen_prozent.toFixed(2),
+    change: erg.stimmen_prozent_vergleich?.toFixed(2) ?? 0,
+  }))
 
   return (
     <div className="px-4 py-6 sm:px-0">
@@ -202,36 +200,46 @@ export default function ConstituencyOverview() {
           </label>
           <select
             id="constituency-select"
-            value={selectedConstituency}
-            onChange={(e) => setSelectedConstituency(e.target.value)}
+            value={selectedConstituency?.id}
+            onChange={updateWahlkreis}
             className="p-2 border rounded"
           >
-            {constituencies.map((constituency) => (
+            {wahlkreise.map((constituency) => (
               <option key={constituency.id} value={constituency.id}>
                 {constituency.name}
               </option>
             ))}
           </select>
         </div>
+        <FormControlLabel
+            control={
+              <Switch
+                  checked={useAggregation}
+                  onChange={() => setUseAggregation(!useAggregation)}
+              ></Switch>
+
+            }
+            label="Aggregation"
+        ></FormControlLabel>
       </div>
-      {data && (
+      {wahlkreisUebersicht && (
         <div className="space-y-8">
           <div className="bg-white p-4 rounded-lg shadow">
             <h3 className="text-lg font-semibold mb-4">General Information</h3>
-            <p>Turnout: {data.turnout}%</p>
-            <p>Directly Elected Candidate: {data.directCandidate}</p>
+            <p>Turnout: {(wahlkreisUebersicht.wahlbeteiligung.teilgenommen * 100 / wahlkreisUebersicht.wahlbeteiligung.berechtigt).toFixed(0)}%</p>
+            <p>Directly Elected Candidate: {wahlkreisUebersicht.direktMandat.vorname} {wahlkreisUebersicht.direktMandat.nachname} ({wahlkreisUebersicht.direktMandat.partei})</p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow">
             <h3 className="text-lg font-semibold mb-4">Vote Distribution</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={data.votes}>
+              <BarChart data={barData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="party" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="percentage" fill="#8884d8" name="Percentage" />
-                <Bar dataKey="change" fill="#82ca9d" name="Change from previous election" />
+                <Bar dataKey="percentage" fill="#8884d8" name="Percentage" stackId="a"/>
+                <Bar dataKey="change" fill="#82ca9d" name="Change from previous election" stackId="b"/>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -242,19 +250,23 @@ export default function ConstituencyOverview() {
                 <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
                 <TableBody>
                   {visibleRows.map((row) => (
-                    <TableRow key={row.party} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                    <TableRow key={row.name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                       <TableCell component="th" scope="row" sx={{ whiteSpace: "nowrap" }}>
-                        {row.party}
+                        {row.name}
                       </TableCell>
                       <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                        {row.votes.toLocaleString()}
+                        {row.stimmen_abs.toLocaleString()}
                       </TableCell>
                       <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                        {row.percentage.toFixed(1)}%
+                        {row.stimmen_prozent.toFixed(1)}%
                       </TableCell>
                       <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-                        {row.change > 0 ? "+" : ""}
-                        {row.change.toFixed(1)}%
+                        {!row.stimmen_abs_vergleich
+                          ? ''
+                          :
+                            (row.stimmen_abs_vergleich > 0 ? "+" : "") +
+                            row.stimmen_abs_vergleich.toFixed(1) + '%'
+                        }
                       </TableCell>
                     </TableRow>
                   ))}
@@ -264,7 +276,7 @@ export default function ConstituencyOverview() {
             <TablePagination
               rowsPerPageOptions={[15, 30, 50]}
               component="div"
-              count={data.votes.length}
+              count={wahlkreisUebersicht.parteiErgebnis.length}
               rowsPerPage={rowsPerPage}
               page={page}
               onPageChange={handleChangePage}

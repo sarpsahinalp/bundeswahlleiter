@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import {useEffect, useState} from "react"
 import {
   Table,
   TableBody,
@@ -14,29 +14,10 @@ import {
 } from "@mui/material"
 import { visuallyHidden } from "@mui/utils"
 import { Box } from "@mui/system"
-
-type ConstituencyWinner = {
-  id: number
-  name: string
-  firstVoteWinner: string
-  secondVoteWinner: string
-}
+import {WahlkreisSieger} from "@/models/models";
+import {electionApi} from "@/services/api";
 
 type Order = "asc" | "desc"
-
-// Mock data for constituency winners
-const generateMockData = (year: number) =>
-  Array.from({ length: 299 }, (_, i) => ({
-    id: i + 1,
-    name: `Constituency ${i + 1} (${year})`,
-    firstVoteWinner: ["CDU/CSU", "SPD", "AfD", "FDP", "Die Linke", "Grüne"][Math.floor(Math.random() * 6)],
-    secondVoteWinner: ["CDU/CSU", "SPD", "AfD", "FDP", "Die Linke", "Grüne"][Math.floor(Math.random() * 6)],
-  }))
-
-const mockData = {
-  2017: generateMockData(2017),
-  2021: generateMockData(2021),
-}
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -48,7 +29,7 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   return 0
 }
 
-function getComparator<Key extends keyof any>(
+function getComparator<Key extends keyof never>(
   order: Order,
   orderBy: Key,
 ): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
@@ -70,26 +51,26 @@ function stableSort<T>(array: readonly T[], comparator: (a: T, b: T) => number) 
 }
 
 interface HeadCell {
-  id: keyof ConstituencyWinner
+  id: keyof WahlkreisSieger
   label: string
   numeric: boolean
 }
 
 const headCells: readonly HeadCell[] = [
-  { id: "name", numeric: false, label: "Constituency" },
-  { id: "firstVoteWinner", numeric: false, label: "First Vote Winner" },
-  { id: "secondVoteWinner", numeric: false, label: "Second Vote Winner" },
+  { id: "wahlkreisName", numeric: false, label: "Constituency" },
+  { id: "parteiNameErstStimme", numeric: false, label: "First Vote Winner" },
+  { id: "parteiNameZweitStimme", numeric: false, label: "Second Vote Winner" },
 ]
 
 interface EnhancedTableProps {
-  onRequestSort: (event: React.MouseEvent<unknown>, property: keyof ConstituencyWinner) => void
+  onRequestSort: (event: React.MouseEvent<unknown>, property: keyof WahlkreisSieger) => void
   order: Order
   orderBy: string
 }
 
 function EnhancedTableHead(props: EnhancedTableProps) {
   const { order, orderBy, onRequestSort } = props
-  const createSortHandler = (property: keyof ConstituencyWinner) => (event: React.MouseEvent<unknown>) => {
+  const createSortHandler = (property: keyof WahlkreisSieger) => (event: React.MouseEvent<unknown>) => {
     onRequestSort(event, property)
   }
 
@@ -125,20 +106,33 @@ export default function ConstituencyWinners() {
   const [year, setYear] = useState<2017 | 2021>(2021)
   const [filter, setFilter] = useState("")
   const [order, setOrder] = useState<Order>("asc")
-  const [orderBy, setOrderBy] = useState<keyof ConstituencyWinner>("name")
+  const [orderBy, setOrderBy] = useState<keyof WahlkreisSieger>("wahlkreisName")
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(15)
 
-  const data = mockData[year]
+  const [data, setData] = useState<null | WahlkreisSieger[]>(null);
 
-  const filteredData = data.filter(
+  const loadWahlkreisSieger = async (year: number) => {
+    try {
+      const response = await electionApi.getConstituencyWinners(year);
+      setData(response);
+    } catch (error) {
+      console.error('Failed to fetch grouped data:', error);
+    }
+  }
+
+  useEffect(() => {
+    loadWahlkreisSieger(year).then();
+  }, [year]);
+
+  const filteredData = data?.filter(
     (winner) =>
-      winner.name.toLowerCase().includes(filter.toLowerCase()) ||
-      winner.firstVoteWinner.toLowerCase().includes(filter.toLowerCase()) ||
-      winner.secondVoteWinner.toLowerCase().includes(filter.toLowerCase()),
-  )
+      winner.wahlkreisName.toLowerCase().includes(filter.toLowerCase()) ||
+      winner.parteiNameErstStimme.toLowerCase().includes(filter.toLowerCase()) ||
+      winner.parteiNameZweitStimme.toLowerCase().includes(filter.toLowerCase()),
+  ) ?? []
 
-  const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof ConstituencyWinner) => {
+  const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof WahlkreisSieger) => {
     const isAsc = orderBy === property && order === "asc"
     setOrder(isAsc ? "desc" : "asc")
     setOrderBy(property)
@@ -190,12 +184,12 @@ export default function ConstituencyWinners() {
             <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
             <TableBody>
               {visibleRows.map((row) => (
-                <TableRow key={row.id} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                <TableRow key={row.wahlkreisId} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
                   <TableCell component="th" scope="row" sx={{ whiteSpace: "nowrap" }}>
-                    {row.name}
+                    {row.wahlkreisName}
                   </TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>{row.firstVoteWinner}</TableCell>
-                  <TableCell sx={{ whiteSpace: "nowrap" }}>{row.secondVoteWinner}</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>{row.parteiNameErstStimme}</TableCell>
+                  <TableCell sx={{ whiteSpace: "nowrap" }}>{row.parteiNameZweitStimme}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
