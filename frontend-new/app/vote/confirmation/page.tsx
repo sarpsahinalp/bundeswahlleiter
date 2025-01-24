@@ -2,8 +2,9 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import withAuth from "@/lib/RequiresAuth";
 
-export default function VoteConfirmation() {
+function VoteConfirmation() {
     const router = useRouter()
 
     useEffect(() => {
@@ -42,3 +43,5 @@ export default function VoteConfirmation() {
         </div>
     )
 }
+
+export default VoteConfirmation;

@@ -1,6 +1,8 @@
 package db.in.tum.de.datenbanken.logic.voting;
 
 import db.in.tum.de.datenbanken.configuration.security.TokenService;
+import db.in.tum.de.datenbanken.configuration.security.dtos.JwtPrincipal;
+import db.in.tum.de.datenbanken.logic.DTOs.WahlkreiseDTO;
 import db.in.tum.de.datenbanken.logic.DTOs.token.VotingToken;
 import db.in.tum.de.datenbanken.logic.DTOs.voting.ErstestimmeOptionen;
 import db.in.tum.de.datenbanken.logic.DTOs.voting.ZweitestimmeOptionen;
@@ -17,12 +19,13 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Slf4j
 @RestController
 @AllArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class VotingController {
 
     private final TokenService tokenService;
@@ -38,19 +41,21 @@ public class VotingController {
             @PathVariable String code,
             HttpServletResponse response) {
 
-        String hashed = BCrypt.hashpw(code, TokenService.securityProperties.get("BCRYPT_SALT").toString());
+//        String hashed = BCrypt.hashpw(code, TokenService.securityProperties.get("BCRYPT_SALT").toString());
 
         // 1. Lookup the code in the DB
         //    If you store the code in plain text, just do findByCode(code).
         //    If you store a hashed version, you must hash the incoming `code` first and query by that.
-        VotingToken votingToken = votingService.validateCode(hashed);
+        VotingToken votingToken = votingService.validateCode(
+                code
+        );
 
         // 3. Mark code as used to prevent re-issuance
 
         // 4. Generate short-lived JWT (with random or minimal claim)
         //    Instead of using the user’s original code, generate a new random claim
         //    to avoid storing the user’s code in the token. This helps anonymity.
-        String token = tokenService.createTokenForVoting(code, votingToken.wahlkreis_id(), votingToken.last_modified_date());
+        String token = tokenService.createTokenForVoting(code, votingToken.wahlkreis_id(), votingToken.year());
 
         // 5. Create secure cookie
         Cookie cookie = new Cookie("vote_jwt", token);
@@ -61,7 +66,6 @@ public class VotingController {
         // (Optional) cookie.setMaxAge(...);
         // Mitigate CSRF attacks
         cookie.setAttribute("SameSite", "Strict");
-
         response.addCookie(cookie);
 
         // 6. Return success or some minimal body
@@ -69,49 +73,46 @@ public class VotingController {
     }
 
     @GetMapping("/secure/vote/erstestimme")
-    public ResponseEntity<List<ErstestimmeOptionen>> getErstestimmeForWahlkreis() {
-        // Retrieve the wahlkreisId and year from the JWT
-        int wahlkreisId = 1;
-        int year = 2025;
-        return ResponseEntity.ok(votingService.getErststimmeOptionen(wahlkreisId, year));
+    public ResponseEntity<List<ErstestimmeOptionen>> getErstestimmeForWahlkreis(HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        JwtPrincipal principal = (JwtPrincipal) auth.getPrincipal();
+        return ResponseEntity.ok(votingService.getErststimmeOptionen(principal.wahlkreis_id(), principal.year() - 4));
     }
 
     @GetMapping("/secure/vote/zweitestimme")
-    public ResponseEntity<List<ZweitestimmeOptionen>> getZweitestimmeForWahlkreis() {
-        // Retrieve the wahlkreisId and year from the JWT
-        int wahlkreisId = 1;
-        int year = 2025;
-        return ResponseEntity.ok(votingService.getZweitestimmeOptionen(wahlkreisId, year));
+    public ResponseEntity<List<ZweitestimmeOptionen>> getZweitestimmeForWahlkreis(HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        JwtPrincipal principal = (JwtPrincipal) auth.getPrincipal();
+        return ResponseEntity.ok(votingService.getZweitestimmeOptionen(principal.wahlkreis_id(), principal.year() - 4));
     }
 
-    @PostMapping("/secure/vote")
+    @SuppressWarnings("unchecked")
+    @PostMapping("/secure/submit/vote")
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public ResponseEntity<String> castVote(@RequestBody Object voteData, HttpServletResponse response) {
+    public ResponseEntity<String> castVote(
+            @RequestBody Object voteData,
+            HttpServletResponse response) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
         }
 
-        String ephemeralClaim = (String) auth.getPrincipal();
+        JwtPrincipal ephemeralClaim = (JwtPrincipal) auth.getPrincipal();
 
-        log.info("Received vote from: {}", ephemeralClaim);
+        // Check whether the user has already voted
+//        String hashed = BCrypt.hashpw(ephemeralClaim.code(), TokenService.securityProperties.get("BCRYPT_SALT").toString());
+        VotingToken votingToken = votingService.validateCode(ephemeralClaim.code());
 
-        // 2. Check if this ephemeral JWT was already used to vote
-        //    If your design is purely stateless, you might just rely on token expiration.
-        //    Or you can keep a small in-memory or DB record of ephemeral tokens that have
-        //    cast a vote, to ensure “single vote.” For example:
-//        if (hasAlreadyVoted(ephemeralClaim)) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You have already voted!");
-//        }
-        VotingToken votingToken = votingService.validateCode(ephemeralClaim);
-
-        // 3. Record the vote in your DB
-        //    Importantly, store it WITHOUT linking to ephemeralClaim or user data
-        //    to maintain anonymity. If you must store ephemeralClaim for a time, store
-        //    only a hashed/salted version so it can’t be trivially linked back.
-//        recordVote(voteData);
-
-        log.info(voteData.toString());
+        LinkedHashMap<String, Integer> vote = (LinkedHashMap<String, Integer>) voteData;
+        votingService.saveErsteUndZweiteStimme(vote.get("erststimme").longValue(), vote.get("zweitstimme").longValue(), ephemeralClaim.wahlkreis_id(), ephemeralClaim.year());
 
         // Delete from the DB, so the user can't vote again
         votingService.deleteCode(votingToken.code());
@@ -125,9 +126,20 @@ public class VotingController {
         cookie.setAttribute("SameSite", "Strict");
         // Expire the cookie
         cookie.setMaxAge(0);
-
         response.addCookie(cookie);
 
         return ResponseEntity.ok("Vote cast successfully!");
     }
+
+    @GetMapping("/secure/validate-token")
+    public ResponseEntity<WahlkreiseDTO> validateToken(HttpServletResponse response) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        JwtPrincipal ephemeralClaim = (JwtPrincipal) auth.getPrincipal();
+        return ResponseEntity.ok(new WahlkreiseDTO(votingService.getWahlkreisById(ephemeralClaim.wahlkreis_id())));
+    }
+
 }

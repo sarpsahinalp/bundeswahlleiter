@@ -4,7 +4,6 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Properties;
 
@@ -33,12 +32,12 @@ public class TokenService {
     private static final Algorithm ALGORITHM = Algorithm.HMAC256(SECRET);
 
     @SuppressWarnings("deprecation")
-    public String createTokenForVoting(String hash, int wahlkreis, Timestamp year) {
+    public String createTokenForVoting(String hash, long wahlkreis, int year) {
         return JWT.create()
                 .withClaim("code", hash)
                 .withClaim("wahlkreis", wahlkreis)
-                .withClaim("year", year.getYear())
-                .withExpiresAt(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
+                .withClaim("year", year)
+                .withExpiresAt(new Date(System.currentTimeMillis() + 65 * 60 * 1000))
                 .sign(ALGORITHM);
     }
 }

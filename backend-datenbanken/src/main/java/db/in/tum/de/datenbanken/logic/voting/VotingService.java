@@ -3,7 +3,7 @@ package db.in.tum.de.datenbanken.logic.voting;
 import db.in.tum.de.datenbanken.logic.DTOs.token.VotingToken;
 import db.in.tum.de.datenbanken.logic.DTOs.voting.ErstestimmeOptionen;
 import db.in.tum.de.datenbanken.logic.DTOs.voting.ZweitestimmeOptionen;
-import db.in.tum.de.datenbanken.schema.voting.VoteCode;
+import db.in.tum.de.datenbanken.schema.kreise.Wahlkreis;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,13 +27,13 @@ public class VotingService {
     private final JdbcTemplate jdbcTemplate;
 
     @Transactional(readOnly = true)
-    public List<ErstestimmeOptionen> getErststimmeOptionen(int wahlkreisId, int year){
+    public List<ErstestimmeOptionen> getErststimmeOptionen(long wahlkreisId, int year){
         return voteRepo.getCandidatesByWahlkreisAndYearErstestimme(wahlkreisId, year)
                 .stream().map(ErstestimmeOptionen::new).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ZweitestimmeOptionen> getZweitestimmeOptionen(int wahlkreisId, int year){
+    public List<ZweitestimmeOptionen> getZweitestimmeOptionen(long wahlkreisId, int year){
         return voteRepo.getPartyByBundeslandAndYearZweitestimme(wahlkreisId, year)
                 .stream().map(ZweitestimmeOptionen::new).toList();
     }
@@ -44,7 +44,7 @@ public class VotingService {
                 .stream()
                 .map(VotingToken::new)
                 .findFirst()
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Code not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Either the code is invalid or has already been used."));
     }
 
     @Transactional
@@ -106,5 +106,20 @@ public class VotingService {
 
     private void writeToFile(String content) throws IOException {
         Files.write(Paths.get("voting_tokens.txt"), content.getBytes(), StandardOpenOption.APPEND);
+    }
+
+    public Wahlkreis getWahlkreisById(long wahlkreisId) {
+        return voteRepo.findWahlkreisByWahlkreisId(wahlkreisId);
+    }
+
+    public boolean saveErsteUndZweiteStimme(long partyIdFirst, long partyIdSecond, long wahlkreisId, int year) {
+        try {
+            voteRepo.saveErstestimme(wahlkreisId, partyIdFirst, year);
+            voteRepo.saveZweitestimme(wahlkreisId, partyIdSecond, year);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+
     }
 }

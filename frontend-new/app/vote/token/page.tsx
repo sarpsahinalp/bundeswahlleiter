@@ -1,130 +1,98 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ChevronDown } from "lucide-react"
+import withAuth, {WahlkreisInfo} from "@/lib/RequiresAuth"
+import { ErstestimmeOptionen, ZweitestimmeOptionen } from "@/models/vote/token/models"
+import api from "@/lib/axios";
 
-interface Candidate {
-  id: number
-  name: string
-  occupation: string
-  city: string
-  party: string
-  partyFull: string
+interface VotingInterfaceProps {
+    wahlkreisInfo: WahlkreisInfo
 }
 
-interface Party {
-  id: number
-  name: string
-  fullName: string
-  candidates: string[]
-}
-
-const candidates: Candidate[] = [
-  {
-    id: 1,
-    name: "Dr. Westerwelle, Angelika",
-    occupation: "Unternehmerin",
-    city: "Bielefeld",
-    party: "CDU",
-    partyFull: "Christlich Demokratische Union Deutschlands",
-  },
-  {
-    id: 2,
-    name: "Dr. Esdar, Wiebke",
-    occupation: "Diplom-Psychologin",
-    city: "Bielefeld",
-    party: "SPD",
-    partyFull: "Sozialdemokratische Partei Deutschlands",
-  },
-  {
-    id: 3,
-    name: "Schlifter-de la Fontaine, Jan Maik",
-    occupation: "Unternehmer",
-    city: "Bielefeld",
-    party: "FDP",
-    partyFull: "Freie Demokratische Partei",
-  },
-  {
-    id: 4,
-    name: "Kneller, Maximilian",
-    occupation: "Wissenschaftlicher Mitarbeiter",
-    city: "Bielefeld",
-    party: "AfD",
-    partyFull: "Alternative für Deutschland",
-  },
-  {
-    id: 5,
-    name: "Haßelmann, Britta",
-    occupation: "Diplom-Sozialarbeiterin",
-    city: "Bielefeld",
-    party: "GRÜNE",
-    partyFull: "BÜNDNIS 90/DIE GRÜNEN",
-  },
-  {
-    id: 6,
-    name: "Straetmanns, Friedrich",
-    occupation: "Bundestagsabgeordneter",
-    city: "Bielefeld",
-    party: "DIE LINKE",
-    partyFull: "DIE LINKE",
-  },
-]
-
-const parties: Party[] = [
-  {
-    id: 1,
-    name: "CDU",
-    fullName: "Christlich Demokratische Union Deutschlands",
-    candidates: ["Armin Laschet", "Anja Karliczek", "Ralph Brinkhaus", "Jens Spahn", "Elisabeth Winkelmeier-Becker"],
-  },
-  {
-    id: 2,
-    name: "SPD",
-    fullName: "Sozialdemokratische Partei Deutschlands",
-    candidates: ["Dr. Rolf Mützenich", "Svenja Schulze", "Sebastian Hartmann", "Kerstin Griese", "Dirk Wiese"],
-  },
-  {
-    id: 3,
-    name: "FDP",
-    fullName: "Freie Demokratische Partei",
-    candidates: [
-      "Christian Lindner",
-      "Dr. Marie-Agnes Strack-Zimmermann",
-      "Alexander Graf Lambsdorff",
-      "Dr. Marco Buschmann",
-    ],
-  },
-  {
-    id: 4,
-    name: "AfD",
-    fullName: "Alternative für Deutschland",
-    candidates: ["Rüdiger Lucassen", "Dr. Martin Vincentz", "Matthias Helferich"],
-  },
-  {
-    id: 5,
-    name: "GRÜNE",
-    fullName: "BÜNDNIS 90/DIE GRÜNEN",
-    candidates: ["Mona Neubaur", "Felix Banaszak", "Sven Lehmann", "Irene Mihalic"],
-  },
-  {
-    id: 6,
-    name: "DIE LINKE",
-    fullName: "DIE LINKE",
-    candidates: ["Dr. Sahra Wagenknecht", "Sevim Dagdelen", "Nina Eumann"],
-  },
-]
-
-export default function VotingInterface({ params }: { params: { token: string } }) {
-  const [erststimme, setErststimme] = useState("")
-  const [zweitstimme, setZweitstimme] = useState("")
+function VotingInterface( { wahlkreisInfo }: VotingInterfaceProps ) {
+  const [erststimme, setErststimme] = useState<number>(-1)
+  const [zweitstimme, setZweitstimme] = useState<number>(-1)
+  const [wahlkreis, setWahlkreis] = useState<WahlkreisInfo>(wahlkreisInfo)
+  const [erststimmeOptions, setErststimmeOptions] = useState<ErstestimmeOptionen[]>([])
+  const [zweitstimmeOptions, setZweitstimmeOptions] = useState<ZweitestimmeOptionen[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
   const router = useRouter()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  console.log('Prop sent in?', wahlkreis)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [erstRes, zweitRes] = await Promise.all([
+          api.get("/secure/vote/erstestimme"),
+          api.get("/secure/vote/zweitestimme"),
+            // api.get("/secure/")
+        ])
+
+        setErststimmeOptions(erstRes.data)
+        setZweitstimmeOptions(zweitRes.data)
+        setWahlkreis(wahlkreisInfo)
+      } catch (err) {
+        setError("Failed to load voting options. Please try again.")
+        console.error("Error fetching data:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [])
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log("Vote submitted:", { erststimme, zweitstimme })
-    router.push("/vote/confirmation")
+    try {
+      await api.post('/secure/submit/vote',
+          {
+            erststimme: erststimme,
+            zweitstimme: zweitstimme,
+          })
+
+      router.push("/vote/confirmation")
+    } catch (err) {
+      console.error("Vote submission failed:", err)
+      setError("Failed to submit vote. Please try again.")
+    }
   }
+
+  if (loading) {
+    return (
+        <div className="flex justify-center items-center min-h-screen">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+    )
+  }
+
+  if (error) {
+    return (
+        <div className="px-4 py-6 sm:px-0">
+          <div className="max-w-5xl mx-auto text-center p-6 bg-red-50 rounded-lg">
+            <p className="text-red-600">{error}</p>
+          </div>
+        </div>
+    )
+  }
+
+  // Group zweitstimme options by party kurzbezeichnung
+  const groupedParties = zweitstimmeOptions.reduce((acc, candidate) => {
+    const key = candidate.kurzbezeichnung
+    if (!acc[key]) {
+      acc[key] = {
+        name: key,
+        partei_id: candidate.partei_id,
+        candidates: []
+      }
+    }
+    acc[key].candidates.push(`${candidate.vorname} ${candidate.nachname}`)
+    return acc
+  }, {} as Record<string, { name: string; partei_id: number; candidates: string[] }>)
 
   return (
       <div className="px-4 py-6 sm:px-0">
@@ -133,7 +101,7 @@ export default function VotingInterface({ params }: { params: { token: string } 
             <div className="p-6 bg-gray-50 border-b">
               <h1 className="text-2xl font-bold text-center">Stimmzettel</h1>
               <p className="text-center text-gray-600 mt-2">
-                für die Wahl zum Deutschen Bundestag im Wahlkreis 132 Bielefeld
+                für die Wahl zum Deutschen Bundestag im Wahlkreis {wahlkreis.id} {wahlkreis.name}
               </p>
               <div className="text-center font-bold text-xl mt-4">
                 Sie haben 2 Stimmen
@@ -160,11 +128,11 @@ export default function VotingInterface({ params }: { params: { token: string } 
                     <p className="font-bold mt-2">Erststimme</p>
                   </div>
                   <div className="space-y-4">
-                    {candidates.map((candidate) => (
+                    {erststimmeOptions.map((candidate, index) => (
                         <div
-                            key={candidate.id}
+                            key={index}
                             className={`p-4 rounded-lg border ${
-                                erststimme === candidate.party
+                                erststimme === candidate.partei_id
                                     ? "border-black bg-gray-50"
                                     : "border-gray-200 hover:border-gray-300"
                             }`}
@@ -173,31 +141,24 @@ export default function VotingInterface({ params }: { params: { token: string } 
                             <div className="flex-shrink-0 mt-1">
                               <div
                                   className={`w-6 h-6 rounded-full border-2 ${
-                                      erststimme === candidate.party ? "border-black" : "border-gray-300"
+                                      erststimme === candidate.partei_id ? "border-black" : "border-gray-300"
                                   } flex items-center justify-center`}
                               >
-                                {erststimme === candidate.party && <div className="w-4 h-4 rounded-full bg-black" />}
+                                {erststimme === candidate.partei_id && <div className="w-4 h-4 rounded-full bg-black" />}
                               </div>
                             </div>
                             <div className="flex-grow">
                               <input
                                   type="radio"
                                   name="erststimme"
-                                  value={candidate.party}
-                                  checked={erststimme === candidate.party}
-                                  onChange={(e) => setErststimme(e.target.value)}
+                                  value={candidate.partei_id}
+                                  checked={erststimme === candidate.partei_id}
+                                  onChange={(e) => setErststimme(Number(e.target.value))}
                                   className="sr-only"
                               />
-                              <div className="font-bold">{candidate.name}</div>
-                              <div className="text-sm text-gray-600">
-                                {candidate.occupation}
-                                <br />
-                                {candidate.city}
-                              </div>
+                              <div className="font-bold">{`${candidate.vorname} ${candidate.nachname}`}</div>
                               <div className="mt-1">
-                                <span className="font-bold">{candidate.party}</span>
-                                <br />
-                                <span className="text-sm">{candidate.partyFull}</span>
+                                <span className="font-bold">{candidate.kurzbezeichnung}</span>
                               </div>
                             </div>
                           </label>
@@ -214,11 +175,11 @@ export default function VotingInterface({ params }: { params: { token: string } 
                     <p className="font-bold mt-2 text-blue-600">Zweitstimme</p>
                   </div>
                   <div className="space-y-4">
-                    {parties.map((party) => (
+                    {Object.values(groupedParties).map((party, index) => (
                         <div
-                            key={party.id}
+                            key={index}
                             className={`p-4 rounded-lg border ${
-                                zweitstimme === party.name
+                                zweitstimme === party.partei_id
                                     ? "border-blue-600 bg-blue-50"
                                     : "border-gray-200 hover:border-gray-300"
                             }`}
@@ -227,29 +188,27 @@ export default function VotingInterface({ params }: { params: { token: string } 
                             <div className="flex-shrink-0 mt-1">
                               <div
                                   className={`w-6 h-6 rounded-full border-2 ${
-                                      zweitstimme === party.name ? "border-blue-600" : "border-gray-300"
+                                      zweitstimme === party.partei_id ? "border-blue-600" : "border-gray-300"
                                   } flex items-center justify-center`}
                               >
-                                {zweitstimme === party.name && <div className="w-4 h-4 rounded-full bg-blue-600" />}
+                                {zweitstimme === party.partei_id && <div className="w-4 h-4 rounded-full bg-blue-600" />}
                               </div>
                             </div>
                             <div className="flex-grow">
                               <input
                                   type="radio"
                                   name="zweitstimme"
-                                  value={party.name}
-                                  checked={zweitstimme === party.name}
-                                  onChange={(e) => setZweitstimme(e.target.value)}
+                                  value={party.partei_id}
+                                  checked={zweitstimme === party.partei_id}
+                                  onChange={(e) => setZweitstimme(Number(e.target.value))}
                                   className="sr-only"
                               />
                               <div>
                                 <span className="font-bold text-blue-600">{party.name}</span>
-                                <br />
-                                <span className="text-sm">{party.fullName}</span>
                               </div>
                               <div className="mt-2 text-sm text-gray-600">
-                                {party.candidates.map((candidate, index) => (
-                                    <div key={index}>{candidate}</div>
+                                {party.candidates.map((candidate, idx) => (
+                                    <div key={idx}>{candidate}</div>
                                 ))}
                               </div>
                             </div>
@@ -264,8 +223,8 @@ export default function VotingInterface({ params }: { params: { token: string } 
                 <button
                     type="submit"
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg
-                  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                  transition-all duration-300 text-lg"
+                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                transition-all duration-300 text-lg"
                 >
                   Submit Vote
                 </button>
@@ -277,3 +236,4 @@ export default function VotingInterface({ params }: { params: { token: string } 
   )
 }
 
+export default withAuth(VotingInterface)
