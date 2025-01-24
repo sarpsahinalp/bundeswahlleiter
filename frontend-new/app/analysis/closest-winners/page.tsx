@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import {useEffect, useState} from "react"
 import {
   Table,
   TableBody,
@@ -14,6 +14,7 @@ import {
 } from "@mui/material"
 import { visuallyHidden } from "@mui/utils"
 import { Box } from "@mui/system"
+import {electionApi} from "@/services/api";
 
 type ClosestResult = {
   constituency: string
@@ -22,30 +23,6 @@ type ClosestResult = {
 }
 
 type Order = "asc" | "desc"
-
-// Updated mock data to include both wins and losses
-const generateMockData = (year: number): ClosestResult[] => [
-  { constituency: `Berlin-Mitte (${year})`, party: "SPD", margin: 152 },
-  { constituency: `Hamburg-Nord (${year})`, party: "CDU/CSU", margin: 203 },
-  { constituency: `München-Süd (${year})`, party: "Grüne", margin: 287 },
-  { constituency: `Köln-Innenstadt (${year})`, party: "SPD", margin: 312 },
-  { constituency: `Frankfurt-West (${year})`, party: "FDP", margin: -356 },
-  { constituency: `Dresden-Ost (${year})`, party: "Die Linke", margin: -401 },
-  { constituency: `Düsseldorf-Süd (${year})`, party: "CDU/CSU", margin: 423 },
-  { constituency: `Stuttgart-Mitte (${year})`, party: "Grüne", margin: -467 },
-  { constituency: `Leipzig-Nord (${year})`, party: "SPD", margin: 489 },
-  { constituency: `Hannover-Mitte (${year})`, party: "CDU/CSU", margin: -521 },
-  { constituency: `Bremen-West (${year})`, party: "SPD", margin: -178 },
-  { constituency: `Nürnberg-Nord (${year})`, party: "CSU", margin: 245 },
-  { constituency: `Rostock (${year})`, party: "Die Linke", margin: 301 },
-  { constituency: `Mainz (${year})`, party: "SPD", margin: -389 },
-  { constituency: `Potsdam (${year})`, party: "Grüne", margin: 412 },
-]
-
-const mockData = {
-  2017: generateMockData(2017),
-  2021: generateMockData(2021),
-}
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -57,7 +34,7 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   return 0
 }
 
-function getComparator<Key extends keyof any>(
+function getComparator<Key extends keyof never>(
   order: Order,
   orderBy: Key,
 ): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
@@ -138,7 +115,24 @@ export default function ClosestResults() {
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(15)
 
-  const data = mockData[year]
+  const [data, setData] = useState<ClosestResult[]>([]);
+
+  const fetchData = async (jahr: number) => {
+    try {
+      const results = await electionApi.getClosestResults(jahr);
+      setData(results.map(sieger => ({
+        party: sieger.parteiName,
+        constituency: sieger.wahlKreisName,
+        margin: sieger.typ === 'Sieg' ? sieger.differenz : - sieger.differenz,
+      })));
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData(year).then();
+  }, [year])
 
   const filteredData = selectedParty === "All" ? data : data.filter((result) => result.party === selectedParty)
 

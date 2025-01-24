@@ -1,5 +1,14 @@
 import api from "../lib/axios"
-import type { Election, Vote, PartyResult, ConstituencyResult, OverhangSeat } from "@/models/election"
+import type { Election, Vote, PartyResult, ConstituencyResult } from "@/models/election"
+import {
+    Bundesland, KnappsteSieger,
+    Mandat,
+    Sitzverteilung,
+    UberhangMandate,
+    Wahlkreis,
+    WahlkreisSieger,
+    WahlkreisUebersicht
+} from "@/models/models"
 
 export const electionApi = {
     // Election management
@@ -35,19 +44,14 @@ export const electionApi = {
     },
 
     // Analysis endpoints
-    getSeatDistribution: async (year: number) => {
-        try {
-            const response = await api.get<PartyResult[]>(`/analysis/seats/${year}`)
-            return response.data
-        } catch (error) {
-            console.error("Error fetching seat distribution:", error)
-            return []
-        }
+    getSeatDistribution: async (year: number): Promise<Sitzverteilung[]> => {
+        const response = await api.get<Sitzverteilung[]>(`/ergebnisse/sitzverteilung/${year}`)
+        return response.data
     },
 
-    getParliamentMembers: async (year: number) => {
+    getParliamentMembers: async (year: number, bundesland_id: number): Promise<Mandat[]> => {
         try {
-            const response = await api.get<any[]>(`/analysis/members/${year}`)
+            const response = await api.get<Mandat[]>(`/ergebnisse/bundestagsmitglieder/${year}/${bundesland_id}`)
             return response.data
         } catch (error) {
             console.error("Error fetching parliament members:", error)
@@ -55,19 +59,14 @@ export const electionApi = {
         }
     },
 
-    getConstituencyOverview: async (year: number, constituencyId: string) => {
-        try {
-            const response = await api.get<ConstituencyResult>(`/analysis/constituencies/${year}/${constituencyId}`)
-            return response.data
-        } catch (error) {
-            console.error("Error fetching constituency overview:", error)
-            return null
-        }
+    getConstituencyOverview: async (year: number, wahlkreis_id: number, useAggregation: boolean): Promise<WahlkreisUebersicht> => {
+        const response = await api.get<WahlkreisUebersicht>(`/ergebnisse/wahlkreis/uebersicht/${year}/${wahlkreis_id}/${useAggregation}`)
+        return response.data
     },
 
-    getConstituencyWinners: async (year: number) => {
+    getConstituencyWinners: async (year: number): Promise<WahlkreisSieger[]> => {
         try {
-            const response = await api.get<ConstituencyResult[]>(`/analysis/winners/${year}`)
+            const response = await api.get<WahlkreisSieger[]>(`/ergebnisse/wahlkreisSieger/${year}`)
             return response.data
         } catch (error) {
             console.error("Error fetching constituency winners:", error)
@@ -75,9 +74,9 @@ export const electionApi = {
         }
     },
 
-    getOverhangSeats: async (year: number) => {
+    getOverhangSeats: async (year: number, grouping: string): Promise<UberhangMandate[]> => {
         try {
-            const response = await api.get<OverhangSeat[]>(`/analysis/overhang/${year}`)
+            const response = await api.get<UberhangMandate[]>(`/ergebnisse/ueberhangmandate/${year}/${grouping}`)
             return response.data
         } catch (error) {
             console.error("Error fetching overhang seats:", error)
@@ -85,9 +84,9 @@ export const electionApi = {
         }
     },
 
-    getClosestResults: async (year: number) => {
+    getClosestResults: async (year: number): Promise<KnappsteSieger[]> => {
         try {
-            const response = await api.get<ConstituencyResult[]>(`/analysis/closest/${year}`)
+            const response = await api.get<KnappsteSieger[]>(`/ergebnisse/knappsteSieger/${year}`)
             return response.data
         } catch (error) {
             console.error("Error fetching closest results:", error)
@@ -118,5 +117,22 @@ export const electionApi = {
             return { firstVotes: [], secondVotes: [], totalVotes: 0 }
         }
     },
+
+    // Auswahldaten
+
+    getAllConstituencies: async (): Promise<Wahlkreis[]> => {
+        const response = await api.get<Wahlkreis[]>('/ergebnisse/wahlkreise')
+        return response.data;
+    },
+
+    getAllBundeslander: async (): Promise<Bundesland[]> => {
+        try {
+            const response = await api.get<Bundesland[]>(`/ergebnisse/bundeslander`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching Bundesländer:', error);
+            throw error;
+        }
+    }
 }
 

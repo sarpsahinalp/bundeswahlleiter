@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import {useEffect, useState} from "react"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
 import {
   Table,
@@ -15,6 +15,7 @@ import {
 } from "@mui/material"
 import { visuallyHidden } from "@mui/utils"
 import { Box } from "@mui/system"
+import {electionApi} from "@/services/api";
 
 type OverhangSeat = {
   name: string
@@ -22,65 +23,6 @@ type OverhangSeat = {
 }
 
 type Order = "asc" | "desc"
-
-const mockData = {
-  2017: {
-    parties: [
-      { name: "CDU/CSU", seats: 4 },
-      { name: "SPD", seats: 3 },
-      { name: "AfD", seats: 0 },
-      { name: "FDP", seats: 2 },
-      { name: "Die Linke", seats: 0 },
-      { name: "Grüne", seats: 1 },
-    ],
-    states: [
-      { name: "Baden-Württemberg", seats: 2 },
-      { name: "Bayern", seats: 3 },
-      { name: "Berlin", seats: 1 },
-      { name: "Brandenburg", seats: 0 },
-      { name: "Bremen", seats: 0 },
-      { name: "Hamburg", seats: 1 },
-      { name: "Hessen", seats: 1 },
-      { name: "Mecklenburg-Vorpommern", seats: 0 },
-      { name: "Niedersachsen", seats: 1 },
-      { name: "Nordrhein-Westfalen", seats: 1 },
-      { name: "Rheinland-Pfalz", seats: 0 },
-      { name: "Saarland", seats: 0 },
-      { name: "Sachsen", seats: 0 },
-      { name: "Sachsen-Anhalt", seats: 0 },
-      { name: "Schleswig-Holstein", seats: 0 },
-      { name: "Thüringen", seats: 0 },
-    ],
-  },
-  2021: {
-    parties: [
-      { name: "CDU/CSU", seats: 3 },
-      { name: "SPD", seats: 2 },
-      { name: "AfD", seats: 0 },
-      { name: "FDP", seats: 1 },
-      { name: "Die Linke", seats: 0 },
-      { name: "Grüne", seats: 1 },
-    ],
-    states: [
-      { name: "Baden-Württemberg", seats: 1 },
-      { name: "Bayern", seats: 2 },
-      { name: "Berlin", seats: 1 },
-      { name: "Brandenburg", seats: 0 },
-      { name: "Bremen", seats: 0 },
-      { name: "Hamburg", seats: 0 },
-      { name: "Hessen", seats: 1 },
-      { name: "Mecklenburg-Vorpommern", seats: 0 },
-      { name: "Niedersachsen", seats: 1 },
-      { name: "Nordrhein-Westfalen", seats: 1 },
-      { name: "Rheinland-Pfalz", seats: 0 },
-      { name: "Saarland", seats: 0 },
-      { name: "Sachsen", seats: 0 },
-      { name: "Sachsen-Anhalt", seats: 0 },
-      { name: "Schleswig-Holstein", seats: 0 },
-      { name: "Thüringen", seats: 0 },
-    ],
-  },
-}
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -92,7 +34,7 @@ function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   return 0
 }
 
-function getComparator<Key extends keyof any>(
+function getComparator<Key extends keyof never>(
   order: Order,
   orderBy: Key,
 ): (a: { [key in Key]: number | string }, b: { [key in Key]: number | string }) => number {
@@ -173,7 +115,25 @@ export default function OverhangSeats() {
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(15)
 
-  const data = mockData[year][view]
+  const [data, setData] = useState<OverhangSeat[]>([]);
+
+  const loadData = async (year: number, groupBy: 'bundesland' | 'partei') => {
+    try {
+      const response = await electionApi.getOverhangSeats(year, groupBy);
+      setData(response.map(mandate => ({
+        name: mandate.groupField,
+        seats: mandate.mandates,
+      })));
+    } catch (error) {
+      console.error('Failed to fetch grouped data:', error);
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    const viewBy = view == "parties" ? "partei" : "bundesland";
+    loadData(year, viewBy).then();
+  }, [year, view]);
 
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof OverhangSeat) => {
     const isAsc = orderBy === property && order === "asc"
@@ -232,7 +192,7 @@ export default function OverhangSeats() {
           <ResponsiveContainer width="100%" height={400}>
             <BarChart data={data}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
+              <XAxis dataKey="name"/>
               <YAxis />
               <Tooltip />
               <Legend />
