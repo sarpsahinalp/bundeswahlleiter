@@ -1,4 +1,4 @@
-create table verteilungskriterium
+create table IF NOT EXISTS verteilungskriterium
 (
     id      SERIAL PRIMARY KEY,
     name    VARCHAR(255) NOT NULL,
@@ -6,7 +6,7 @@ create table verteilungskriterium
     divisor FLOAT        NOT NULL
 );
 
-create table erste_oberverteilung
+create table IF NOT EXISTS erste_oberverteilung
 (
     bundesland_id INT references bundesland (id),
     sitze         INT,
@@ -14,7 +14,7 @@ create table erste_oberverteilung
     primary key (bundesland_id, jahr)
 );
 
-create table erste_unterverteilung
+create table IF NOT EXISTS erste_unterverteilung
 (
     bundesland_id INT references bundesland (id),
     partei_id     INT references partei (id),
@@ -23,7 +23,7 @@ create table erste_unterverteilung
     primary key (bundesland_id, partei_id, jahr)
 );
 
-create table mindestSitzanspruch
+create table IF NOT EXISTS mindestSitzanspruch
 (
     bundesland_id      INT references bundesland (id),
     partei_id          INT references partei (id),
@@ -34,7 +34,7 @@ create table mindestSitzanspruch
     primary key (bundesland_id, partei_id, jahr)
 );
 
-create table zweiter_oberverteilung
+create table IF NOT EXISTS zweiter_oberverteilung
 (
     partei_id INT,
     sitze     INT,
@@ -63,8 +63,8 @@ BEGIN
             UNION
             -- Recursive case: updating the divisor based on previous iteration
             (SELECT CASE
-                        WHEN (zielwert - vk.sitzeverteilt) > 0 THEN vk.divisor - 10
-                        ELSE vk.divisor + 10
+                        WHEN (zielwert - vk.sitzeverteilt) > 0 THEN vk.divisor * 0.95
+                        ELSE vk.divisor * 1.05
                         END                    AS divisor,
                     (SELECT sum(round(b.bevoelkerung / vk.divisor))
                      FROM bevoelkerung b
@@ -90,142 +90,77 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Divisor erste unterverteilung function
-CREATE
-    OR REPLACE FUNCTION calculate_divisor_erste_unterverteilung(bundeslandId BIGINT, zielWert INT, paramJahr INT)
-    RETURNS VOID AS
-$$
-BEGIN
-    -- Using WITH RECURSIVE to calculate the divisor iteratively
-    WITH RECURSIVE
-        divisor_verfahren (divisor, sitzeverteilt, iteration) AS (
-            -- Base case: initial values
-            (SELECT (select sum(gesamtStimmen)
-                     from sumZweteStimmeImJahrUndBundesland) / (zielWert::FLOAT) as divisor,
-                    (SELECT sum(round(za.gesamtStimmen / ((select sum(gesamtStimmen)
-                                                           from sumZweteStimmeImJahrUndBundesland) /
-                                                          (zielWert::FLOAT))))
-                     FROM sumZweteStimmeImJahrUndBundesland za)                  AS sitze,
-                    0                                                            AS iteration)
-            UNION
-            -- Recursive case: updating the divisor based on previous iteration
-            (SELECT CASE
-                        WHEN (zielwert - vk.sitzeverteilt) > 0 THEN vk.divisor - 10
-                        ELSE vk.divisor + 10
-                        END                                     AS divisor,
-                    (SELECT sum(round(za.gesamtStimmen / vk.divisor))
-                     FROM sumZweteStimmeImJahrUndBundesland za) AS sitze,
-                    vk.iteration + 1                            AS iteration
-             FROM divisor_verfahren vk
-             where vk.sitzeverteilt != zielwert)),
-        sumZweteStimmeImJahrUndBundesland as (select *
-                                              from sumzweitestimmeproparteiinbundesland
-                                              where jahr = paramJahr
-                                                and bundesland = bundeslandId),
-        divisor_end as (SELECT vk.divisor::FLOAT as divisor_final
-                        FROM divisor_verfahren vk
-                        WHERE iteration = (select max(iteration) from divisor_verfahren)
-                        LIMIT 1)
+CREATE OR REPLACE FUNCTION calculate_all_unterverteilung(param_jahr INT)
+    RETURNS VOID AS $$
+WITH RECURSIVE bundesland_data AS (
+    SELECT
+        eov.bundesland_id,
+        eov.sitze AS zielwert,
+        SUM(sz.gesamtstimmen)::FLOAT AS total_stimmen
+    FROM erste_oberverteilung eov
+             JOIN sumzweitestimmeproparteiinbundesland sz
+                  ON sz.bundesland = eov.bundesland_id
+                      AND sz.jahr = eov.jahr
+    WHERE eov.jahr = param_jahr
+    GROUP BY eov.bundesland_id, eov.sitze
+),
+               divisor_calculation AS (
+                   SELECT
+                       bd.bundesland_id,
+                       bd.zielwert,
+                       bd.total_stimmen / bd.zielwert AS initial_divisor,
+                       bd.total_stimmen,
+                       0 AS iteration
+                   FROM bundesland_data bd
 
-    INSERT
-    INTO erste_unterverteilung (bundesland_id, partei_id, sitze, jahr)
-    SELECT za.bundesland, za.partei_id, round(za.gesamtStimmen / d.divisor_final) as sitze, za.jahr
-    FROM sumZweiteStimmeProParteiInBundesland za,
-         divisor_end d
-    where za.jahr = paramJahr
-      and za.bundesland = bundeslandId
-    ON CONFLICT (bundesland_id, partei_id, jahr)
-        DO UPDATE SET sitze = EXCLUDED.sitze;
+                   UNION ALL
 
-END;
-$$
-    LANGUAGE plpgsql;
+                   SELECT
+                       dc.bundesland_id,
+                       dc.zielwert,
+                       CASE
+                           WHEN current_seats < dc.zielwert THEN dc.initial_divisor * 0.95
+                           ELSE dc.initial_divisor * 1.05
+                           END,
+                       dc.total_stimmen,
+                       dc.iteration + 1
+                   FROM divisor_calculation dc
+                            CROSS JOIN LATERAL (
+                       SELECT SUM(ROUND(sz.gesamtstimmen / dc.initial_divisor)) AS current_seats
+                       FROM sumzweitestimmeproparteiinbundesland sz
+                       WHERE sz.bundesland = dc.bundesland_id
+                         AND sz.jahr = param_jahr
+                       ) seats
+                   WHERE dc.iteration < 50  -- Safety limit
+                     AND current_seats != dc.zielwert
+               ),
+               final_divisors AS (
+                   SELECT DISTINCT ON (bundesland_id)
+                       bundesland_id,
+                       initial_divisor AS final_divisor
+                   FROM divisor_calculation
+                   ORDER BY bundesland_id, iteration DESC
+               )
+INSERT INTO erste_unterverteilung (bundesland_id, partei_id, sitze, jahr)
+SELECT
+    sz.bundesland,
+    sz.partei_id,
+    GREATEST(ROUND(sz.gesamtstimmen / fd.final_divisor), 0) AS sitze,
+    param_jahr
+FROM sumzweitestimmeproparteiinbundesland sz
+         JOIN final_divisors fd
+              ON fd.bundesland_id = sz.bundesland
+WHERE sz.jahr = param_jahr
+ON CONFLICT (bundesland_id, partei_id, jahr)
+    DO UPDATE SET sitze = EXCLUDED.sitze;
+$$ LANGUAGE SQL;
 
 -- Erste Oberverteilung
-select *
-from calculate_divisor_erste_oberverteilung(
+select calculate_divisor_erste_oberverteilung(
         (select sum(b.bevoelkerung) / 598.0 from bevoelkerung b where b.jahr = 2021), 598, 2021);
 
 -- Erste Unterverteilung
-select *
-from calculate_divisor_erste_unterverteilung(1, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 1
-                                                   and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(2, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 2
-                                                   and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(3, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 3
-                                                   and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(4, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 4
-                                                   and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(5, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 5
-                                                   and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(6, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 6
-                                                   and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(7, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 7
-                                                   and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(8, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 8
-                                                   and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(9, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 9
-                                                   and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(10, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 10
-                                                    and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(11, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 11
-                                                    and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(12, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 12
-                                                    and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(13, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 13
-                                                    and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(14, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 14
-                                                    and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(15, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 15
-                                                    and jahr = 2021), 2021);
-select *
-from calculate_divisor_erste_unterverteilung(16, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 16
-                                                    and jahr = 2021), 2021);
+select calculate_all_unterverteilung(2021);
 
 
 -- Zweite Oberverteilung
@@ -343,7 +278,7 @@ $$ LANGUAGE plpgsql;
 select *
 from calculate_divisor_min_seat_claims();
 
-create table zweite_unterverteilung
+create table IF NOT EXISTS zweite_unterverteilung
 (
     partei_id INT references partei (id),
     divisor   FLOAT,
@@ -394,8 +329,8 @@ with recursive
                    select i.partei_id,
                           i.jahr,
                           case
-                              when (i.zielWert - i.verteilteSitze) > 0 then i.divisor - 10
-                              else i.divisor + 10 end        as divisor,
+                              when (i.zielWert - i.verteilteSitze) > 0 then i.divisor * 0.95
+                              else i.divisor * 1.05 end        as divisor,
                           i.zielWert,
                           (select (sum(case
                                            when round(szb.gesamtStimmen / i.divisor) <
@@ -427,11 +362,4 @@ where i.iteration = (select max(iteration)
                        and i2.jahr = i.jahr)
 ON CONFLICT (partei_id, jahr)
     DO UPDATE SET divisor = EXCLUDED.divisor;
-
--- INSERT
--- INTO zweite_unterverteilung (partei_id, divisor, jahr)
--- SELECT f.partei_id, f.divisor, f.jahr
--- FROM final_val f
--- ON CONFLICT (partei_id, jahr)
---     DO UPDATE SET divisor = EXCLUDED.divisor;
 

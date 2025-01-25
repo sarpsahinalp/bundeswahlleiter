@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 1.5rem;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #666;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .alert {
+            padding: 10px;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .error {
+            background: #ffdddd;
+            color: #f44336;
+        }
+        .success {
+            background: #ddffdd;
+            color: #4CAF50;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h1>Admin Login</h1>
+    <div th:if="${error}" class="alert error">
+        Invalid username or password
+    </div>
+    <div th:if="${logout}" class="alert success">
+        You have been successfully logged out
+    </div>
+
+    <form action="/admin/login" method="post" id="loginForm">
+        <div class="input-group">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div class="input-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+        </div>
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <button type="submit">Login</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('loginForm');
+        const inputs = form.querySelectorAll('input[type="text"], input[type="password"]');
+
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.style.boxShadow = '0 0 5px rgba(76, 175, 80, 0.5)';
+            });
+
+            input.addEventListener('blur', function() {
+                this.style.boxShadow = 'none';
+            });
+        });
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Simple client-side validation
+            let isValid = true;
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    isValid = false;
+                    input.style.borderColor = '#f44336';
+                } else {
+                    input.style.borderColor = '#ddd';
+                }
+            });
+
+            if (isValid) {
+                this.submit();
+            }
+        });
+    });
+</script>
+</body>
+</html>

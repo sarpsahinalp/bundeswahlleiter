@@ -1,4 +1,4 @@
-package db.in.tum.de.datenbanken.logic;
+package db.in.tum.de.datenbanken.logic.pdf;
 
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -10,7 +10,6 @@ import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Text;
 import com.itextpdf.kernel.pdf.canvas.draw.SolidLine;
 import com.itextpdf.layout.properties.TextAlignment;
-import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
 import java.util.UUID;

@@ -6,86 +6,7 @@ from calculate_divisor_erste_oberverteilung(
         (select sum(b.bevoelkerung) / 598.0 from bevoelkerung b where b.jahr = 2017), 598, 2017);
 
 -- Erste Unterverteilung
-select *
-from calculate_divisor_erste_unterverteilung(1, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 1
-                                                   and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(2, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 2
-                                                   and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(3, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 3
-                                                   and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(4, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 4
-                                                   and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(5, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 5
-                                                   and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(6, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 6
-                                                   and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(7, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 7
-                                                   and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(8, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 8
-                                                   and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(9, (select erste_oberverteilung.sitze
-                                                 from erste_oberverteilung
-                                                 where bundesland_id = 9
-                                                   and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(10, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 10
-                                                    and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(11, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 11
-                                                    and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(12, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 12
-                                                    and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(13, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 13
-                                                    and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(14, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 14
-                                                    and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(15, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 15
-                                                    and jahr = 2017), 2017);
-select *
-from calculate_divisor_erste_unterverteilung(16, (select erste_oberverteilung.sitze
-                                                  from erste_oberverteilung
-                                                  where bundesland_id = 16
-                                                    and jahr = 2017), 2017);
+select calculate_all_unterverteilung(2017);
 
 create materialized view IF NOT EXISTS uberhangAndMindestsiztanzahl2017 as
 (
@@ -168,8 +89,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Calculates the zweite oberverteilung and inserts into the table
-select *
-from calculate_divisor_min_seat_claims_2017();
+select calculate_divisor_min_seat_claims_2017();
 
 -- Zweite Unterverteilung
 with recursive
@@ -214,8 +134,8 @@ with recursive
                    select i.partei_id,
                           i.jahr,
                           case
-                              when (i.zielWert - i.verteilteSitze) > 0 then i.divisor - 100
-                              else i.divisor + 100 end        as divisor,
+                              when (i.zielWert - i.verteilteSitze) > 0 then i.divisor * 0.95
+                              else i.divisor * 1.05 end        as divisor,
                           i.zielWert,
                           (select (sum(case
                                            when round(szb.gesamtStimmen / i.divisor) <

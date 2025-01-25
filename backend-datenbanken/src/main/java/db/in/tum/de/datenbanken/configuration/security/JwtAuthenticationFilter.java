@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import db.in.tum.de.datenbanken.configuration.security.dtos.JwtPrincipal;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -18,11 +19,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+import static db.in.tum.de.datenbanken.configuration.security.TokenService.securityProperties;
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String SECRET = "change-me"; // same as used in TokenService
+    private static final String SECRET = securityProperties.getProperty("JWT_SECRET");
     private static final Algorithm ALGORITHM = Algorithm.HMAC256(SECRET);
     private static final String COOKIE_NAME = "vote_jwt";
 
@@ -38,11 +41,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 DecodedJWT decodedJWT = verifier.verify(token);
 
                 // If verification succeeds, you can read claims:
-                String hash = decodedJWT.getClaim("hash").asString();
+                JwtPrincipal principal = new JwtPrincipal(
+                        decodedJWT.getClaim("code").asString(),
+                        decodedJWT.getClaim("wahlkreis").asLong(),
+                        decodedJWT.getClaim("year").asInt()
+                );
 
                 // Build an anonymous Authentication (no roles). The principal is the 'hash'.
                 UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(hash, null, null);
+                        new UsernamePasswordAuthenticationToken(principal, null, null);
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JWTVerificationException ex) {

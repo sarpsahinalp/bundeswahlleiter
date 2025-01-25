@@ -41,16 +41,11 @@ export default function RootLayout({
                       Analysis
                     </Link>
                   </li>
-                  <li>
-                    <Link href="/vote" className="text-blue-600 hover:text-blue-800 transition-colors duration-300">
-                      Vote
-                    </Link>
-                  </li>
-                  <li>
-                    <Link href="/admin" className="text-blue-600 hover:text-blue-800 transition-colors duration-300">
-                      Admin
-                    </Link>
-                  </li>
+                  {/*<li>*/}
+                  {/*  <Link href="/vote" className="text-blue-600 hover:text-blue-800 transition-colors duration-300">*/}
+                  {/*    Vote*/}
+                  {/*  </Link>*/}
+                  {/*</li>*/}
                 </ul>
               </nav>
             </div>

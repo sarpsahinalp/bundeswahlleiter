@@ -1,6 +1,8 @@
 package db.in.tum.de.datenbanken.logic;
 
 import db.in.tum.de.datenbanken.logic.DTOs.*;
+import db.in.tum.de.datenbanken.logic.DTOs.voting.ErstestimmeOptionen;
+import db.in.tum.de.datenbanken.logic.DTOs.voting.ZweitestimmeOptionen;
 import lombok.AllArgsConstructor;
 
 import java.util.*;

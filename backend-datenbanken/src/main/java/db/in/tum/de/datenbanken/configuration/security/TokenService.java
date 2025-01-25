@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class TokenService {
 
-    static final Properties securityProperties = new Properties();
+    public static final Properties securityProperties = new Properties();
     static {
         try {
             securityProperties.load(TokenService.class.getResourceAsStream("/security.properties"));
@@ -31,10 +31,13 @@ public class TokenService {
 
     private static final Algorithm ALGORITHM = Algorithm.HMAC256(SECRET);
 
-    public String createTokenForVoting(String hash) {
+    @SuppressWarnings("deprecation")
+    public String createTokenForVoting(String hash, long wahlkreis, int year) {
         return JWT.create()
                 .withClaim("code", hash)
-                .withExpiresAt(new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000))
+                .withClaim("wahlkreis", wahlkreis)
+                .withClaim("year", year)
+                .withExpiresAt(new Date(System.currentTimeMillis() + 65 * 60 * 1000))
                 .sign(ALGORITHM);
     }
 }
