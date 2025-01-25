@@ -52,4 +52,16 @@ public class Kandidatur {
 
     @Column(name = "jahr", nullable = false)
     private int jahr;
+
+    @Column(name = "titel")
+    private String titel;
+
+    @Column(name = "namenszusatz")
+    private String namenszusatz;
+
+    @Column(name = "wohnort")
+    private String wohnort;
+
+    @Column(name = "beruf")
+    private String beruf;
 }
