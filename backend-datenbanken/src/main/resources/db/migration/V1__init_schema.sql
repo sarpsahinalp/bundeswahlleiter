@@ -80,6 +80,10 @@ CREATE TABLE kandidatur
     bundesland_id     BIGINT,
     landesliste_platz INTEGER,
     jahr              INTEGER      NOT NULL,
+    titel             VARCHAR(255),
+    namenszusatz      VARCHAR(255),
+    wohnort           VARCHAR(255),
+    beruf             VARCHAR(255),
     CONSTRAINT pk_kandidatur PRIMARY KEY (id)
 );
 

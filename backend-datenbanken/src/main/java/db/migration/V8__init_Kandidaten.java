@@ -13,41 +13,46 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class V8__init_Kandidaten extends BaseJavaMigration {
 
     private static final String[] CSV_FILE_PATH = {
-            "backend-datenbanken/src/main/resources/electionData/targetCSV/2021/direktmandate.csv",
-            "backend-datenbanken/src/main/resources/electionData/targetCSV/2021/landesliste.csv",
-            "backend-datenbanken/src/main/resources/electionData/targetCSV/2017/kandidaten.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2021/direktmandate_berufe.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2021/landesliste_berufe.csv",
+            "backend-datenbanken/src/main/resources/electionData/targetCSV/2017/kandidaten_berufe.csv",
     };
 
     @Override
     public void migrate(Context context) {
         // Define the batch insert SQL with placeholders for the parameters
-        String insertSql = "WITH neuePartei(name) AS (VALUES (?))," +
-                "neuerWahlkreis(id) AS (SELECT CASE WHEN newWK.column1 ~ E'^\\\\d+$'" +
-                "    THEN (SELECT w.id FROM wahlkreis w WHERE w.id = cast(newWK.column1 AS int))" +
-                "    ELSE (SELECT w.id FROM wahlkreis w WHERE w.name = newWK.column1) END" +
-                "    FROM (VALUES (?)) as newWK)," +
-                "neuerKandidat(id, nachname, vorname, geburtsjahr, partei_id, wahlkreis_id, bundesland_id, landesliste_platz, jahr) AS (" +
-                "             VALUES (" +
-                "                     nextval('kandidatur_seq')," +
-                "                     ?," +
-                "                     ?," +
-                "                     ?," +
-                "                     (SELECT p.id FROM partei p, neuePartei np, neuerWahlkreis nw WHERE (NOT p.is_einzelbewerber AND p.kurzbezeichnung = np.name) OR " +
-                "                   (p.is_einzelbewerber AND p.kurzbezeichnung = np.name AND p.wahlkreis_id = nw.id))," +
-                "                     (SELECT nw.id FROM  neuerWahlkreis nw)," +
-                "                     (SELECT b.id FROM bundesland b WHERE b.name = ?)," +
-                "                     (SELECT CASE WHEN listenPlatz.column1 > 0 THEN listenPlatz.column1 END" +
-                "                      FROM (VALUES (?)) as listenPlatz)," +
-                "                     ?" +
-                "))" +
-                "INSERT INTO kandidatur as k (id, nachname, vorname, geburtsjahr, partei_id, wahlkreis_id, bundesland_id, landesliste_platz, jahr)" +
-                "SELECT *" +
-                "FROM  neuerKandidat " +
-                "ON CONFLICT ON CONSTRAINT kandidaturEinmaligProJahr DO UPDATE " +
-                "SET wahlkreis_id = CASE WHEN k.wahlkreis_id is not null THEN k.wahlkreis_id ELSE (SELECT p.id FROM wahlkreis p JOIN neuerKandidat n on p.id = n.wahlkreis_id) END," +
-                "    bundesland_id = CASE WHEN k.bundesland_id is not null THEN k.bundesland_id ELSE (SELECT b.id FROM bundesland b JOIN neuerKandidat n on b.id = n.bundesland_id) END," +
-                "    landesliste_platz =  CASE WHEN k.landesliste_platz is not null THEN k.landesliste_platz ELSE (SELECT n.landesliste_platz FROM neuerKandidat n WHERE n.landesliste_platz is not null) END";
-
+        String insertSql = """
+            WITH neuePartei(name) AS (VALUES (?)),\s
+                neuerWahlkreis(id) AS (SELECT CASE WHEN newWK.column1 ~ E'^\\\\\\\\+d$'
+                    THEN (SELECT w.id FROM wahlkreis w WHERE w.id = cast(newWK.column1 AS int))
+                    ELSE (SELECT w.id FROM wahlkreis w WHERE w.name = newWK.column1) END
+                    FROM (VALUES (?)) as newWK),
+                neuerKandidat(id, nachname, vorname, geburtsjahr, partei_id, wahlkreis_id, bundesland_id, landesliste_platz, jahr, titel, namenszusatz, wohnort, beruf) AS (
+                             VALUES (
+                                     nextval('kandidatur_seq'),
+                                     ?,
+                                     ?,
+                                     ?,
+                                     (SELECT p.id FROM partei p, neuePartei np, neuerWahlkreis nw WHERE (NOT p.is_einzelbewerber AND p.kurzbezeichnung = np.name) OR
+                                   (p.is_einzelbewerber AND p.kurzbezeichnung = np.name AND p.wahlkreis_id = nw.id)),
+                                     (SELECT nw.id FROM  neuerWahlkreis nw),
+                                     (SELECT b.id FROM bundesland b WHERE b.name = ?),
+                                     (SELECT CASE WHEN listenPlatz.column1 > 0 THEN listenPlatz.column1 END
+                                      FROM (VALUES (?)) as listenPlatz),
+                                     ?,
+                                     (SELECT CASE WHEN a = '' THEN NULL ELSE a END FROM (VALUES (?)) as T(a)),
+                                     (SELECT CASE WHEN a = '' THEN NULL ELSE a END FROM (VALUES (?)) as T(a)),
+                                     (SELECT CASE WHEN a = '' THEN NULL ELSE a END FROM (VALUES (?)) as T(a)),
+                                     (SELECT CASE WHEN a = '' THEN NULL ELSE a END FROM (VALUES (?)) as T(a))
+                ))
+                INSERT INTO kandidatur as k (id, nachname, vorname, geburtsjahr, partei_id, wahlkreis_id, bundesland_id, landesliste_platz, jahr, titel, namenszusatz, wohnort, beruf)
+                SELECT *
+                FROM  neuerKandidat
+                ON CONFLICT ON CONSTRAINT kandidaturEinmaligProJahr DO UPDATE
+                SET wahlkreis_id = CASE WHEN k.wahlkreis_id is not null THEN k.wahlkreis_id ELSE (SELECT p.id FROM wahlkreis p JOIN neuerKandidat n on p.id = n.wahlkreis_id) END,
+                    bundesland_id = CASE WHEN k.bundesland_id is not null THEN k.bundesland_id ELSE (SELECT b.id FROM bundesland b JOIN neuerKandidat n on b.id = n.bundesland_id) END,
+                    landesliste_platz =  CASE WHEN k.landesliste_platz is not null THEN k.landesliste_platz ELSE (SELECT n.landesliste_platz FROM neuerKandidat n WHERE n.landesliste_platz is not null) END;
+            """;
         // Set up the reader for the CSV file (located in resources/db/migration)
         List<String[]> rows = Arrays.stream(CSV_FILE_PATH)
                 .map(ParseAndInsertCSV::readCsv)
@@ -70,7 +75,11 @@ public class V8__init_Kandidaten extends BaseJavaMigration {
                     preparedStatement.setInt(5, Integer.parseInt(row[2].trim())); // geburtsjahr
                     preparedStatement.setString(6, row[5].trim()); // bundesland
                     preparedStatement.setInt(7, Integer.parseInt(row[6].trim())); // landesliste_platz
-                    preparedStatement.setInt(8, Integer.parseInt(row[7].trim())); // jahr
+                    preparedStatement.setInt(8, Integer.parseInt(row[11].trim())); // jahr
+                    preparedStatement.setString(9, row[7].trim()); // titel
+                    preparedStatement.setString(10, row[8].trim()); // namenszusatz
+                    preparedStatement.setString(11, row[9].trim()); // wohnort
+                    preparedStatement.setString(12, row[10].trim()); // Beruf
 
 
                     // Add this set of parameters to the batch
