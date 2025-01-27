@@ -103,12 +103,21 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 export default function ConstituencyWinners() {
-  const [year, setYear] = useState<2017 | 2021>(2021)
+  const [year, setYear] = useState<number>(2021)
   const [filter, setFilter] = useState("")
   const [order, setOrder] = useState<Order>("asc")
   const [orderBy, setOrderBy] = useState<keyof WahlkreisSieger>("wahlkreisName")
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(15)
+
+  const [yearsArray, setYearsArray] = useState<number[]>([])
+  const loadYear = async() => {
+    const response = await electionApi.getJahre();
+    setYearsArray(response);
+  }
+  useEffect(() => {
+    loadYear().then();
+  }, []);
 
   const [data, setData] = useState<null | WahlkreisSieger[]>(null);
 
@@ -161,11 +170,12 @@ export default function ConstituencyWinners() {
           <select
             id="year-select"
             value={year}
-            onChange={(e) => setYear(Number(e.target.value) as 2017 | 2021)}
+            onChange={(e) => setYear(Number(e.target.value) as number)}
             className="p-2 border rounded"
           >
-            <option value={2017}>2017</option>
-            <option value={2021}>2021</option>
+            {yearsArray.map((year) => (
+                <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </div>
         <div className="flex-grow">

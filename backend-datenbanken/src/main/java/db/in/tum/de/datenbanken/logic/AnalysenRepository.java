@@ -11,6 +11,13 @@ import java.util.List;
 @Repository
 public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
 
+    @Query(value = """
+    SELECT year
+    FROM elections
+    WHERE status = 'INACTIVE';
+    """, nativeQuery = true)
+    List<Object[]> getJahre();
+
     @Query(value = "WITH jahr AS (VALUES (:year))," +
             "    summed_votes_zweitstimme AS (" +
             "        SELECT wahlkreis_id,  partei_id, SUM(stimmen) AS total_stimmen" +

@@ -40,7 +40,7 @@ type SeatData = {
   name: string
   seats: number
   prevSeats: number | null
-  year: 2017 | 2021
+  year: number
   color: string
 }
 
@@ -156,14 +156,23 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 export default function SeatDistribution() {
-  const [year, setYear] = useState<2017 | 2021>(2021)
+  const [year, setYear] = useState<number>(2021)
   const [order, setOrder] = useState<Order>("desc")
   const [orderBy, setOrderBy] = useState<keyof SeatData>("seats")
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(15)
   const [data, setData] = useState<SeatData[]>([]);
+  
+  const [yearsArray, setYearsArray] = useState<number[]>([])
+  const loadYear = async() => {
+    const response = await electionApi.getJahre();
+    setYearsArray(response);
+  }
+  useEffect(() => {
+    loadYear().then();
+  }, []);
 
-  const loadData = async (year: 2017 | 2021) => {
+  const loadData = async (year: number) => {
     try {
       const response = await electionApi.getSeatDistribution(year);
       let newData: SeatData[] = response.map(res => ({
@@ -227,11 +236,12 @@ export default function SeatDistribution() {
           <select
               id="year-select"
               value={year}
-              onChange={(e) => setYear(Number(e.target.value) as 2017 | 2021)}
+              onChange={(e) => setYear(Number(e.target.value))}
               className="p-2 border rounded"
           >
-            <option value={2017}>2017</option>
-            <option value={2021}>2021</option>
+            {yearsArray.map((year) => (
+                <option key={year} value={year}>{year}</option>
+            ))}
           </select>
         </div>
         <div className="space-y-8">

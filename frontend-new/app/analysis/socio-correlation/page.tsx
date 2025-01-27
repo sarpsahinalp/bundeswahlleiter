@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import {useEffect, useState } from "react"
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
 import { Select, MenuItem, FormControl, InputLabel, Paper, Typography, Button, Tooltip as MuiTooltip } from "@mui/material"
 import InfoIcon from "@mui/icons-material/Info"
+import {electionApi} from "@/services/api";
 
 interface SocioCulturalStats {
   winningParty: number
@@ -184,7 +185,14 @@ export default function SocioCulturalCorrelation() {
   const [selectedAgeCategory, setSelectedAgeCategory] = useState(ageCategories[0].key)
   const [selectedUnemploymentCategory, setSelectedUnemploymentCategory] = useState(unemploymentCategories[0].key)
 
-  const years = Object.keys(mockData).map(Number)
+  const [yearsArray, setYearsArray] = useState<number[]>([])
+  const loadYear = async() => {
+    const response = await electionApi.getJahre();
+    setYearsArray(response);
+  }
+  useEffect(() => {
+    loadYear().then();
+  }, []);
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -217,7 +225,7 @@ export default function SocioCulturalCorrelation() {
     <div className="px-4 py-6 sm:px-0">
       <h2 className="text-2xl font-bold mb-4">Q8: Socio-Cultural Correlation Analysis</h2>
       <div className="mb-4">
-        {years.map((year) => (
+        {yearsArray.map((year) => (
           <Button
             key={year}
             variant={selectedYear === year ? "contained" : "outlined"}

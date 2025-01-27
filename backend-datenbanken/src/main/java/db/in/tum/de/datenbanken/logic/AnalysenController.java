@@ -17,6 +17,12 @@ public class AnalysenController {
     private final AnalysenService wahlkreisAnalysenService;
     private final AnalysenService analysenService;
 
+    @GetMapping("/jahre")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<Integer>> getJahre() {
+        return ResponseEntity.ok(wahlkreisAnalysenService.getJahre());
+    }
+
     @GetMapping("/wahlkreisSieger/{year}")
     @Transactional(readOnly = true)
     public ResponseEntity<List<WahlkreisSiegerDTO>> getBundesland(@PathVariable("year") int year) {

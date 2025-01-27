@@ -148,6 +148,16 @@ export const electionApi = {
             console.error('Error fetching Bundesländer:', error);
             throw error;
         }
+    },
+
+    getJahre: async (): Promise<number[]> => {
+        try {
+            const response = await api.get<number[]>(`/ergebnisse/jahre`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching Bundesländer:', error);
+            throw error;
+        }
     }
 }
 
