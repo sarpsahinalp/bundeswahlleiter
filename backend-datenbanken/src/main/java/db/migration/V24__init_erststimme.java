@@ -17,11 +17,12 @@ public class V24__init_erststimme extends BaseJavaMigration {
 
         Statement statement = connection.createStatement();
         statement.executeUpdate("ALTER TABLE erststimme DISABLE TRIGGER ALL;");
+        statement.executeUpdate("DROP INDEX idx_erststimme_partei;");
 
         String query = """
                 SELECT *
                 FROM erststimme_aggr
-                WHERE wahlkreis_id <= 5;
+                WHERE wahlkreis_id <= 2;
                 """;
         PreparedStatement preparedStatement = connection.prepareStatement(query);
         ResultSet resultSet = preparedStatement.executeQuery();
@@ -60,6 +61,7 @@ public class V24__init_erststimme extends BaseJavaMigration {
         copyIn.endCopy();
 
         statement.executeUpdate("ALTER TABLE erststimme ENABLE TRIGGER ALL;");
+        statement.executeUpdate("CREATE INDEX IF NOT EXISTS idx_erststimme_partei ON erststimme (partei_id);");
 
     }
 }
