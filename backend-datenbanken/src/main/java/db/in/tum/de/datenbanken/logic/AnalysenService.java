@@ -1,8 +1,6 @@
 package db.in.tum.de.datenbanken.logic;
 
 import db.in.tum.de.datenbanken.logic.DTOs.*;
-import db.in.tum.de.datenbanken.logic.DTOs.voting.ErstestimmeOptionen;
-import db.in.tum.de.datenbanken.logic.DTOs.voting.ZweitestimmeOptionen;
 import lombok.AllArgsConstructor;
 
 import java.util.*;
@@ -12,6 +10,10 @@ import java.util.*;
 public class AnalysenService {
 
     public final AnalysenRepository analysenRepository;
+
+    public boolean isJahrDenied(int jahr) {
+        return ! (boolean) analysenRepository.isJahrAllowed(jahr).getFirst()[0];
+    }
 
     public List<Integer> getJahre() {
         return analysenRepository.getJahre()

@@ -26,18 +26,27 @@ public class AnalysenController {
     @GetMapping("/wahlkreisSieger/{year}")
     @Transactional(readOnly = true)
     public ResponseEntity<List<WahlkreisSiegerDTO>> getBundesland(@PathVariable("year") int year) {
+        if(analysenService.isJahrDenied(year)) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(wahlkreisAnalysenService.getWahlkreisSieger(year));
     }
 
     @GetMapping("/sitzverteilung/{year}")
     @Transactional(readOnly = true)
     public ResponseEntity<List<SitzverteilungDTO>> getSitzverteilung(@PathVariable("year") int year) {
+        if(analysenService.isJahrDenied(year)) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(wahlkreisAnalysenService.getSitzverteilung(year));
     }
 
     @GetMapping("/ueberhangmandate/{year}/{grouping}")
     @Transactional(readOnly = true)
     public ResponseEntity<List<UberhangMandateDTO>> getUeberhangmandate(@PathVariable("year") int year, @PathVariable("grouping") String grouping) {
+        if(analysenService.isJahrDenied(year)) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(wahlkreisAnalysenService.getUeberhangmandate(year, grouping));
     }
 
@@ -54,12 +63,18 @@ public class AnalysenController {
             @PathVariable("wahlkreis_id") int wahlkreis_id,
             @PathVariable("useAggregation") boolean useAggregation
     ) {
+        if(analysenService.isJahrDenied(year)) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(wahlkreisAnalysenService.getWahlkreisUebersicht(year, wahlkreis_id, useAggregation));
     }
 
     @GetMapping("/knappsteSieger/{year}")
     @Transactional(readOnly = true)
     public ResponseEntity<List<KnappsteSiegerDTO>> getKnappsteSieger(@PathVariable("year") int year) {
+        if(analysenService.isJahrDenied(year)) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(wahlkreisAnalysenService.getKnappsteSieger(year));
     }
 
@@ -69,6 +84,9 @@ public class AnalysenController {
             @PathVariable("year") int year,
             @PathVariable("erststimme") String erststimme
     ) {
+        if(analysenService.isJahrDenied(year)) {
+            return null;
+        }
         return analysenService.getNonVoters(year, erststimme);
     }
 
@@ -78,6 +96,9 @@ public class AnalysenController {
             @PathVariable("year") int year,
             @PathVariable("bundesland_id") long bundesland_id
     ) {
+        if(analysenService.isJahrDenied(year)) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(wahlkreisAnalysenService.getBundesTagsMitglieder(year, bundesland_id));
     }
 
@@ -90,6 +111,9 @@ public class AnalysenController {
     @GetMapping("/socioCulturalStats/{year}")
     @Transactional(readOnly = true)
     public ResponseEntity<List<SocioCulturalStatsDTO>> getSocioCulturalStats(@PathVariable("year") int year) {
+        if(analysenService.isJahrDenied(year)) {
+            return ResponseEntity.badRequest().build();
+        }
         return ResponseEntity.ok(wahlkreisAnalysenService.getSocioCulturalStats(year));
     }
 

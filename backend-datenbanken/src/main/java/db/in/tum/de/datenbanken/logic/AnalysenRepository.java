@@ -12,6 +12,15 @@ import java.util.List;
 public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
 
     @Query(value = """
+    SELECT :year = any(
+        SELECT year
+        FROM elections
+        WHERE status = 'INACTIVE'
+    );
+    """, nativeQuery = true)
+    List<Object[]> isJahrAllowed(int year);
+
+    @Query(value = """
     SELECT year
     FROM elections
     WHERE status = 'INACTIVE';
