@@ -1,10 +1,13 @@
 package db.in.tum.de.datenbanken.logic.admin;
 
+import db.in.tum.de.datenbanken.configuration.security.TokenService;
 import db.in.tum.de.datenbanken.logic.voting.VoteCodeRepository;
 import db.in.tum.de.datenbanken.schema.election.Election;
+import db.in.tum.de.datenbanken.schema.kreise.Wahlkreis;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -15,7 +18,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -28,8 +33,6 @@ public class ElectionService {
     private final VoteCodeRepository voteCodeRepository;
     private final DataSource dataSource;
     private final PlatformTransactionManager transactionManager;
-
-    private Lock mutex = new ReentrantLock();
 
     /**
      * Checks if there is an active election.
@@ -85,35 +88,56 @@ public class ElectionService {
     }
 
     private void generateVoteCodesUsingBulkInsert(Long electionId, long totalVotes) {
-        int chunkSize = 100000; // Adjust based on DB performance
-        long remaining = totalVotes;
+        // e.g., how many rows to batch-insert in one go
+        int chunkSize = 10000;
 
-        String sql = "WITH wk AS (SELECT array_agg(id ORDER BY id) AS ids FROM wahlkreis) " +
+        // 1) Query all wahlkreis IDs in order (if you need to round-robin them)
+        List<Wahlkreis> wahlkreisIds = electionRepository.findAllWahlkreis();
+        int wahlkreisIndex = 0;
+
+        // 2) Prepare the insert statement
+        String insertSQL =
                 "INSERT INTO vote_code (code, wahlkreis_id, election_id) " +
-                "SELECT gen_random_uuid(), " +
-                "       wk.ids[(seq - 1) % array_length(wk.ids, 1) + 1], " +
-                "       ? " +
-                "FROM wk, generate_series(1, ?) seq;";
+                        "VALUES (?, ?, ?)";
+
+        String salt = TokenService.securityProperties.get("BCRYPT_SALT").toString();
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(insertSQL)) {
             conn.setAutoCommit(false);
 
-            conn.prepareStatement("ALTER TABLE vote_code DISABLE TRIGGER ALL;").execute();
+            long inserted = 0;
+            while (inserted < totalVotes) {
+                int currentChunk = (int) Math.min(chunkSize, totalVotes - inserted);
 
-            while (remaining > 0) {
-                int currentChunk = (int) Math.min(chunkSize, remaining);
-                stmt.setLong(1, electionId);
-                stmt.setInt(2, currentChunk);
-                stmt.executeUpdate();
-                conn.commit();
-                remaining -= currentChunk;
-                log.info(String.valueOf(remaining));
+                // 3) For each row in this chunk, generate a unique code and add to batch
+                for (int i = 0; i < currentChunk; i++) {
+                    // Generate a unique code
+                    String code = BCrypt.hashpw(UUID.randomUUID().toString(), salt);
+
+                    // Round-robin picking from wahlkreisIds (if needed)
+                    long wahlkreisId = wahlkreisIds.get(wahlkreisIndex).getId();
+                    wahlkreisIndex = (wahlkreisIndex + 1) % wahlkreisIds.size();
+
+                    // Bind parameters
+                    stmt.setString(1, code);
+                    stmt.setLong(2, wahlkreisId);
+                    stmt.setLong(3, electionId);
+                    stmt.addBatch();
+                }
+
+                // 4) Execute this batch
+                stmt.executeBatch();
+                conn.commit();  // commit after each chunk (or do one big commit at the end)
+
+                inserted += currentChunk;
+                log.info("Inserted so far: {}", inserted);
             }
 
-            conn.prepareStatement("ALTER TABLE vote_code ENABLE TRIGGER ALL;").execute();
+            conn.commit();
         } catch (SQLException e) {
-            throw new RuntimeException("Bulk insert failed", e);
+            log.error(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -124,6 +148,7 @@ public class ElectionService {
      */
     @Transactional
     public Election stopElection() {
+        // TODO: Refresh the analysis data for the election on stop
         Optional<Election> activeElectionOpt = getActiveElection();
         if (activeElectionOpt.isEmpty()) {
             throw new IllegalStateException("No active election to stop.");
@@ -133,6 +158,8 @@ public class ElectionService {
         activeElection.setStatus(Election.Status.INACTIVE);
         return electionRepository.save(activeElection);
     }
+
+    // TODO: A new service to refresh data on import!!!
 
     public long getElectionTotalCount(long electionId) {
         return electionRepository.getElectionTotalCount(electionId);

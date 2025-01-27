@@ -3,8 +3,12 @@ export interface ErstestimmeOptionen {
     vorname: string;
     nachname: string;
     wahlkreis_id: number;
-    kurzbezeichnung: string;
+    partyKurzbezeichnung: string;
+    partyName: string;
     partei_id: number;
+    titel: string;
+    beruf: string;
+    wohnort: string;
 }
 
 // Interface for ZweitestimmeOptionen
@@ -14,5 +18,6 @@ export interface ZweitestimmeOptionen {
     landesliste_platz: number;
     bundesland_id: number;
     kurzbezeichnung: string;
+    name: string;
     partei_id: number;
 }

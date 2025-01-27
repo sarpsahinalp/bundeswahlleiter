@@ -45,8 +45,13 @@ export const electionApi = {
 
     // Analysis endpoints
     getSeatDistribution: async (year: number): Promise<Sitzverteilung[]> => {
-        const response = await api.get<Sitzverteilung[]>(`/ergebnisse/sitzverteilung/${year}`)
-        return response.data
+        try {
+            const response = await api.get<Sitzverteilung[]>(`/ergebnisse/sitzverteilung/${year}`)
+            return response.data
+        } catch (error) {
+            console.error("Error fetching seat distribution:", error)
+            return []
+        }
     },
 
     getParliamentMembers: async (year: number, bundesland_id: number): Promise<Mandat[]> => {
@@ -60,8 +65,13 @@ export const electionApi = {
     },
 
     getConstituencyOverview: async (year: number, wahlkreis_id: number, useAggregation: boolean): Promise<WahlkreisUebersicht> => {
-        const response = await api.get<WahlkreisUebersicht>(`/ergebnisse/wahlkreis/uebersicht/${year}/${wahlkreis_id}/${useAggregation}`)
-        return response.data
+        try {
+            const response = await api.get<WahlkreisUebersicht>(`/ergebnisse/wahlkreis/uebersicht/${year}/${wahlkreis_id}/${useAggregation}`)
+            return response.data
+        } catch (error) {
+            console.error("Error fetching constituency overview:", error)
+            return null
+        }
     },
 
     getConstituencyWinners: async (year: number): Promise<WahlkreisSieger[]> => {
@@ -121,8 +131,13 @@ export const electionApi = {
     // Auswahldaten
 
     getAllConstituencies: async (): Promise<Wahlkreis[]> => {
-        const response = await api.get<Wahlkreis[]>('/ergebnisse/wahlkreise')
-        return response.data;
+        try {
+            const response = await api.get<Wahlkreis[]>('/ergebnisse/wahlkreise')
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching Wahlkreise:', error);
+            throw error;
+        }
     },
 
     getAllBundeslander: async (): Promise<Bundesland[]> => {

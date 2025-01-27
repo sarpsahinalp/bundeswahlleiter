@@ -41,13 +41,13 @@ public class VotingController {
             @PathVariable String code,
             HttpServletResponse response) {
 
-//        String hashed = BCrypt.hashpw(code, TokenService.securityProperties.get("BCRYPT_SALT").toString());
+        String hashed = BCrypt.hashpw(code, TokenService.securityProperties.get("BCRYPT_SALT").toString());
 
         // 1. Lookup the code in the DB
         //    If you store the code in plain text, just do findByCode(code).
         //    If you store a hashed version, you must hash the incoming `code` first and query by that.
         VotingToken votingToken = votingService.validateCode(
-                code
+                hashed
         );
 
         // 3. Mark code as used to prevent re-issuance
@@ -80,7 +80,7 @@ public class VotingController {
         }
 
         JwtPrincipal principal = (JwtPrincipal) auth.getPrincipal();
-        return ResponseEntity.ok(votingService.getErststimmeOptionen(principal.wahlkreis_id(), principal.year() - 4));
+        return ResponseEntity.ok(votingService.getErststimmeOptionen(principal.wahlkreis_id(), 2021));
     }
 
     @GetMapping("/secure/vote/zweitestimme")
@@ -91,7 +91,7 @@ public class VotingController {
         }
 
         JwtPrincipal principal = (JwtPrincipal) auth.getPrincipal();
-        return ResponseEntity.ok(votingService.getZweitestimmeOptionen(principal.wahlkreis_id(), principal.year() - 4));
+        return ResponseEntity.ok(votingService.getZweitestimmeOptionen(principal.wahlkreis_id(), 2021));
     }
 
     @SuppressWarnings("unchecked")
@@ -108,8 +108,8 @@ public class VotingController {
         JwtPrincipal ephemeralClaim = (JwtPrincipal) auth.getPrincipal();
 
         // Check whether the user has already voted
-//        String hashed = BCrypt.hashpw(ephemeralClaim.code(), TokenService.securityProperties.get("BCRYPT_SALT").toString());
-        VotingToken votingToken = votingService.validateCode(ephemeralClaim.code());
+        String hashed = BCrypt.hashpw(ephemeralClaim.code(), TokenService.securityProperties.get("BCRYPT_SALT").toString());
+        VotingToken votingToken = votingService.validateCode(hashed);
 
         LinkedHashMap<String, Integer> vote = (LinkedHashMap<String, Integer>) voteData;
         votingService.saveErsteUndZweiteStimme(vote.get("erststimme").longValue(), vote.get("zweitstimme").longValue(), ephemeralClaim.wahlkreis_id(), ephemeralClaim.year());

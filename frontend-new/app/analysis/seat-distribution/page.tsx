@@ -15,7 +15,6 @@ import {
 } from "@mui/material"
 import { visuallyHidden } from "@mui/utils"
 import { Box } from "@mui/system"
-import {Sitzverteilung} from "@/models/models";
 import {electionApi} from "@/services/api";
 
 const colorsMap: Map<string, [string, number]> = new Map([
@@ -27,9 +26,50 @@ const colorsMap: Map<string, [string, number]> = new Map([
   ['Union',     ['#121212', 5]],
 ])
 
-type SeatData = Sitzverteilung
+const PARTY_FULL_NAMES = new Map([
+  ['Union', "Christlich Demokratische Union Deutschlands"],
+  ['SPD', "Sozialdemokratische Partei Deutschlands"],
+  ['AfD', "Alternative für Deutschland"],
+  ['FDP', "Freie Demokratische Partei"],
+  ["DIE LINKE", "Die Linke"],
+  ['GRÜNE', "Bündnis 90/Die Grünen"],
+  ['Other', "Other Parties"],
+])
+
+type SeatData = {
+  name: string
+  seats: number
+  prevSeats: number | null
+  year: 2017 | 2021
+  color: string
+}
 
 type Order = "asc" | "desc"
+
+// Custom tooltip component
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data: SeatData = payload[0].payload
+    const difference = data.seats - (data.prevSeats ?? 0)
+    const diffText = difference > 0 ? `+${difference}` : difference
+
+    return (
+        <div className="bg-white p-4 shadow-lg rounded-lg border">
+          <div className="text-lg font-bold">{data.name}</div>
+          <div className="text-sm text-gray-600">{PARTY_FULL_NAMES.get(data.name)}</div>
+          {data.prevSeats
+              ? <div className="mt-2 font-semibold">
+                {data.seats} Sitze (Diff.zu {data.year === 2021 ? "2017" : "2013"}: {diffText} Sitze)
+              </div>
+              : <div className="mt-2 font-semibold">
+                  {data.seats} Sitze
+                </div>
+          }
+        </div>
+  )
+  }
+  return null
+}
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -69,8 +109,8 @@ interface HeadCell {
 }
 
 const headCells: readonly HeadCell[] = [
-  { id: "kurzbezeichnung", numeric: false, label: "Party" },
-  { id: "sitze", numeric: true, label: "Seats" },
+  { id: "name", numeric: false, label: "Party" },
+  { id: "seats", numeric: true, label: "Seats" },
 ]
 
 interface EnhancedTableProps {
@@ -118,15 +158,35 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 export default function SeatDistribution() {
   const [year, setYear] = useState<2017 | 2021>(2021)
   const [order, setOrder] = useState<Order>("desc")
-  const [orderBy, setOrderBy] = useState<keyof SeatData>("sitze")
+  const [orderBy, setOrderBy] = useState<keyof SeatData>("seats")
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(15)
-  const [data, setData] = useState<Sitzverteilung[]>([]);
+  const [data, setData] = useState<SeatData[]>([]);
 
-  const loadData = async (year: number) => {
+  const loadData = async (year: 2017 | 2021) => {
     try {
       const response = await electionApi.getSeatDistribution(year);
-      setData(response);
+      let newData: SeatData[] = response.map(res => ({
+        name: res.kurzbezeichnung,
+        seats: res.sitze,
+        prevSeats: res.prevSitze,
+        color: (colorsMap.get(res.kurzbezeichnung) ?? ['#8d8d8d'])[0],
+        year: year,
+      }))
+      newData.push({
+        name: 'Union',
+        seats: newData.reduce((accumulator, currentValue) => ['CDU', 'CSU'].includes(currentValue.name) ?  accumulator + currentValue.seats : accumulator, 0),
+        prevSeats: newData.reduce((accumulator, currentValue) => ['CDU', 'CSU'].includes(currentValue.name) ?  accumulator + (currentValue.prevSeats ?? 0) : accumulator, 0),
+        color: (colorsMap.get('Union') ?? ['#8d8d8d'])[0],
+        year: year,
+      })
+      newData = newData.filter(val => !['CDU', 'CSU'].includes(val.name));
+      newData.sort((a, b) => {
+        const aNum = colorsMap.get(a.name);
+        const bNum = colorsMap.get(b.name);
+        return (aNum ? aNum[1] : 10 )- (bNum ? bNum[1] : 10);
+      })
+      setData(newData);
     } catch (error) {
       console.error('Failed to fetch Sitzverteilung data:', error);
     }
@@ -135,7 +195,7 @@ export default function SeatDistribution() {
   useEffect(() => {
     loadData(year).then();
   }, [year]);
-  
+
   const handleRequestSort = (event: React.MouseEvent<unknown>, property: keyof SeatData) => {
     const isAsc = orderBy === property && order === "asc"
     setOrder(isAsc ? "desc" : "asc")
@@ -154,20 +214,12 @@ export default function SeatDistribution() {
   const sortedRows = stableSort(data, getComparator(order, orderBy))
   const visibleRows = sortedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
 
-  const dataPipe = data.filter(val => !['CDU', 'CSU'].includes(val.kurzbezeichnung));
-  dataPipe.push({
-    kurzbezeichnung: 'Union',
-    sitze: data.reduce((accumulator, currentValue) => ['CDU', 'CSU'].includes(currentValue.kurzbezeichnung) ?  accumulator + currentValue.sitze : accumulator, 0)
-  })
-  dataPipe.sort((a, b) => {
-    const aNum = colorsMap.get(a.kurzbezeichnung);
-    const bNum = colorsMap.get(b.kurzbezeichnung);
-    return (aNum ? aNum[1] : 10 )- (bNum ? bNum[1] : 10);
-  })
-
   return (
       <div className="px-4 py-6 sm:px-0">
-        <h2 className="text-2xl font-bold mb-4">Q1: Seat Distribution</h2>
+        <h2 className="text-2xl font-bold mb-4">Sitzverteilung</h2>
+        <h3 className="text-lg mb-4">
+          Bundestagswahl {year} {year === 2021 && "(Wiederholung in Teilen Berlins)"}, Deutschland
+        </h3>
         <div className="mb-4">
           <label htmlFor="year-select" className="mr-2">
             Select Year:
@@ -184,29 +236,35 @@ export default function SeatDistribution() {
         </div>
         <div className="space-y-8">
           <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-4">Seat Distribution</h3>
+            <div className="text-center mb-4">
+              <span className="text-2xl font-bold">{data.reduce((sum, item) => sum + item.seats, 0)} Sitze</span>
+            </div>
             <ResponsiveContainer width="100%" height={400}>
               <PieChart>
                 <Pie
-                    data={dataPipe}
+                    data={data}
                     cx="50%"
-                    cy="100%"
+                    cy="90%"
                     startAngle={180}
                     endAngle={0}
-                    innerRadius={60}
-                    outerRadius={180}
-                    paddingAngle={2}
-                    dataKey="sitze"
-                    nameKey="kurzbezeichnung"
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    innerRadius="60%"
+                    outerRadius="90%"
+                    paddingAngle={1}
+                    dataKey="seats"
                 >
-                  {dataPipe.map((entry, index) => {
-                      const color = colorsMap.get(entry.kurzbezeichnung) ?? ['#8d8d8d'];
-                      return <Cell key={`cell-${index}`} fill={color[0]} />
-                  })}
+                  {data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
                 </Pie>
-                <Tooltip />
-                <Legend verticalAlign="top" height={36} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend
+                    verticalAlign="top"
+                    height={36}
+                    formatter={(value, entry) => {
+                      const { payload } = entry
+                      return `${value} (${payload?.seats})`
+                    }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -217,12 +275,20 @@ export default function SeatDistribution() {
                 <EnhancedTableHead order={order} orderBy={orderBy} onRequestSort={handleRequestSort} />
                 <TableBody>
                   {visibleRows.map((row) => (
-                      <TableRow key={row.kurzbezeichnung} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
-                        <TableCell component="th" scope="row" size="small" sx={{ whiteSpace: "nowrap" }}>
-                          {row.kurzbezeichnung}
+                      <TableRow key={row.name} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
+                        <TableCell
+                            component="th"
+                            scope="row"
+                            size="small"
+                            sx={{
+                              whiteSpace: "nowrap",
+                              color: row.color,
+                            }}
+                        >
+                          {row.name}
                         </TableCell>
                         <TableCell align="right" size="small" sx={{ whiteSpace: "nowrap" }}>
-                          {row.sitze}
+                          {row.seats}
                         </TableCell>
                       </TableRow>
                   ))}

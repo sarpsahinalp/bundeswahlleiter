@@ -13,6 +13,9 @@ export default function Analysis() {
           { href: "/analysis/overhang-seats", title: "Q5: Overhang Seats" },
           { href: "/analysis/closest-winners", title: "Q6: Closest Winners" },
           { href: "/analysis/constituency-details", title: "Q7: Constituency Details (Individual Votes)" },
+          { href: "/analysis/socio-correlation", title: "Q8: Socio-Cultural Correlation" },
+          { href: "/analysis/economic-correlation", title: "Q9: Economic Correlation" },
+          { href: "/analysis/political-graph3d", title: "3D Graph Correlation"}
         ].map((item) => (
           <Link
             key={item.href}

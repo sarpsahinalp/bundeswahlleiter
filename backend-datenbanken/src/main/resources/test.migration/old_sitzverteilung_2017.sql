@@ -248,4 +248,6 @@ from iterations i
 where i.iteration = (select max(iteration)
                      from iterations i2
                      where i2.partei_id = i.partei_id
-                       and i2.jahr = i.jahr);
+                       and i2.jahr = i.jahr)
+ON CONFLICT (partei_id, jahr)
+DO UPDATE SET divisor = EXCLUDED.divisor;

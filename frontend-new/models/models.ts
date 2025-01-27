@@ -56,6 +56,7 @@ export interface SocioCulturalStats {
 export interface Sitzverteilung {
     kurzbezeichnung: string;
     sitze: number;
+    prevSitze: number | null;
 }
 export interface NonVoters {
     wahlkreisName: string;

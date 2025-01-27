@@ -81,27 +81,6 @@ FROM (SELECT DISTINCT jahr FROM directmandate) y
 GROUP BY b.id, y.jahr, p.id
     );
 
--- Materialized View Indexes --------------------------------------------------
--- parties_mind3
-CREATE INDEX IF NOT EXISTS idx_parties_mind3_jahr_partei
-    ON parties_mind3 (jahr, partei_id);
-
--- gultigeparties
-CREATE INDEX IF NOT EXISTS idx_gultigeparties_jahr_partei
-    ON gultigeparties (jahr, partei_id);
-
--- sumZweiteStimmeProParteiInBundesland
-CREATE INDEX IF NOT EXISTS idx_sum_zweitestimme_bl_jahr_partei
-    ON sumZweiteStimmeProParteiInBundesland (bundesland, jahr, partei_id);
-
--- directmandate
-CREATE INDEX IF NOT EXISTS idx_directmandate_jahr_wk_partei
-    ON directmandate (jahr, wahlkreis_id, partei_id);
-
--- wahlkreisSitze
-CREATE INDEX IF NOT EXISTS idx_wahlkreissitze_jahr_bl_partei
-    ON wahlkreisSitze (jahr, bundesland_id, partei_id);
-
 -- Materialized View Indexes (Run after creating views)
 -------------------------------------------------------
 -- parties_mind3
@@ -123,7 +102,3 @@ CREATE INDEX IF NOT EXISTS idx_directmandate_main
 -- wahlkreisSitze
 CREATE INDEX IF NOT EXISTS idx_wahlkreissitze_main
     ON wahlkreisSitze (jahr, bundesland_id, partei_id);
-
--- Supporting Indexes
-CREATE INDEX IF NOT EXISTS idx_zweitestimme_aggr_year
-    ON zweitestimme_aggr (jahr);

@@ -11,19 +11,25 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^6.4.1",
     "@mui/material": "^6.4.0",
     "@mui/system": "^6.4.0",
     "@mui/utils": "^6.4.0",
+    "@react-three/drei": "^9.121.3",
+    "@react-three/fiber": "^8.17.12",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "framer-motion": "^12.0.5",
     "lucide-react": "^0.473.0",
     "next": "14.2.16",
     "react": "^18",
     "react-dom": "^18",
     "recharts": "^2.15.0",
     "tailwind-merge": "^2.6.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.172.0",
+    "vis-graph3d": "^6.0.6"
   },
   "devDependencies": {
     "@types/node": "^20",
