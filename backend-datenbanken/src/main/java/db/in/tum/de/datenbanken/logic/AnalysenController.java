@@ -11,9 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/ergebnisse")
 @AllArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
-// TODO: Add security, authentication and authorization
-// TODO: Write description for each endpoint and explain in detail the queries in the repository
+@CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class AnalysenController {
 
     private final AnalysenService wahlkreisAnalysenService;

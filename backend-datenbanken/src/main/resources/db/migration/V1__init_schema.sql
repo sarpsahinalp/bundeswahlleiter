@@ -2,7 +2,7 @@ CREATE SEQUENCE IF NOT EXISTS bevoelkerung_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE IF NOT EXISTS bundesland_seq START WITH 1 INCREMENT BY 1;
 
-CREATE SEQUENCE IF NOT EXISTS elections_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE IF NOT EXISTS elections_seq START WITH 5 INCREMENT BY 1;
 
 CREATE SEQUENCE IF NOT EXISTS erststimme_aggr_seq START WITH 1 INCREMENT BY 50;
 
@@ -209,6 +209,32 @@ ALTER TABLE zweitestimme
     ADD CONSTRAINT FK_ZWEITESTIMME_ON_WAHLKREIS FOREIGN KEY (wahlkreis_id) REFERENCES wahlkreis (id);
 
 -- Indexes ---------------------------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_bevoelkerung_bundesland_jahr
+    ON bevoelkerung (bundesland_id, jahr);
+
+CREATE INDEX IF NOT EXISTS idx_erststimme_aggr_main
+    ON erststimme_aggr (jahr, wahlkreis_id, partei_id);
+
+CREATE INDEX IF NOT EXISTS idx_zweitstimme_aggr_main
+    ON zweitestimme_aggr (jahr, partei_id, wahlkreis_id);
+
+CREATE INDEX IF NOT EXISTS idx_kandidatur_search
+    ON kandidatur (jahr, partei_id, wahlkreis_id);
+
+-- Foreign Key Indexes --------------------------------------------------------
+CREATE INDEX IF NOT EXISTS idx_wahlkreis_bundesland
+    ON wahlkreis (bundesland_id);
+
+CREATE INDEX IF NOT EXISTS idx_erststimme_partei
+    ON erststimme (partei_id);
+
+CREATE INDEX IF NOT EXISTS idx_zweitestimme_partei
+    ON zweitestimme (partei_id);
+
+CREATE INDEX IF NOT EXISTS idx_wahlberechtigte_wk
+    ON wahlberechtigte (wahlkreis_id);
+
+-- Critical Query Support -----------------------------------------------------
 CREATE INDEX IF NOT EXISTS idx_partei_name
     ON partei (name);
 
@@ -217,5 +243,8 @@ CREATE INDEX IF NOT EXISTS idx_kandidatur_jahr
 
 CREATE INDEX IF NOT EXISTS idx_minderheitspartei_partei
     ON minderheitspartei (partei_id);
+
+CREATE INDEX IF NOT EXISTS idx_zweitestimme_aggr_year
+    ON zweitestimme_aggr (jahr);
 
 CREATE UNIQUE INDEX unique_active_election ON elections (status) WHERE status = 'ACTIVE';

@@ -62,9 +62,15 @@ public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
     List<Object[]> getWahlkreisSieger(@Param("year") int year);
 
     @Query(value = """
-            select p.kurzbezeichnung, zo.sitze
+            with vorjahr AS (
+                    SELECT max(jahr)
+                    FROM zweiter_oberverteilung
+                    WHERE jahr < :year
+                )
+            select p.kurzbezeichnung, zo.sitze,
+                   (SELECT vorWahl.sitze FROM zweiter_oberverteilung vorWahl WHERE vorWahl.jahr = (SELECT * FROM vorjahr) and vorWahl.partei_id = zo.partei_id)
             FROM zweiter_oberverteilung  zo
-            join partei p on p.id = zo.partei_id
+                     join partei p on p.id = zo.partei_id
             WHERE zo.jahr = :year
             """, nativeQuery = true)
     List<Object[]> getSitzverteilung(@Param("year") int year);

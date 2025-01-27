@@ -23,7 +23,7 @@ public class V8__init_Kandidaten extends BaseJavaMigration {
         // Define the batch insert SQL with placeholders for the parameters
         String insertSql = """
             WITH neuePartei(name) AS (VALUES (?)),\s
-                neuerWahlkreis(id) AS (SELECT CASE WHEN newWK.column1 ~ E'^\\\\\\\\+d$'
+                neuerWahlkreis(id) AS (SELECT CASE WHEN newWK.column1 ~ E'^\\\\d+$'
                     THEN (SELECT w.id FROM wahlkreis w WHERE w.id = cast(newWK.column1 AS int))
                     ELSE (SELECT w.id FROM wahlkreis w WHERE w.name = newWK.column1) END
                     FROM (VALUES (?)) as newWK),

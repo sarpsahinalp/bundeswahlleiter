@@ -35,7 +35,7 @@ public interface VoteCodeRepository extends JpaRepository<VoteCode, String> {
 
     @Query(
             value = """
-                    SELECT k.vorname, k.nachname, k.wahlkreis_id, p.kurzbezeichnung, p.id
+                    SELECT k.vorname, k.nachname, k.wahlkreis_id, p.kurzbezeichnung, p.name, p.id, k.titel, k.beruf, k.wohnort
                     FROM kandidatur k
                     LEFT JOIN partei p ON k.partei_id = p.id
                     WHERE k.wahlkreis_id = :wahlkreisID
@@ -47,7 +47,7 @@ public interface VoteCodeRepository extends JpaRepository<VoteCode, String> {
 
     @Query(
             value = """
-                    SELECT k.vorname, k.nachname, k.landesliste_platz, k.bundesland_id, p.kurzbezeichnung, p.id
+                    SELECT k.vorname, k.nachname, k.landesliste_platz, k.bundesland_id, p.kurzbezeichnung, p.name, p.id
                     FROM kandidatur k
                     LEFT JOIN partei p ON k.partei_id = p.id
                     JOIN bundesland b on k.bundesland_id = b.id
