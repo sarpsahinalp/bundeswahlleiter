@@ -1,9 +1,10 @@
 "use client"
 
-import { useState } from "react"
+import {useEffect, useState} from "react"
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
 import { Select, MenuItem, FormControl, InputLabel, Paper, Typography, Tooltip as MuiTooltip } from "@mui/material"
 import InfoIcon from "@mui/icons-material/Info"
+import {electionApi} from "@/services/api";
 
 interface SocioCulturalStats {
   winningParty: number
@@ -175,7 +176,15 @@ export default function EconomicCorrelation() {
   const [selectedCategory1, setSelectedCategory1] = useState(economicCategories[0].key)
   const [selectedCategory2, setSelectedCategory2] = useState(economicCategories[1].key)
 
-  const years = Object.keys(mockData).map(Number)
+  const [yearsArray, setYearsArray] = useState<number[]>([])
+  const loadYear = async() => {
+    const response = await electionApi.getJahre();
+    setYearsArray(response);
+  }
+  useEffect(() => {
+    loadYear().then();
+  }, []);
+
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -208,7 +217,7 @@ export default function EconomicCorrelation() {
       <FormControl fullWidth className="mb-4">
         <InputLabel>Select Year</InputLabel>
         <Select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))} label="Select Year">
-          {years.map((year) => (
+          {yearsArray.map((year) => (
             <MenuItem key={year} value={year}>
               {year}
             </MenuItem>
@@ -226,7 +235,7 @@ export default function EconomicCorrelation() {
                 economic sectors (e.g., Agriculture & Fishery, Manufacturing, Services). Each point on the graph
                 represents a region, with its color indicating the winning party. This visualization helps identify
                 patterns in how the prominence of different economic sectors might influence election outcomes. By
-                comparing two sectors, it's possible to see how the balance between different types of economic activity
+                comparing two sectors, it&#39;s possible to see how the balance between different types of economic activity
                 relates to political preferences in various areas.
               </Typography>
             }

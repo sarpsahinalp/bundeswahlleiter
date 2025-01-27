@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from "recharts"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts"
 import {
   Table,
   TableBody,
@@ -137,12 +137,21 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 export default function OverhangSeats() {
-  const [year, setYear] = useState<2017 | 2021>(2021)
+  const [year, setYear] = useState<number>(2021)
   const [order, setOrder] = useState<Order>("desc")
   const [orderBy, setOrderBy] = useState<keyof OverhangSeat>("seats")
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(15)
   const [selectedType, setSelectedType] = useState<"parties" | "states">("parties")
+
+  const [yearsArray, setYearsArray] = useState<number[]>([])
+  const loadYear = async() => {
+    const response = await electionApi.getJahre();
+    setYearsArray(response);
+  }
+  useEffect(() => {
+    loadYear().then();
+  }, []);
 
   const [data, setData] = useState<OverhangSeat[]>([])
 
@@ -193,11 +202,12 @@ export default function OverhangSeats() {
             <select
                 id="year-select"
                 value={year}
-                onChange={(e) => setYear(Number(e.target.value) as 2017 | 2021)}
+                onChange={(e) => setYear(Number(e.target.value) as number)}
                 className="p-2 border rounded"
             >
-              <option value={2017}>2017</option>
-              <option value={2021}>2021</option>
+              {yearsArray.map((year) => (
+                  <option key={year} value={year}>{year}</option>
+              ))}
             </select>
           </div>
           <div>

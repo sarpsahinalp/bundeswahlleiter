@@ -13,6 +13,11 @@ public class AnalysenService {
 
     public final AnalysenRepository analysenRepository;
 
+    public List<Integer> getJahre() {
+        return analysenRepository.getJahre()
+                .stream().map(objArr -> (int) objArr[0]).toList();
+    }
+
     public List<WahlkreisSiegerDTO> getWahlkreisSieger(int jahr){
         return analysenRepository.getWahlkreisSieger(jahr)
                 .stream().map(WahlkreisSiegerDTO::new).toList();

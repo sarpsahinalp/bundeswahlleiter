@@ -105,12 +105,21 @@ function EnhancedTableHead(props: EnhancedTableProps) {
 }
 
 export default function ConstituencyOverview() {
-  const [year, setYear] = useState<2017 | 2021>(2021)
+  const [year, setYear] = useState<number>(2021)
   const [selectedConstituency, setSelectedConstituency] = useState<Wahlkreis | null>(null)
   const [order, setOrder] = useState<Order>("asc")
   const [orderBy, setOrderBy] = useState<keyof Stimmen>("name")
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(15)
+
+  const [yearsArray, setYearsArray] = useState<number[]>([])
+  const loadYear = async() => {
+    const response = await electionApi.getJahre();
+    setYearsArray(response);
+  }
+  useEffect(() => {
+    loadYear().then();
+  }, []);
 
   const [wahlkreise, setWahlkreise] = useState<Wahlkreis[]>([]);
   const [wahlkreisUebersicht, setWahlkreisUebersicht] = useState<WahlkreisUebersicht | null>(null);
@@ -186,11 +195,12 @@ export default function ConstituencyOverview() {
             <select
                 id="year-select"
                 value={year}
-                onChange={(e) => setYear(Number(e.target.value) as 2017 | 2021)}
+                onChange={(e) => setYear(Number(e.target.value) as number)}
                 className="p-2 border rounded"
             >
-              <option value={2017}>2017</option>
-              <option value={2021}>2021</option>
+              {yearsArray.map((year) => (
+                  <option key={year} value={year}>{year}</option>
+              ))}
             </select>
           </div>
           <div>
