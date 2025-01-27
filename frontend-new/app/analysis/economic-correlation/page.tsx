@@ -5,163 +5,18 @@ import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Responsive
 import { Select, MenuItem, FormControl, InputLabel, Paper, Typography, Tooltip as MuiTooltip } from "@mui/material"
 import InfoIcon from "@mui/icons-material/Info"
 import {electionApi} from "@/services/api";
+import { SocioCulturalStats } from "@/models/socio-cultural/socio"
 
-interface SocioCulturalStats {
-  winningParty: number
-  type: string
-  svbInsgesamt: number
-  svbLandwFischerei: number
-  svbProduzGewerbe: number
-  svbHandelGastVerkehr: number
-  svbDienstleister: number
-  svbUebrigeDienstleister: number
-  alterUnter18: number
-  alter1824: number
-  alter2534: number
-  alter3559: number
-  alter6074: number
-  alter75Plus: number
-  alqFrauen: number
-  alq1524: number
-  alq5564: number
-  alqInsgesamt: number
-  alqMaenner: number
+const partyColors: { [key: string]: string } = {
+  "CDU": "#000000",
+  "CSU": "#000000",
+  "SPD": "#FF0000",
+  "AfD": "#009EE0",
+  "FDP": "#FFED00",
+  "DIE LINKE": "#BE3075",
+  "GRÜNE": "#64A12D",
+  "Other": "#CCCCCC",
 }
-
-const mockData: { [year: number]: SocioCulturalStats[] } = {
-  2017: [
-    {
-      winningParty: 1,
-      type: "Urban",
-      svbInsgesamt: 100000,
-      svbLandwFischerei: 1000,
-      svbProduzGewerbe: 20000,
-      svbHandelGastVerkehr: 25000,
-      svbDienstleister: 40000,
-      svbUebrigeDienstleister: 14000,
-      alterUnter18: 15,
-      alter1824: 10,
-      alter2534: 20,
-      alter3559: 30,
-      alter6074: 15,
-      alter75Plus: 10,
-      alqFrauen: 5.2,
-      alq1524: 7.5,
-      alq5564: 4.8,
-      alqInsgesamt: 5.5,
-      alqMaenner: 5.8,
-    },
-    {
-      winningParty: 2,
-      type: "Rural",
-      svbInsgesamt: 50000,
-      svbLandwFischerei: 5000,
-      svbProduzGewerbe: 15000,
-      svbHandelGastVerkehr: 10000,
-      svbDienstleister: 15000,
-      svbUebrigeDienstleister: 5000,
-      alterUnter18: 18,
-      alter1824: 8,
-      alter2534: 15,
-      alter3559: 35,
-      alter6074: 18,
-      alter75Plus: 6,
-      alqFrauen: 4.8,
-      alq1524: 6.9,
-      alq5564: 4.2,
-      alqInsgesamt: 5.1,
-      alqMaenner: 5.4,
-    },
-    {
-      winningParty: 3,
-      type: "Suburban",
-      svbInsgesamt: 75000,
-      svbLandwFischerei: 2000,
-      svbProduzGewerbe: 18000,
-      svbHandelGastVerkehr: 20000,
-      svbDienstleister: 25000,
-      svbUebrigeDienstleister: 10000,
-      alterUnter18: 17,
-      alter1824: 9,
-      alter2534: 18,
-      alter3559: 32,
-      alter6074: 16,
-      alter75Plus: 8,
-      alqFrauen: 5.0,
-      alq1524: 7.2,
-      alq5564: 4.5,
-      alqInsgesamt: 5.3,
-      alqMaenner: 5.6,
-    },
-  ],
-  2021: [
-    {
-      winningParty: 2,
-      type: "Urban",
-      svbInsgesamt: 110000,
-      svbLandwFischerei: 800,
-      svbProduzGewerbe: 22000,
-      svbHandelGastVerkehr: 28000,
-      svbDienstleister: 45000,
-      svbUebrigeDienstleister: 14200,
-      alterUnter18: 14,
-      alter1824: 11,
-      alter2534: 22,
-      alter3559: 28,
-      alter6074: 16,
-      alter75Plus: 9,
-      alqFrauen: 4.9,
-      alq1524: 7.1,
-      alq5564: 4.6,
-      alqInsgesamt: 5.2,
-      alqMaenner: 5.5,
-    },
-    {
-      winningParty: 1,
-      type: "Rural",
-      svbInsgesamt: 55000,
-      svbLandwFischerei: 5500,
-      svbProduzGewerbe: 16000,
-      svbHandelGastVerkehr: 11000,
-      svbDienstleister: 17000,
-      svbUebrigeDienstleister: 5500,
-      alterUnter18: 17,
-      alter1824: 7,
-      alter2534: 14,
-      alter3559: 36,
-      alter6074: 19,
-      alter75Plus: 7,
-      alqFrauen: 4.5,
-      alq1524: 6.5,
-      alq5564: 4.0,
-      alqInsgesamt: 4.8,
-      alqMaenner: 5.1,
-    },
-    {
-      winningParty: 4,
-      type: "Suburban",
-      svbInsgesamt: 80000,
-      svbLandwFischerei: 1800,
-      svbProduzGewerbe: 19000,
-      svbHandelGastVerkehr: 22000,
-      svbDienstleister: 27000,
-      svbUebrigeDienstleister: 10200,
-      alterUnter18: 16,
-      alter1824: 10,
-      alter2534: 19,
-      alter3559: 31,
-      alter6074: 17,
-      alter75Plus: 7,
-      alqFrauen: 4.7,
-      alq1524: 6.8,
-      alq5564: 4.3,
-      alqInsgesamt: 5.0,
-      alqMaenner: 5.3,
-    },
-  ],
-}
-
-const partyColors = ["#000000", "#FF0000", "#FFFF00", "#00FF00", "#0000FF", "#FF00FF"]
 
 const economicCategories = [
   { key: "svbLandwFischerei", label: "Agriculture & Fishery" },
@@ -175,12 +30,18 @@ export default function EconomicCorrelation() {
   const [selectedYear, setSelectedYear] = useState<number>(2021)
   const [selectedCategory1, setSelectedCategory1] = useState(economicCategories[0].key)
   const [selectedCategory2, setSelectedCategory2] = useState(economicCategories[1].key)
+  const [socioStats, setSocioStats] = useState<SocioCulturalStats[]>([])
 
   const [yearsArray, setYearsArray] = useState<number[]>([])
   const loadYear = async() => {
     const response = await electionApi.getJahre();
     setYearsArray(response);
+
+    const socioResponse = await electionApi.getSocioCulturalStats(selectedYear, "zweitestimme")
+    setSocioStats(socioResponse)
   }
+
+
   useEffect(() => {
     loadYear().then();
   }, []);
@@ -291,9 +152,9 @@ export default function EconomicCorrelation() {
               label={{ value: "Category 2 Percentage", angle: -90, position: "left" }}
             />
             <Tooltip content={<CustomTooltip />} />
-            <Scatter name="Economic Sectors vs Winning Party" data={mockData[selectedYear]}>
-              {mockData[selectedYear].map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={partyColors[entry.winningParty - 1]} />
+            <Scatter name="Economic Sectors vs Winning Party" data={socioStats}>
+              {socioStats.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={partyColors[entry.winningParty]} />
               ))}
             </Scatter>
           </ScatterChart>
