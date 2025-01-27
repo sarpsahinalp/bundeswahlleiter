@@ -17,6 +17,7 @@ import lombok.*;
         "vorname",
         "geburtsjahr",
         "jahr",
+        "partei_id"
 })})
 public class Kandidatur {
 

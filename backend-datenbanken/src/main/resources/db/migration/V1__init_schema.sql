@@ -158,7 +158,7 @@ CREATE TABLE zweitestimme_aggr
 );
 
 ALTER TABLE kandidatur
-    ADD CONSTRAINT kandidaturEinmaligProJahr UNIQUE (nachname, vorname, geburtsjahr, jahr);
+    ADD CONSTRAINT kandidaturEinmaligProJahr UNIQUE (nachname, vorname, geburtsjahr, jahr, partei_id);
 
 ALTER TABLE partei
     ADD CONSTRAINT parteiNameUnique UNIQUE (kurzbezeichnung, wahlkreis_id);
