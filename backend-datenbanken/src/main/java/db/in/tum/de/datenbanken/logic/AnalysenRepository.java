@@ -77,23 +77,23 @@ public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
 
     @Query(value = """
             SELECT
-                           CASE
-                               WHEN :grouping = 'bundesland' THEN b.name
-                               ELSE p.kurzbezeichnung
-                           END AS group_field,
-                           SUM(u.drohendeuberhang) AS mandates
-                       FROM (
-                           SELECT *
-                           FROM uberhangandmindestsiztanzahl2021
-                           UNION
-                           SELECT *
-                           FROM uberhangandmindestsiztanzahl2017
-                       ) AS u
-                       JOIN gultigeparties gp ON u.partei_id = gp.partei_id
-                       JOIN partei p ON gp.partei_id = p.id
-                       JOIN bundesland b ON b.id = u.bundesland_id
-                       WHERE u.jahr = :year
-                       GROUP BY group_field
+                CASE
+                    WHEN :grouping = 'bundesland' THEN b.name
+                    ELSE p.kurzbezeichnung
+                    END AS group_field,
+                SUM(u.drohendeuberhang) AS mandates
+            FROM (
+                     SELECT *
+                     FROM uberhangandmindestsiztanzahl2021
+                     UNION
+                     SELECT *
+                     FROM uberhangandmindestsiztanzahl2017
+                 ) AS u
+                     JOIN gultigeparties gp using (partei_id, jahr)
+                     JOIN partei p ON gp.partei_id = p.id
+                     JOIN bundesland b ON b.id = u.bundesland_id
+            WHERE u.jahr = :year
+            GROUP BY group_field;
             """, nativeQuery = true)
     List<Object[]> getUberhangmandate(int year, String grouping);
 
