@@ -9,6 +9,7 @@ import {
     WahlkreisSieger,
     WahlkreisUebersicht
 } from "@/models/models"
+import {SocioCulturalStats} from "@/models/socio-cultural/socio";
 
 export const electionApi = {
     // Election management
@@ -70,7 +71,7 @@ export const electionApi = {
             return response.data
         } catch (error) {
             console.error("Error fetching constituency overview:", error)
-            return null
+            throw error
         }
     },
 
@@ -157,6 +158,16 @@ export const electionApi = {
         } catch (error) {
             console.error('Error fetching Bundesländer:', error);
             throw error;
+        }
+    },
+
+    getSocioCulturalStats: async (year: number, type: string): Promise<SocioCulturalStats[]> => {
+        try {
+            const response = await api.get<SocioCulturalStats[]>(`/ergebnisse/socioCulturalStats/${year}/${type}`)
+            return response.data
+        } catch (error) {
+            console.error("Error fetching socio-cultural stats:", error)
+            throw error
         }
     }
 }

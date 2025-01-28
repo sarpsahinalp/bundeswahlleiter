@@ -380,38 +380,30 @@ public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
     List<Object[]> getBundesLander();
 
     @Query(value = """
-
-            WITH winning_parties AS (
-                -- Determine the winning party for each wahlkreis and year in erststimme and zweitestimme
-                SELECT
-                    w.wahlkreis_id,
-                    w.jahr,
-                    w.partei_id AS winning_partei_id,
-                    w.stimmen,
-                    'erststimme' AS type
-                FROM erststimme_aggr w
-                WHERE w.stimmen = (SELECT MAX(ea.stimmen)
-                                   FROM erststimme_aggr ea
-                                   WHERE ea.wahlkreis_id = w.wahlkreis_id AND ea.jahr = w.jahr)
-                
-                UNION ALL
-                
+            WITH maxVotesProWahlkreis as (
+                SELECT wahlkreis_id, jahr, MAX(stimmen) as max_stimmen
+                FROM zweitestimme_aggr
+                WHERE jahr = :year
+                GROUP BY wahlkreis_id, jahr
+                        )
+                          , winning_parties AS (
                 SELECT
                     z.wahlkreis_id,
                     z.jahr,
                     z.partei_id AS winning_partei_id,
+                    p.kurzbezeichnung AS winning_partei_name,
                     z.stimmen,
                     'zweitestimme' AS type
                 FROM zweitestimme_aggr z
-                WHERE z.stimmen = (SELECT MAX(za.stimmen)
-                                   FROM zweitestimme_aggr za
-                                   WHERE za.wahlkreis_id = z.wahlkreis_id AND za.jahr = z.jahr)
+                            JOIN maxVotesProWahlkreis mv ON z.wahlkreis_id = mv.wahlkreis_id
+                            JOIN partei p ON z.partei_id = p.id
+                WHERE z.stimmen = mv.max_stimmen
             ),
                 
                  weighted_data AS (
                      -- Combine socio-cultural info with population and winning party
                      SELECT
-                         ws.wahlkreis_id,
+                         w.name,
                          ws.year,
                          ws.SVB_insgesamt,
                          ws.SVB_landw_fischerei,
@@ -431,20 +423,22 @@ public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
                          ws.ALQ_maenner,
                          pw.population,
                          wp.winning_partei_id,
+                         wp.winning_partei_name,
                          wp.type
                      FROM wahlkreis_soziokulturell_info ws
                               JOIN population_wahlkreis pw
                                    ON ws.wahlkreis_id = pw.wahlkreis_id AND ws.year = pw.year
                               JOIN winning_parties wp
                                    ON ws.wahlkreis_id = wp.wahlkreis_id AND ws.year = wp.jahr
+                                 JOIN wahlkreis w on ws.wahlkreis_id = w.id
                     where ws.year = :year
                  ),
                 
                  averages AS (
                      -- Calculate population-weighted averages for each winning party and type (erst/zweit)
                      SELECT
-                         wd.winning_partei_id,
-                         wd.year,
+                         wd.winning_partei_name,
+                         wd.name,
                          wd.type,
                          AVG(wd.SVB_insgesamt / 10) AS avg_SVB_insgesamt,
                          AVG(wd.SVB_landw_fischerei) AS avg_SVB_landw_fischerei,
@@ -463,12 +457,13 @@ public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
                          AVG(wd.ALQ_insgesamt) AS avg_ALQ_insgesamt,
                          AVG(wd.ALQ_maenner) AS avg_ALQ_maenner
                      FROM weighted_data wd
-                     GROUP BY wd.winning_partei_id, wd.year, wd.type
+                     GROUP BY wd.winning_partei_name, wd.name, wd.year, wd.type
                  )
                 
-            SELECT * from averages a;
+            SELECT * from averages a
+                        where a.type = :type;
             """, nativeQuery = true)
-    List<Object[]> getSozioKulturellProPartei(int year);
+    List<Object[]> getSozioKulturellProPartei(String type, int year);
 
 
 }

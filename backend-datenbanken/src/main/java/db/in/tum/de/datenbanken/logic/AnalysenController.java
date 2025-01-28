@@ -108,13 +108,15 @@ public class AnalysenController {
         return ResponseEntity.ok(wahlkreisAnalysenService.getBundesLander());
     }
 
-    @GetMapping("/socioCulturalStats/{year}")
+    @GetMapping("/socioCulturalStats/{year}/{type}")
     @Transactional(readOnly = true)
-    public ResponseEntity<List<SocioCulturalStatsDTO>> getSocioCulturalStats(@PathVariable("year") int year) {
+    public ResponseEntity<List<SocioCulturalStatsDTO>> getSocioCulturalStats(
+            @PathVariable("year") int year,
+            @PathVariable("type") String type) {
         if(analysenService.isJahrDenied(year)) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(wahlkreisAnalysenService.getSocioCulturalStats(year));
+        return ResponseEntity.ok(wahlkreisAnalysenService.getSocioCulturalStats(type, year));
     }
 
 }
