@@ -225,12 +225,6 @@ CREATE INDEX IF NOT EXISTS idx_kandidatur_search
 CREATE INDEX IF NOT EXISTS idx_wahlkreis_bundesland
     ON wahlkreis (bundesland_id);
 
-CREATE INDEX IF NOT EXISTS idx_erststimme_partei
-    ON erststimme (partei_id);
-
-CREATE INDEX IF NOT EXISTS idx_zweitestimme_partei
-    ON zweitestimme (partei_id);
-
 CREATE INDEX IF NOT EXISTS idx_wahlberechtigte_wk
     ON wahlberechtigte (wahlkreis_id);
 
