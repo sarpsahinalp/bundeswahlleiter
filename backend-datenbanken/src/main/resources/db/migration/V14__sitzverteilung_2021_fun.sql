@@ -1,11 +1,3 @@
-create table IF NOT EXISTS verteilungskriterium
-(
-    id      SERIAL PRIMARY KEY,
-    name    VARCHAR(255) NOT NULL,
-    sitze   INT          NOT NULL,
-    divisor FLOAT        NOT NULL
-);
-
 create table IF NOT EXISTS erste_oberverteilung
 (
     bundesland_id INT references bundesland (id),
@@ -20,17 +12,6 @@ create table IF NOT EXISTS erste_unterverteilung
     partei_id     INT references partei (id),
     sitze         INT,
     jahr          INT,
-    primary key (bundesland_id, partei_id, jahr)
-);
-
-create table IF NOT EXISTS mindestSitzanspruch
-(
-    bundesland_id      INT references bundesland (id),
-    partei_id          INT references partei (id),
-    sitze              INT,
-    jahr               INT,
-    drohendeUberhang   INT,
-    mindesSitzAnspruch INT,
     primary key (bundesland_id, partei_id, jahr)
 );
 

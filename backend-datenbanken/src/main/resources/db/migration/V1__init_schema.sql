@@ -14,8 +14,6 @@ CREATE SEQUENCE IF NOT EXISTS minderheitspartei_seq START WITH 1 INCREMENT BY 50
 
 CREATE SEQUENCE IF NOT EXISTS partei_seq START WITH 1 INCREMENT BY 1;
 
-CREATE SEQUENCE IF NOT EXISTS partei_wahl_teilnahme_seq START WITH 1 INCREMENT BY 1;
-
 CREATE SEQUENCE IF NOT EXISTS wahlberechtigte_seq START WITH 1 INCREMENT BY 1;
 
 CREATE SEQUENCE IF NOT EXISTS wahlkreis_seq START WITH 1 INCREMENT BY 1;
@@ -105,14 +103,6 @@ CREATE TABLE partei
     CONSTRAINT pk_partei PRIMARY KEY (id)
 );
 
-CREATE TABLE partei_wahl_teilnahme
-(
-    id        BIGINT  NOT NULL,
-    partei_id BIGINT  NOT NULL,
-    jahr      INTEGER NOT NULL,
-    CONSTRAINT pk_partei_wahl_teilnahme PRIMARY KEY (id)
-);
-
 CREATE TABLE vote_code
 (
     code         VARCHAR(255) NOT NULL,
@@ -186,9 +176,6 @@ ALTER TABLE minderheitspartei
 
 ALTER TABLE partei
     ADD CONSTRAINT FK_PARTEI_ON_WAHLKREIS FOREIGN KEY (wahlkreis_id) REFERENCES wahlkreis (id);
-
-ALTER TABLE partei_wahl_teilnahme
-    ADD CONSTRAINT FK_PARTEI_WAHL_TEILNAHME_ON_PARTEI FOREIGN KEY (partei_id) REFERENCES partei (id);
 
 ALTER TABLE vote_code
     ADD CONSTRAINT FK_VOTE_CODE_ON_ELECTION FOREIGN KEY (election_id) REFERENCES elections (id);
