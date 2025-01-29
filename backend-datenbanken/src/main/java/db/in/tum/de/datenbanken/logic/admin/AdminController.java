@@ -2,14 +2,11 @@ package db.in.tum.de.datenbanken.logic.admin;
 
 import db.in.tum.de.datenbanken.schema.election.Election;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -115,4 +112,15 @@ public class AdminController {
         }
         return "redirect:/admin/dashboard";
     }
+
+    @PostMapping("/upload_votes")
+    public String uploadVotes(
+            @RequestParam("file-erststimme") MultipartFile file_erststimme,
+            @RequestParam("file-zweitstimme") MultipartFile file_zweitstimme
+    ) {
+        electionService.uploadErststimme(file_erststimme);
+        electionService.uploadZweitstimme(file_zweitstimme);
+        return "redirect:/admin/dashboard";
+    }
+
 }

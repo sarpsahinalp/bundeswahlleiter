@@ -49,7 +49,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 1.5rem;
-            margin-top: 2rem;
+            margin: 2rem 0;
         }
 
         .card {
@@ -57,6 +57,8 @@
             border-radius: 8px;
             padding: 1.5rem;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
         }
 
         .timer-display {
@@ -119,12 +121,12 @@
             background-color: var(--accent-color);
         }
 
-        .btn-danger {
+        .btn-danger:not([disabled]) {
             background-color: #dc3545;
             color: white;
         }
 
-        .btn-danger:hover {
+        .btn-danger:not([disabled]):hover {
             background-color: #c82333;
         }
 
@@ -179,6 +181,61 @@
             font-size: 1.25rem;
             margin-bottom: 1rem;
             color: var(--primary-color);
+        }
+
+        #loading-spinner {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            position: absolute;
+            display: none;
+        }
+
+        #loading-spinner::after {
+            content: '';
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background-color: black;
+            opacity: 50%;
+            position: absolute;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            position: absolute;
+            left: 50%;
+            top: 30%;
+            translate: -50%;
+        }
+
+        .spinner::after {
+            content: 'Uploading...';
+            position: absolute;
+            bottom: -30px;
+            left: calc(50%  + 5px);
+            translate: -50%;
+        }
+
+        .spinner::before {
+            content: '';
+            animation: spin 1s linear infinite;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #000;
+            border-radius: 50%;
+            height: 100%;
+            width: 100%;
+            display: block;
+            position: absolute;
+            top: -3.6px;
+            left: -3.6px;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -244,10 +301,36 @@
             </div>
         </div>
     </div>
+
+    <div class="card">
+        <h3 class="card-title">Upload Votes</h3>
+        <form th:action="@{/admin/upload_votes}" method="post" enctype="multipart/form-data" onsubmit="showLoading()">
+            <label for="erststimme">Erststimme</label>
+            <br>
+            <input id="erststimme" type="file" name="file-erststimme" accept="text/csv"/>
+            <br>
+            <label for="zweitstimme">Zweitstimme</label>
+            <br>
+            <input id="zweitstimme" type="file" name="file-zweitstimme" accept="text/csv"/>
+            <br>
+            <br>
+            <button id="submit-btn" type="submit" class="btn btn-danger">Upload Votes</button>
+        </form>
+
+        <div id="loading-spinner">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script th:inline="javascript">
+    function showLoading() {
+        document.getElementById("loading-spinner").style.display = "block";
+        document.getElementById("submit-btn").setAttribute("disabled", "true")
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize date picker
         flatpickr("#electionStartTime", {
