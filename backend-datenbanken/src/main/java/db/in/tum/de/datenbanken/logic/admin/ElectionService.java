@@ -7,13 +7,17 @@ import db.in.tum.de.datenbanken.schema.kreise.Wahlkreis;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.postgresql.copy.CopyManager;
+import org.postgresql.jdbc.PgConnection;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -21,8 +25,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.io.BufferedReader;
+
 
 @Slf4j
 @Service
@@ -167,6 +171,32 @@ public class ElectionService {
 
     public long getCountOfRemainingVotes(long electionId) {
         return electionRepository.getCountOfRemainingVotes(electionId);
+    }
+
+    public void uploadErststimme(MultipartFile file_erststimme) {
+        String copySQL = "COPY erststimme(id, partei_id, wahlkreis_id, jahr)  FROM STDIN WITH DELIMITER ';' CSV HEADER;";
+
+        loadData(file_erststimme, copySQL);
+    }
+
+    public void uploadZweitstimme(MultipartFile file_zweitstimme) {
+        String copySQL = "COPY zweitestimme(id, partei_id, wahlkreis_id, jahr)  FROM STDIN WITH DELIMITER ';' CSV HEADER;";
+
+        loadData(file_zweitstimme, copySQL);
+    }
+
+    private void loadData(MultipartFile file_erststimme, String copySQL) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file_erststimme.getInputStream()))) {
+
+            Connection connection = dataSource.getConnection();
+
+            PgConnection pgConnection = connection.unwrap(PgConnection.class);
+            CopyManager copyManager = new CopyManager(pgConnection);
+            copyManager.copyIn(copySQL, reader);
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload CSV file", e);
+        }
     }
 }
 
