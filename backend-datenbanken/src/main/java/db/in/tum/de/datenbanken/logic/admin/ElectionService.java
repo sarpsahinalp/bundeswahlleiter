@@ -109,10 +109,16 @@ public class ElectionService {
                 "INSERT INTO vote_code (code, wahlkreis_id, election_id) " +
                         "VALUES (?, ?, ?)";
 
+        String createVoteCount = "INSERT INTO vote_count (total_votes, election_id) VALUES (0, ?)";
+
         byte[] salt = TokenService.securityProperties.get("BCRYPT_SALT").toString().getBytes();
 
         try (Connection conn = dataSource.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(insertSQL)) {
+             PreparedStatement stmt = conn.prepareStatement(insertSQL);
+             PreparedStatement stmtVoteCount = conn.prepareStatement(createVoteCount)) {
+
+            stmtVoteCount.setLong(1, electionId);
+            stmtVoteCount.execute();
 
             conn.setAutoCommit(false);
 
