@@ -49,4 +49,19 @@ public interface ElectionRepository extends JpaRepository<Election, Long> {
             "SELECT w FROM Wahlkreis w"
     )
     List<Wahlkreis> findAllWahlkreis();
+
+    @Query(value = """
+        SELECT year
+        FROM elections;
+    """, nativeQuery = true)
+    List<Integer> getAllYears();
+
+    @Query(value = """
+        SELECT EXISTS (
+            SELECT *
+            FROM elections
+            WHERE year = :year AND status = 'INACTIVE'
+        );
+    """, nativeQuery = true)
+    boolean isInactive(int year);
 }

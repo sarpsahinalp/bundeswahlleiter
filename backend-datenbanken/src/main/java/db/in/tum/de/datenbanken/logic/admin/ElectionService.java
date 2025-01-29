@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.postgresql.copy.CopyManager;
 import org.postgresql.jdbc.PgConnection;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -20,6 +19,7 @@ import javax.sql.DataSource;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -28,7 +28,6 @@ import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.io.BufferedReader;
 
 
@@ -38,6 +37,7 @@ import java.io.BufferedReader;
 public class ElectionService {
 
     private final ElectionRepository electionRepository;
+    private final ScriptsRepository scriptsRepository;
     private final VoteCodeRepository voteCodeRepository;
     private final DataSource dataSource;
     private final PlatformTransactionManager transactionManager;
@@ -171,8 +171,7 @@ public class ElectionService {
      * @throws IllegalStateException if no active election exists.
      */
     @Transactional
-    public Election stopElection() {
-        // TODO: Refresh the analysis data for the election on stop
+    public Election stopElection() throws IOException {
         Optional<Election> activeElectionOpt = getActiveElection();
         if (activeElectionOpt.isEmpty()) {
             throw new IllegalStateException("No active election to stop.");
@@ -180,10 +179,23 @@ public class ElectionService {
 
         Election activeElection = activeElectionOpt.get();
         activeElection.setStatus(Election.Status.INACTIVE);
-        return electionRepository.save(activeElection);
+        Election saved = electionRepository.save(activeElection);
+
+        updateSitzverteilung(saved.getYear());
+
+        return saved;
     }
 
-    // TODO: A new service to refresh data on import!!!
+    @Transactional
+    public void updateSitzverteilung(int year) throws IOException {
+        scriptsRepository.updateSitzverteilung(year);
+    }
+
+    @Transactional
+    public void updateVoteCount(int year) {
+        scriptsRepository.updateVoteCount(year);
+    }
+
 
     public long getElectionTotalCount(long electionId) {
         return electionRepository.getElectionTotalCount(electionId);
@@ -193,12 +205,14 @@ public class ElectionService {
         return electionRepository.getCountOfSubmittedVotes(electionId);
     }
 
+    @Transactional
     public void uploadErststimme(MultipartFile file_erststimme) {
         String copySQL = "COPY erststimme(id, partei_id, wahlkreis_id, jahr)  FROM STDIN WITH DELIMITER ';' CSV HEADER;";
 
         loadData(file_erststimme, copySQL);
     }
 
+    @Transactional
     public void uploadZweitstimme(MultipartFile file_zweitstimme) {
         String copySQL = "COPY zweitestimme(id, partei_id, wahlkreis_id, jahr)  FROM STDIN WITH DELIMITER ';' CSV HEADER;";
 
