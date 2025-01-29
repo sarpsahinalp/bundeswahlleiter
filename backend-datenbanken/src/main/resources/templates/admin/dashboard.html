@@ -305,6 +305,13 @@
             <br>
             <input id="zweitstimme" type="file" name="file-zweitstimme" accept="text/csv"/>
             <br>
+            <label for="yearSelect">Select Year:</label>
+            <br>
+            <select id="yearSelect" name="year">
+                <option value="" disabled selected>Select a year</option>
+                <option th:each="year : ${years}" th:value="${year}" th:text="${year}"></option>
+            </select>
+            <br>
             <br>
             <button id="submit-btn" type="submit" class="btn btn-danger">Upload Votes</button>
         </form>

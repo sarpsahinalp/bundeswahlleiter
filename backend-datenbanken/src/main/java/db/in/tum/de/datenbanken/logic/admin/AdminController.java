@@ -8,8 +8,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin")
@@ -17,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 public class AdminController {
 
     private final ElectionService electionService;
+    private final ElectionRepository electionRepository;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -52,6 +56,9 @@ public class AdminController {
             model.addAttribute("currentElectionYear", null);
             model.addAttribute("totalVoters", 0);
         }
+
+        List<Integer> years = electionRepository.getAllYears();
+        model.addAttribute("years", years);
 
         // Add error message if present
         if (error != null) {
@@ -109,11 +116,20 @@ public class AdminController {
 
     @PostMapping("/upload_votes")
     public String uploadVotes(
-            @RequestParam("file-erststimme") MultipartFile file_erststimme,
-            @RequestParam("file-zweitstimme") MultipartFile file_zweitstimme
-    ) {
-        electionService.uploadErststimme(file_erststimme);
-        electionService.uploadZweitstimme(file_zweitstimme);
+            @RequestParam("file-erststimme") Optional<MultipartFile> file_erststimme,
+            @RequestParam("file-zweitstimme") Optional<MultipartFile> file_zweitstimme,
+            @RequestParam(value = "year") Optional<Integer> year
+    ) throws IOException {
+        file_erststimme.ifPresent(electionService::uploadErststimme);
+        file_zweitstimme.ifPresent(electionService::uploadZweitstimme);
+        if(year.isPresent()) {
+            int value = year.get();
+            if(electionRepository.isInactive(value)) {
+                electionService.updateSitzverteilung(year.get());
+            } else {
+                electionService.updateVoteCount(value);
+            }
+        }
         return "redirect:/admin/dashboard";
     }
 

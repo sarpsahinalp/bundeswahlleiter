@@ -6,10 +6,10 @@ REFRESH MATERIALIZED VIEW directmandate;
 REFRESH MATERIALIZED VIEW wahlkreissitze;
 
 -- Erste Oberverteilung
-CALL calculate_divisor_erste_oberverteilung(598, ?);
+CALL calculate_divisor_erste_oberverteilung(598, :year);
 
 -- Erste Unterverteilung
-CALL calculate_all_unterverteilung(?);
+CALL calculate_all_unterverteilung(:year);
 
 create or replace view uberhangAndMindestsiztanzahl as
 (
@@ -26,10 +26,10 @@ from wahlkreisSitze w
          left join erste_unterverteilung eu on w.bundesland_id = eu.bundesland_id
     and w.partei_id = eu.partei_id
     and w.jahr = eu.jahr
-where w.jahr = ?
+where w.jahr > 2017
     );
 
-CALL calculate_divisor_min_seat_claims(?);
+CALL calculate_divisor_min_seat_claims(:year);
 
 -- Zweite Unterverteilung
 with recursive
@@ -39,7 +39,7 @@ with recursive
                                                        where zo.partei_id = szb.partei_id
                                                          and zo.jahr = szb.jahr) ::float as divisor
                       from sumzweitestimmeproparteiinbundesland szb
-                      where szb.jahr = ?
+                      where szb.jahr = :year
                       group by szb.partei_id, szb.jahr),
     iterations as (select szb.partei_id,
                           szb.jahr,
@@ -66,7 +66,7 @@ with recursive
                    where m.partei_id = szb.partei_id
                      and m.jahr = szb.jahr
                      and szb.bundesland = m.bundesland_id
-                     and szb.jahr = 2021
+                     and szb.jahr = :year
                    group by szb.partei_id, szb.jahr
 
                    union all
@@ -89,7 +89,7 @@ with recursive
                            where m.partei_id = szb.partei_id
                              and m.jahr = szb.jahr
                              and szb.bundesland = m.bundesland_id
-                             and szb.jahr = 2021
+                             and szb.jahr = :year
                              and szb.partei_id = i.partei_id
                              and szb.jahr = i.jahr
                            group by szb.partei_id, szb.jahr) as verteilteSitze,
