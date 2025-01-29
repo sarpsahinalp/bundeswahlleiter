@@ -1,4 +1,4 @@
-package db.migration;
+package db.test.migration;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

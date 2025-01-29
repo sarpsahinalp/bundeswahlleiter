@@ -1,12 +1,17 @@
 package db.in.tum.de.datenbanken.logic;
 
 import db.in.tum.de.datenbanken.logic.DTOs.*;
+import db.in.tum.de.datenbanken.logic.DTOs.live.LiveAnalysisDTO;
+import db.in.tum.de.datenbanken.logic.admin.ElectionService;
+import db.in.tum.de.datenbanken.schema.election.Election;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "/ergebnisse")
@@ -16,6 +21,7 @@ public class AnalysenController {
 
     private final AnalysenService wahlkreisAnalysenService;
     private final AnalysenService analysenService;
+    private final ElectionService electionService;
 
     @GetMapping("/jahre")
     @Transactional(readOnly = true)
@@ -117,6 +123,19 @@ public class AnalysenController {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(wahlkreisAnalysenService.getSocioCulturalStats(type, year));
+    }
+
+    @GetMapping("/analysis/live")
+    @Transactional(readOnly = true)
+    public ResponseEntity<LiveAnalysisDTO> getLiveAnalysis() {
+        return ResponseEntity.ok(analysenService.getLiveAnalysis());
+    }
+
+    @GetMapping("/election/status")
+    @Transactional(readOnly = true)
+    public ResponseEntity<Election> getElectionStatus() {
+        Optional<Election> activeElection = electionService.getActiveElection();
+        return activeElection.map(ResponseEntity::ok).orElseGet(() -> new ResponseEntity<>(null, HttpStatusCode.valueOf(405)));
     }
 
 }

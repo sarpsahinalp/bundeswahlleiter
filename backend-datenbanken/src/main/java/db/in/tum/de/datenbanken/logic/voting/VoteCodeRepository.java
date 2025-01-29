@@ -16,7 +16,7 @@ public interface VoteCodeRepository extends JpaRepository<VoteCode, String> {
 
     @Query(
             value = """
-                SELECT v.code, v.wahlkreis_id, e.year 
+                SELECT v.code, v.wahlkreis_id, e.year, e.id as election_id
                 FROM vote_code v
                 join elections e on v.election_id = e.id 
                 where v.code = :code and e.status = 'ACTIVE'
@@ -32,6 +32,13 @@ public interface VoteCodeRepository extends JpaRepository<VoteCode, String> {
             , nativeQuery = true
     )
     void deleteByCode(String code);
+
+    @Modifying
+    @Query(
+            value = "UPDATE vote_count SET total_votes = total_votes + 1 WHERE election_id = :electionId"
+            , nativeQuery = true
+    )
+    void incrementTotalVotes(long electionId);
 
     @Query(
             value = """

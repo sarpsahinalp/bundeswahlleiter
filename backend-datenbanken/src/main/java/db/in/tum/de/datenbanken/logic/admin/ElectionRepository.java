@@ -40,10 +40,10 @@ public interface ElectionRepository extends JpaRepository<Election, Long> {
     Long getElectionTotalCount(long electionId);
 
     @Query(
-            value = "SELECT COUNT(*) FROM vote_code WHERE election_id = :electionId"
+            value = "SELECT total_votes from vote_count WHERE election_id = :electionId"
             , nativeQuery = true
     )
-    Long getCountOfRemainingVotes(long electionId);
+    Long getCountOfSubmittedVotes(long electionId);
 
     @Query(
             "SELECT w FROM Wahlkreis w"

@@ -46,17 +46,11 @@ public class AdminController {
             model.addAttribute("electionStartTime", activeElection.getStartTime().format(FORMATTER));
             model.addAttribute("currentElectionYear", activeElection.getYear());
             long totalVoter = electionService.getElectionTotalCount(activeElection.getId());
-            long remainingVotes = electionService.getCountOfRemainingVotes(activeElection.getId());
-            long votesCount = totalVoter - remainingVotes;
             model.addAttribute("totalVoters", totalVoter);
-            model.addAttribute("votesCount", votesCount);
-            model.addAttribute("voterTurnout", votesCount / (double) totalVoter);
         } else {
             model.addAttribute("electionStartTime", null);
             model.addAttribute("currentElectionYear", null);
             model.addAttribute("totalVoters", 0);
-            model.addAttribute("votesCount", 0);
-            model.addAttribute("voterTurnout", 0.0);
         }
 
         // Add error message if present

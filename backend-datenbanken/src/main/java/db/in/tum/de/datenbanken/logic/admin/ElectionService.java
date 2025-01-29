@@ -17,11 +17,15 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.sql.DataSource;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,6 +41,7 @@ public class ElectionService {
     private final VoteCodeRepository voteCodeRepository;
     private final DataSource dataSource;
     private final PlatformTransactionManager transactionManager;
+    private static final SecureRandom random = new SecureRandom();
 
     /**
      * Checks if there is an active election.
@@ -104,10 +109,11 @@ public class ElectionService {
                 "INSERT INTO vote_code (code, wahlkreis_id, election_id) " +
                         "VALUES (?, ?, ?)";
 
-        String salt = TokenService.securityProperties.get("BCRYPT_SALT").toString();
+        byte[] salt = TokenService.securityProperties.get("BCRYPT_SALT").toString().getBytes();
 
         try (Connection conn = dataSource.getConnection();
              PreparedStatement stmt = conn.prepareStatement(insertSQL)) {
+
             conn.setAutoCommit(false);
 
             long inserted = 0;
@@ -117,14 +123,22 @@ public class ElectionService {
                 // 3) For each row in this chunk, generate a unique code and add to batch
                 for (int i = 0; i < currentChunk; i++) {
                     // Generate a unique code
-                    String code = BCrypt.hashpw(UUID.randomUUID().toString(), salt);
+                    byte[] rawTokenBytes = new byte[16]; // 128-bit token
+                    random.nextBytes(rawTokenBytes);
+
+                    String tokenPlaintext = Base64.getUrlEncoder().withoutPadding().encodeToString(rawTokenBytes);
+
+                    MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+                    sha256.update(salt);
+                    byte[] hashBytes = sha256.digest(rawTokenBytes);
+                    String hashedBase64 = Base64.getEncoder().encodeToString(hashBytes);
 
                     // Round-robin picking from wahlkreisIds (if needed)
                     long wahlkreisId = wahlkreisIds.get(wahlkreisIndex).getId();
                     wahlkreisIndex = (wahlkreisIndex + 1) % wahlkreisIds.size();
 
                     // Bind parameters
-                    stmt.setString(1, code);
+                    stmt.setString(1, hashedBase64);
                     stmt.setLong(2, wahlkreisId);
                     stmt.setLong(3, electionId);
                     stmt.addBatch();
@@ -139,7 +153,7 @@ public class ElectionService {
             }
 
             conn.commit();
-        } catch (SQLException e) {
+        } catch (SQLException | NoSuchAlgorithmException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }
@@ -169,8 +183,8 @@ public class ElectionService {
         return electionRepository.getElectionTotalCount(electionId);
     }
 
-    public long getCountOfRemainingVotes(long electionId) {
-        return electionRepository.getCountOfRemainingVotes(electionId);
+    public long getCountOfSubmittedVotes(long electionId) {
+        return electionRepository.getCountOfSubmittedVotes(electionId);
     }
 
     public void uploadErststimme(MultipartFile file_erststimme) {

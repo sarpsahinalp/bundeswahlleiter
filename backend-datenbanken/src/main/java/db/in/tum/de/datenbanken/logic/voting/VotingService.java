@@ -52,6 +52,11 @@ public class VotingService {
         voteRepo.deleteByCode(code);
     }
 
+    @Transactional
+    public void incrementTotalVotes(long electionId){
+        voteRepo.incrementTotalVotes(electionId);
+    }
+
     /**
      * Generates 300 voting tokens and writes them to a file.
      */
@@ -114,8 +119,13 @@ public class VotingService {
 
     public boolean saveErsteUndZweiteStimme(long partyIdFirst, long partyIdSecond, long wahlkreisId, int year) {
         try {
-            voteRepo.saveErstestimme(wahlkreisId, partyIdFirst, year);
-            voteRepo.saveZweitestimme(wahlkreisId, partyIdSecond, year);
+            if (partyIdFirst != -1) {
+                voteRepo.saveErstestimme(wahlkreisId, partyIdFirst, year);
+            }
+
+            if (partyIdSecond != -1) {
+                voteRepo.saveZweitestimme(wahlkreisId, partyIdSecond, year);
+            }
             return true;
         } catch (Exception e) {
             return false;

@@ -5,12 +5,12 @@ import { useElection } from "@/contexts/ElectionContext"
 
 export default function ElectionTimer() {
   const [timeLeft, setTimeLeft] = useState("")
-  const { isElectionActive, electionDate } = useElection()
+  const { isElectionActive, electionStartTime } = useElection()
 
   useEffect(() => {
     const timer = setInterval(() => {
       const now = new Date()
-      const difference = electionDate.getTime() - now.getTime()
+      const difference = electionStartTime.getTime() - now.getTime()
 
       if (difference > 0 && isElectionActive) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24))
@@ -20,14 +20,14 @@ export default function ElectionTimer() {
 
         setTimeLeft(`${days}d ${hours}h ${minutes}m ${seconds}s`)
       } else if (isElectionActive) {
-        setTimeLeft("Election Day!")
+        setTimeLeft("Election is in progress!")
       } else {
         setTimeLeft("Election is not active")
       }
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [isElectionActive, electionDate])
+  }, [isElectionActive, electionStartTime])
 
   return (
       <div className="bg-white overflow-hidden shadow rounded-lg transition-all duration-300 hover:shadow-xl">
@@ -36,15 +36,17 @@ export default function ElectionTimer() {
           <p className="mt-1 text-3xl font-semibold animate-pulse">{timeLeft}</p>
           <p className="mt-2 text-sm text-gray-500" suppressHydrationWarning>
             Election date:{" "}
-            {electionDate.toLocaleString("en-US", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit",
-              hour12: true,
-            })}
+            {electionStartTime
+                ? electionStartTime.toLocaleString("en-US", {
+                  year: "numeric",
+                  month: "2-digit",
+                  day: "2-digit",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  second: "2-digit",
+                  hour12: true,
+                })
+                : "Not set"}
           </p>
         </div>
       </div>

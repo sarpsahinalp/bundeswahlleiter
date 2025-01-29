@@ -456,5 +456,45 @@ public interface AnalysenRepository extends CrudRepository<VoteCode, Long> {
             """, nativeQuery = true)
     List<Object[]> getSozioKulturellProPartei(String type, int year);
 
+    /**
+     * Returns party name, sum of first votes, plus placeholders
+     * for secondVotes, seats, percentage.
+     */
+    @Query(value = """
+        SELECT p.kurzbezeichnung                          AS party,
+              w.name as wahlkreis,
+               COUNT(e.id)                     AS firstVotes,
+               0                               AS secondVotes,
+               0                               AS seats,
+               0.0                             AS percentage
+        FROM erststimme e
+                    JOIN wahlkreis w on w.id = e.wahlkreis_id
+                    JOIN elections el on el.status = 'ACTIVE' and el.year = e.jahr
+        JOIN partei p ON p.id = e.partei_id
+        GROUP BY p.kurzbezeichnung, w.name
+        """,
+            nativeQuery = true)
+    List<Object[]> findFirstVotesNative();
+
+    /**
+     * Returns party name, sum of second votes, plus placeholders
+     * for firstVotes, seats, percentage.
+     */
+    @Query(value = """
+        SELECT p.kurzbezeichnung                          AS party,
+               w.name as wahlkreis,
+               0                               AS firstVotes,
+               COUNT(z.id)                     AS secondVotes,
+               0                               AS seats,
+               0.0                             AS percentage
+        FROM zweitestimme z
+                    JOIN wahlkreis w on w.id = z.wahlkreis_id
+                    JOIN elections el on el.status = 'ACTIVE' and el.year = z.jahr
+        JOIN partei p ON p.id = z.partei_id
+        GROUP BY p.kurzbezeichnung, w.name
+        """,
+            nativeQuery = true)
+    List<Object[]> findSecondVotesNative();
+
 
 }

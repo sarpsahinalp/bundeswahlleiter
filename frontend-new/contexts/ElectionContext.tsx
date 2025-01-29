@@ -2,15 +2,20 @@
 
 import type React from "react"
 import { createContext, useState, useContext, useEffect } from "react"
+import {mockApi} from "@/services/mockApi";
+import { electionApi } from "@/services/api";
 
 type ElectionContextType = {
     isElectionActive: boolean
-    electionDate: Date
-    setIsElectionActive: (active: boolean) => void
-    setElectionDate: (date: Date) => void
+    electionStartTime: Date
+    refreshElectionStatus: () => Promise<void>
 }
 
-const ElectionContext = createContext<ElectionContextType | undefined>(undefined)
+const ElectionContext = createContext<ElectionContextType>({
+    isElectionActive: false,
+    electionStartTime: new Date(),
+    refreshElectionStatus: async () => {},
+})
 
 export const useElection = () => {
     const context = useContext(ElectionContext)
@@ -22,25 +27,29 @@ export const useElection = () => {
 
 export const ElectionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isElectionActive, setIsElectionActive] = useState(false)
-    const [electionDate, setElectionDate] = useState(new Date("2025-09-01T08:00:00"))
+    const [electionStartTime, setElectionStartTime] = useState<Date>(new Date())
+
+    const fetchElectionStatus = async () => {
+        try {
+            const status = await electionApi.getElectionStatus()
+            setIsElectionActive(status.status === "ACTIVE")
+            setElectionStartTime(status.startTime ? new Date(status.startTime) : new Date())
+        } catch (error) {
+            console.error("Error fetching election status:", error)
+            setElectionStartTime(new Date()) // Set a default date in case of error
+        }
+    }
 
     useEffect(() => {
-        // Load state from localStorage on component mount
-        const storedIsActive = localStorage.getItem("isElectionActive")
-        const storedDate = localStorage.getItem("electionDate")
-
-        if (storedIsActive) setIsElectionActive(JSON.parse(storedIsActive))
-        if (storedDate) setElectionDate(new Date(storedDate))
+        fetchElectionStatus()
+        const interval = setInterval(fetchElectionStatus, 60000) // Check every minute
+        return () => clearInterval(interval)
     }, [])
 
-    useEffect(() => {
-        // Save state to localStorage whenever it changes
-        localStorage.setItem("isElectionActive", JSON.stringify(isElectionActive))
-        localStorage.setItem("electionDate", electionDate.toISOString())
-    }, [isElectionActive, electionDate])
-
     return (
-        <ElectionContext.Provider value={{ isElectionActive, electionDate, setIsElectionActive, setElectionDate }}>
+        <ElectionContext.Provider
+            value={{ isElectionActive, electionStartTime, refreshElectionStatus: fetchElectionStatus }}
+        >
             {children}
         </ElectionContext.Provider>
     )

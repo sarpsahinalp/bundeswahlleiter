@@ -1,4 +1,4 @@
-import type { Election, Vote, PartyResult } from "@/models/election"
+import type { Election, Vote, PartyResult, ConstituencyResult, OverhangSeat } from "../models/election"
 
 // Helper function to simulate API delay
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
@@ -46,6 +46,37 @@ export const mockApi = {
             { party: "Grüne", firstVotes: 0, secondVotes: 0, seats: year === 2021 ? 118 : 67, percentage: 14.8 },
             { party: "Other", firstVotes: 0, secondVotes: 0, seats: year === 2021 ? 1 : 2, percentage: 2.6 },
         ] as PartyResult[]
+    },
+
+    login: async (credentials: { username: string; password: string }) => {
+        await delay(500)
+        if (credentials.username === "admin" && credentials.password === "password") {
+            return { success: true, message: "Login successful" }
+        } else {
+            throw new Error("Invalid credentials")
+        }
+    },
+
+    getElectionStatus: async () => {
+        await delay(500)
+        const now = new Date()
+        const startTime = new Date(now.getTime() + 24 * 60 * 60 * 1000) // 24 hours from now
+        return {
+            status: Math.random() > 0.5 ? "ACTIVE" : "INACTIVE",
+            startTime: startTime.toISOString(),
+        }
+    },
+
+    getConstituencyResults: async () => {
+        await delay(500)
+        return Array.from({ length: 299 }, (_, i) => ({
+            id: `${i + 1}`,
+            name: `Constituency ${i + 1}`,
+            winningParty: ["CDU", "CSU", "SPD", "GRÜNE", "FDP", "AfD", "LINKE", "SSW", "Other"][
+                Math.floor(Math.random() * 9)
+                ],
+            votePercentage: Math.random() * 50 + 25, // Random percentage between 25% and 75%
+        }))
     },
 
     // Add more mock implementations as needed...

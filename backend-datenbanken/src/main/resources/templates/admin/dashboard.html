@@ -290,14 +290,6 @@
                     <div class="stat-number" th:text="${totalVoters}">0k</div>
                     <div class="stat-label">Total Voters</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" th:text="${votesCount}">0k</div>
-                    <div class="stat-label">Votes Cast</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" th:text="${#numbers.formatDecimal(voterTurnout * 100, 1, 2)} + '%'">0.0%</div>
-                    <div class="stat-label">Turnout</div>
-                </div>
             </div>
         </div>
     </div>

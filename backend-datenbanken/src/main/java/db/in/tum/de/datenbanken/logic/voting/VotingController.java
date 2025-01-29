@@ -6,6 +6,7 @@ import db.in.tum.de.datenbanken.logic.DTOs.WahlkreiseDTO;
 import db.in.tum.de.datenbanken.logic.DTOs.token.VotingToken;
 import db.in.tum.de.datenbanken.logic.DTOs.voting.ErstestimmeOptionen;
 import db.in.tum.de.datenbanken.logic.DTOs.voting.ZweitestimmeOptionen;
+import db.in.tum.de.datenbanken.logic.admin.ElectionService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
@@ -19,6 +20,9 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -30,6 +34,7 @@ public class VotingController {
 
     private final TokenService tokenService;
     private final VotingService votingService;
+    private final ElectionService electionService;
 
     public static void main(String[] args) {
         System.out.println(BCrypt.gensalt());
@@ -39,9 +44,20 @@ public class VotingController {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public ResponseEntity<String> validateHashAndIssueToken(
             @PathVariable String code,
-            HttpServletResponse response) {
+            HttpServletResponse response) throws NoSuchAlgorithmException {
 
-        String hashed = BCrypt.hashpw(code, TokenService.securityProperties.get("BCRYPT_SALT").toString());
+        // 1. Decode from Base64
+        byte[] tokenBytes = Base64.getUrlDecoder().decode(code);
+
+        String salt = TokenService.securityProperties.get("BCRYPT_SALT").toString();
+
+        byte[] saltBytes = salt.getBytes();
+
+        // 2. Hash the token
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        sha256.update(saltBytes);
+        byte[] hashedBytes = sha256.digest(tokenBytes);
+        String hashed = Base64.getEncoder().encodeToString(hashedBytes);
 
         // 1. Lookup the code in the DB
         //    If you store the code in plain text, just do findByCode(code).
@@ -99,7 +115,7 @@ public class VotingController {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public ResponseEntity<String> castVote(
             @RequestBody Object voteData,
-            HttpServletResponse response) {
+            HttpServletResponse response) throws NoSuchAlgorithmException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Not authenticated");
@@ -108,14 +124,26 @@ public class VotingController {
         JwtPrincipal ephemeralClaim = (JwtPrincipal) auth.getPrincipal();
 
         // Check whether the user has already voted
-        String hashed = BCrypt.hashpw(ephemeralClaim.code(), TokenService.securityProperties.get("BCRYPT_SALT").toString());
+        // 1. Decode from Base64
+        byte[] tokenBytes = Base64.getUrlDecoder().decode(ephemeralClaim.code());
+
+        // 2. Hash the token
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        sha256.update(TokenService.securityProperties.get("BCRYPT_SALT").toString().getBytes());
+        byte[] hashedBytes = sha256.digest(tokenBytes);
+        String hashed = Base64.getEncoder().encodeToString(hashedBytes);
+
         VotingToken votingToken = votingService.validateCode(hashed);
 
         LinkedHashMap<String, Integer> vote = (LinkedHashMap<String, Integer>) voteData;
+
+
         votingService.saveErsteUndZweiteStimme(vote.get("erststimme").longValue(), vote.get("zweitstimme").longValue(), ephemeralClaim.wahlkreis_id(), ephemeralClaim.year());
 
         // Delete from the DB, so the user can't vote again
         votingService.deleteCode(votingToken.code());
+
+        votingService.incrementTotalVotes(votingToken.election_id());
 
         Cookie cookie = new Cookie("vote_jwt", "");
         cookie.setHttpOnly(true);

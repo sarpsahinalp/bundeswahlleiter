@@ -1,9 +1,9 @@
 export interface Election {
     id: number
+    startTime: Date
     year: number
-    startDate: Date
-    endDate: Date
-    isActive: boolean
+    status: string
+    totalVotes: number
 }
 
 export interface Vote {
@@ -23,6 +23,7 @@ export interface Constituency {
 
 export interface PartyResult {
     party: string
+    wahlkreis: string
     firstVotes: number
     secondVotes: number
     seats: number
